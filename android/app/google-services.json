@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "639606599049",
+    "project_id": "brainly-life",
+    "storage_bucket": "brainly-life.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:639606599049:android:fe48cf7e0827a9e03a8558",
+        "android_client_info": {
+          "package_name": "com.example.brainly_life"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdvxDIeJClkQKpk-NMbLqVUlQhaYRy0qo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
