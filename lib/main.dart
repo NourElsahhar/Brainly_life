@@ -1,26 +1,21 @@
-// import 'package:flutter/material.dart';
-// import 'package:firebase_core/firebase_core.dart';
+// App entry point. TEMPORARY: DI, error handling and the router
+// will be added here later.
 
-// import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 
-// Future<void> main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-//   runApp(const MyApp());
-// }
+import 'app.dart';
+import 'firebase_options.dart';
 
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const BrainlyLifeApp());
+}
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       title: 'Flutter Demo',
-//       home: Scaffold(
-//         appBar: AppBar(title: const Text('Flutter Demo Home Page')),
-//         body: const Center(child: Text('Hello, World!')),
-//       ),
-//     );
-//   }
-// }
+
+// git add -A
+// git commit -m "feat: add Material 3 light and dark theme"
+// git push -u origin feature/m1-theme
