@@ -43,9 +43,6 @@ class AppColors {
   static const Color neutral = Color(0xFFB2BEC3);
   static const Color reflectiveLilac = Color(0xFFA29BFE);
 
-  // TEMPORARY: kept only so the old app_theme.dart still compiles.
-  // It is removed when AppTheme is rewritten.
-  static const Color seed = primary;
 
   // Gradients (use only for high-value areas: main buttons, AI, progress)
   static const LinearGradient primaryGradient = LinearGradient(
