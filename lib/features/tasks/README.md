@@ -26,7 +26,19 @@ task.copyWith(clearDueAt: true);    // remove the deadline
 task.copyWith(clearCategory: true); // make it uncategorized
 task.copyWith(clearReminder: true); // remove the reminder
 ```
+## Task list tabs
 
+`TaskProgressCalculator` (`logic/task_progress_calculator.dart`) decides
+which tab a task appears in. Every task appears in exactly one tab:
+
+1. **Completed**: the task is done.
+2. **Overdue**: not done and the deadline has passed (even if it was today).
+3. **Today**: the deadline is later today, in the user's time zone.
+4. **Upcoming**: everything else, including tasks without a deadline.
+
+It also gives `progress` (checked subtasks, 0.0 to 1.0) and `isDueSoon`
+(less than 24 hours left). Pass `now` in, never call `DateTime.now()`
+inside, so tests stay deterministic.
 ## Coming next
 
 `TaskRepository` + `MockTaskRepository`, `TaskSummaryProvider` (for Home)
