@@ -103,7 +103,10 @@ class AppButton extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.s6,
                   ),
-                  child: Center(child: content),
+                  child: Center(
+                    widthFactor: expanded ? null : 1,
+                    child: content,
+                  ),
                 ),
               ),
             ),
@@ -136,11 +139,7 @@ class AppButton extends StatelessWidget {
 }
 
 class _ButtonLook {
-  const _ButtonLook({
-    required this.foreground,
-    this.background,
-    this.gradient,
-  });
+  const _ButtonLook({required this.foreground, this.background, this.gradient});
 
   final Color foreground;
   final Color? background;

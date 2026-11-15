@@ -70,6 +70,16 @@ void main() {
       expect(find.byIcon(Icons.add), findsOneWidget);
     });
 
+    testWidgets('expanded false is only as wide as its content',
+        (tester) async {
+      await pumpButton(
+        tester,
+        AppButton(label: 'Go', expanded: false, onPressed: () {}),
+      );
+
+      expect(tester.getSize(find.byType(AppButton)).width, lessThan(300));
+    });
+
     testWidgets('all four types build without errors', (tester) async {
       for (final type in AppButtonType.values) {
         await pumpButton(
