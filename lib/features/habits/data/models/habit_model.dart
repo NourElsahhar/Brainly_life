@@ -1,3 +1,6 @@
+// Habit is the data of one habit (name, icon, color, how often, streaks).
+// It converts to and from Firestore: users/{uid}/habits/{id}.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 

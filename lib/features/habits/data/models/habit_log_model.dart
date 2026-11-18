@@ -1,3 +1,6 @@
+// HabitLog is one completed day of a habit.
+// Its id is habitId_dateKey, so one habit cannot be done twice in one day.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
