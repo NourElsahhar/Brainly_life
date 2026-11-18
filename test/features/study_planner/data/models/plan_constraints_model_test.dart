@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:brainly_life/features/study/data/models/plan_constraints_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/plan_constraints_model.dart';
 
 void main() {
   group('PlanConstraints', () {
@@ -26,8 +26,7 @@ void main() {
     });
 
     test('fromFirestore throws FormatException for a weekday above 7', () {
-      final data = constraints.toFirestore()
-        ..['minutesPerWeekday'] = {'8': 60};
+      final data = constraints.toFirestore()..['minutesPerWeekday'] = {'8': 60};
 
       expect(() => PlanConstraints.fromFirestore(data), throwsFormatException);
     });
@@ -39,12 +38,18 @@ void main() {
       expect(() => PlanConstraints.fromFirestore(data), throwsFormatException);
     });
 
-    test('fromFirestore throws FormatException when minutes are not an int', () {
-      final data = constraints.toFirestore()
-        ..['minutesPerWeekday'] = {'1': 'two hours'};
+    test(
+      'fromFirestore throws FormatException when minutes are not an int',
+      () {
+        final data = constraints.toFirestore()
+          ..['minutesPerWeekday'] = {'1': 'two hours'};
 
-      expect(() => PlanConstraints.fromFirestore(data), throwsFormatException);
-    });
+        expect(
+          () => PlanConstraints.fromFirestore(data),
+          throwsFormatException,
+        );
+      },
+    );
 
     test('fromFirestore throws FormatException when a field is missing', () {
       final data = constraints.toFirestore()..remove('maxSessionMinutes');

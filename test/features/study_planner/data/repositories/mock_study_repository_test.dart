@@ -1,11 +1,11 @@
 import 'package:brainly_life/core/errors/failure.dart';
-import 'package:brainly_life/features/study/data/models/plan_constraints_model.dart';
-import 'package:brainly_life/features/study/data/models/study_enums.dart';
-import 'package:brainly_life/features/study/data/models/study_plan_model.dart';
-import 'package:brainly_life/features/study/data/models/study_session_model.dart';
-import 'package:brainly_life/features/study/data/models/subject_model.dart';
-import 'package:brainly_life/features/study/data/models/topic_model.dart';
-import 'package:brainly_life/features/study/data/repositories/mock_study_repository.dart';
+import 'package:brainly_life/features/study_planner/data/models/plan_constraints_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/study_enums.dart';
+import 'package:brainly_life/features/study_planner/data/models/study_plan_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/study_session_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/subject_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/topic_model.dart';
+import 'package:brainly_life/features/study_planner/data/repositories/mock_study_repository.dart';
 import 'package:clock/clock.dart';
 import 'package:flutter_test/flutter_test.dart';
 

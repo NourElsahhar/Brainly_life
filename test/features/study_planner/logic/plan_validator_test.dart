@@ -2,13 +2,13 @@ import 'package:clock/clock.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Replace brainly_life with the `name:` value from pubspec.yaml.
-import 'package:brainly_life/features/study/data/models/plan_constraints_model.dart';
-import 'package:brainly_life/features/study/data/models/study_enums.dart';
-import 'package:brainly_life/features/study/data/models/study_session_model.dart';
-import 'package:brainly_life/features/study/data/models/topic_model.dart';
-import 'package:brainly_life/features/study/logic/plan_validator.dart';
-import 'package:brainly_life/features/study/logic/planner_types.dart';
-import 'package:brainly_life/features/study/logic/rule_based_planner.dart';
+import 'package:brainly_life/features/study_planner/data/models/plan_constraints_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/study_enums.dart';
+import 'package:brainly_life/features/study_planner/data/models/study_session_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/topic_model.dart';
+import 'package:brainly_life/features/study_planner/logic/plan_validator.dart';
+import 'package:brainly_life/features/study_planner/logic/planner_types.dart';
+import 'package:brainly_life/features/study_planner/logic/rule_based_planner.dart';
 
 // "Now" is Monday 2026-11-16 08:00 UTC in every test.
 final _now = DateTime.utc(2026, 11, 16, 8);

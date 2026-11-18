@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:brainly_life/features/study/data/models/plan_constraints_model.dart';
-import 'package:brainly_life/features/study/data/models/study_enums.dart';
-import 'package:brainly_life/features/study/data/models/study_plan_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/plan_constraints_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/study_enums.dart';
+import 'package:brainly_life/features/study_planner/data/models/study_plan_model.dart';
 
 void main() {
   group('StudyPlan', () {
@@ -65,19 +65,34 @@ void main() {
     test('fromFirestore throws FormatException for an unknown generator', () {
       final data = plan.toFirestore()..['generatedBy'] = 'robot';
 
-      expect(() => StudyPlan.fromFirestore('plan_1', data), throwsFormatException);
+      expect(
+        () => StudyPlan.fromFirestore('plan_1', data),
+        throwsFormatException,
+      );
     });
 
-    test('fromFirestore throws FormatException when constraints are missing', () {
-      final data = plan.toFirestore()..remove('constraints');
+    test(
+      'fromFirestore throws FormatException when constraints are missing',
+      () {
+        final data = plan.toFirestore()..remove('constraints');
 
-      expect(() => StudyPlan.fromFirestore('plan_1', data), throwsFormatException);
-    });
+        expect(
+          () => StudyPlan.fromFirestore('plan_1', data),
+          throwsFormatException,
+        );
+      },
+    );
 
-    test('fromFirestore throws FormatException when promptVersion is not an int', () {
-      final data = plan.toFirestore()..['promptVersion'] = 'v1';
+    test(
+      'fromFirestore throws FormatException when promptVersion is not an int',
+      () {
+        final data = plan.toFirestore()..['promptVersion'] = 'v1';
 
-      expect(() => StudyPlan.fromFirestore('plan_1', data), throwsFormatException);
-    });
+        expect(
+          () => StudyPlan.fromFirestore('plan_1', data),
+          throwsFormatException,
+        );
+      },
+    );
   });
 }

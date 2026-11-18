@@ -1,4 +1,4 @@
-import 'package:brainly_life/features/study/data/models/subject_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/subject_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,7 +24,10 @@ void main() {
     });
 
     test('fromFirestore(toFirestore()) returns an equal subject', () {
-      final restored = Subject.fromFirestore('subject_1', subject.toFirestore());
+      final restored = Subject.fromFirestore(
+        'subject_1',
+        subject.toFirestore(),
+      );
 
       expect(restored, subject);
     });
@@ -61,14 +64,17 @@ void main() {
       );
     });
 
-    test('fromFirestore throws FormatException when a field has wrong type', () {
-      final data = subject.toFirestore()..['priority'] = 'high';
+    test(
+      'fromFirestore throws FormatException when a field has wrong type',
+      () {
+        final data = subject.toFirestore()..['priority'] = 'high';
 
-      expect(
-        () => Subject.fromFirestore('subject_1', data),
-        throwsFormatException,
-      );
-    });
+        expect(
+          () => Subject.fromFirestore('subject_1', data),
+          throwsFormatException,
+        );
+      },
+    );
 
     test('copyWith changes only the given fields', () {
       final renamed = subject.copyWith(name: 'Databases');

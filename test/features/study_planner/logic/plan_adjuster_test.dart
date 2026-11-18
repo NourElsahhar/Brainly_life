@@ -1,10 +1,10 @@
-import 'package:brainly_life/features/study/data/models/plan_constraints_model.dart';
-import 'package:brainly_life/features/study/data/models/study_enums.dart';
-import 'package:brainly_life/features/study/data/models/study_session_model.dart';
-import 'package:brainly_life/features/study/data/models/topic_model.dart';
-import 'package:brainly_life/features/study/logic/plan_adjuster.dart';
-import 'package:brainly_life/features/study/logic/plan_validator.dart';
-import 'package:brainly_life/features/study/logic/planner_types.dart';
+import 'package:brainly_life/features/study_planner/data/models/plan_constraints_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/study_enums.dart';
+import 'package:brainly_life/features/study_planner/data/models/study_session_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/topic_model.dart';
+import 'package:brainly_life/features/study_planner/logic/plan_adjuster.dart';
+import 'package:brainly_life/features/study_planner/logic/plan_validator.dart';
+import 'package:brainly_life/features/study_planner/logic/planner_types.dart';
 import 'package:clock/clock.dart';
 import 'package:flutter_test/flutter_test.dart';
 

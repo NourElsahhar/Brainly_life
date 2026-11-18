@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:brainly_life/features/study/data/models/study_enums.dart';
-import 'package:brainly_life/features/study/data/models/study_session_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/study_enums.dart';
+import 'package:brainly_life/features/study_planner/data/models/study_session_model.dart';
 
 void main() {
   group('StudySession', () {
@@ -19,7 +19,6 @@ void main() {
     test('a new session is planned and has no actual minutes', () {
       expect(session.status, SessionStatus.planned);
       expect(session.actualMinutes, 0);
-      expect(session.reminderId, isNull);
     });
 
     test('toFirestore stores dateKey under the field "date"', () {
@@ -29,7 +28,6 @@ void main() {
       expect(map.containsKey('dateKey'), isFalse);
       expect(map['startAt'], Timestamp.fromDate(startAt));
       expect(map['status'], 'planned');
-      expect(map['reminderId'], isNull);
       expect(map.containsKey('createdAt'), isFalse);
     });
 
@@ -54,9 +52,8 @@ void main() {
       }
     });
 
-    test('reminderId and actualMinutes survive a round trip', () {
+    test('actualMinutes survive a round trip', () {
       final completed = session.copyWith(
-        reminderId: 'study_session_1',
         actualMinutes: 50,
         status: SessionStatus.done,
       );
@@ -66,7 +63,6 @@ void main() {
         completed.toFirestore(),
       );
 
-      expect(restored.reminderId, 'study_session_1');
       expect(restored.actualMinutes, 50);
     });
 

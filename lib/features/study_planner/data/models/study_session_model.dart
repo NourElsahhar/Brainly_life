@@ -20,7 +20,6 @@ abstract class StudySession with _$StudySession {
     required int plannedMinutes,
     @Default(0) int actualMinutes,
     @Default(SessionStatus.planned) SessionStatus status,
-    String? reminderId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _StudySession;
@@ -36,7 +35,6 @@ abstract class StudySession with _$StudySession {
       plannedMinutes: requireField<int>(data, 'plannedMinutes'),
       actualMinutes: requireField<int>(data, 'actualMinutes'),
       status: parseEnum(SessionStatus.values, data['status'], 'status'),
-      reminderId: optionalField<String>(data, 'reminderId'),
       createdAt: optionalDate(data, 'createdAt'),
       updatedAt: optionalDate(data, 'updatedAt'),
     );
@@ -52,7 +50,6 @@ abstract class StudySession with _$StudySession {
       'plannedMinutes': plannedMinutes,
       'actualMinutes': actualMinutes,
       'status': status.name,
-      'reminderId': reminderId,
     };
   }
 }
