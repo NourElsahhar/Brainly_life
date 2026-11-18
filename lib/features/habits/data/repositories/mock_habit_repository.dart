@@ -1,8 +1,12 @@
+// MockHabitRepository is a fake HabitRepository that keeps habits and logs
+// in memory. Used for development and tests while Firestore is not ready.
+
 import 'package:brainly_life/core/errors/failure.dart';
 import 'package:brainly_life/core/errors/result.dart';
 import 'package:brainly_life/features/habits/data/models/habit_log_model.dart';
 import 'package:brainly_life/features/habits/data/models/habit_model.dart';
 import 'package:brainly_life/features/habits/data/repositories/habit_repository.dart';
+import 'package:clock/clock.dart';
 
 /// In-memory [HabitRepository] for development and tests.
 class MockHabitRepository implements HabitRepository {
@@ -12,7 +16,7 @@ class MockHabitRepository implements HabitRepository {
     DateTime Function()? now,
   }) : _habits = {for (final habit in habits) habit.id: habit},
        _logs = {for (final log in logs) log.id: log},
-       _now = now ?? (() => DateTime.now().toUtc());
+       _now = now ?? (() => clock.now().toUtc());
 
   /// A repository filled with sample habits and logs.
   factory MockHabitRepository.withSampleData() {
