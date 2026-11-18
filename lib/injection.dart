@@ -32,7 +32,6 @@ import 'features/auth/auth_injection.dart';
 import 'features/focus/focus_injection.dart';
 import 'features/habits/habits_injection.dart';
 import 'features/home/home_injection.dart';
-import 'features/notifications/notifications_injection.dart';
 import 'features/study_planner/study_planner_injection.dart';
 import 'features/tasks/tasks_injection.dart';
 
@@ -61,7 +60,6 @@ Future<void> configureDependencies({bool? useMocks}) async {
   registerHomeFeature(getIt, useMocks: mocks);
   registerStudyPlannerFeature(getIt, useMocks: mocks);
   registerTasksFeature(getIt, useMocks: mocks);
-  registerNotificationsFeature(getIt, useMocks: mocks);
   registerHabitsFeature(getIt, useMocks: mocks);
   registerFocusFeature(getIt, useMocks: mocks);
   registerAnalyticsFeature(getIt, useMocks: mocks);

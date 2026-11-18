@@ -2,8 +2,8 @@
 
 **Owner:** M3
 
-Task management: tasks with priorities, categories, deadlines,
-checklists (subtasks) and reminders.
+ Task management: tasks with priorities, categories, deadlines
+and checklists (subtasks).
 
 ## Models
 
@@ -24,7 +24,7 @@ checklists (subtasks) and reminders.
 ```dart
 task.copyWith(clearDueAt: true);    // remove the deadline
 task.copyWith(clearCategory: true); // make it uncategorized
-task.copyWith(clearReminder: true); // remove the reminder
+ 
 ```
 ## Task list tabs
 
