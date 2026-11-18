@@ -17,8 +17,17 @@
 // Other features' contracts (like TaskSummaryProvider) are registered by their
 // own owner. Ask for them with getIt<TaskSummaryProvider>().
 
+import 'package:brainly_life/features/tasks/data/repositories/mock_task_repository.dart';
+import 'package:brainly_life/features/tasks/data/repositories/task_repository.dart';
 import 'package:get_it/get_it.dart';
 
 void registerTasksFeature(GetIt getIt, {required bool useMocks}) {
-  // Nothing to register yet.
+  // FirestoreTaskRepository is not ready yet, so both modes use the mock
+  // with sample data for now. When it is ready, this becomes:
+  //   () => useMocks
+  //       ? MockTaskRepository.withSampleData()
+  //       : FirestoreTaskRepository(getIt()),
+  getIt.registerLazySingleton<TaskRepository>(
+    () => MockTaskRepository.withSampleData(),
+  );
 }
