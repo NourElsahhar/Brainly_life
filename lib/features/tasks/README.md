@@ -39,7 +39,26 @@ which tab a task appears in. Every task appears in exactly one tab:
 It also gives `progress` (checked subtasks, 0.0 to 1.0) and `isDueSoon`
 (less than 24 hours left). Pass `now` in, never call `DateTime.now()`
 inside, so tests stay deterministic.
+## Repository
+
+`TaskRepository` (`data/repositories/task_repository.dart`) is the contract.
+Every method returns a `Result`.
+
+- `watchActiveTasks()`: live list of every task that is not done, earliest
+  deadline first. The Cubit splits it into tabs with `TaskProgressCalculator`.
+- `getCompletedTasks(afterTaskId:, limit:)`: completed tasks from the last
+  30 days, newest first, 20 per page.
+- `watchTask(id)`, `createTask`, `updateTask`, `deleteTask`.
+
+`MockTaskRepository` keeps tasks in memory:
+
+```dart
+final tasks = MockTaskRepository.withSampleData(); // 5 sample tasks
+final empty = MockTaskRepository(now: () => fixedTime); // for tests
+empty.failWith = const NetworkFailure(); // simulate an error
+```
+
 ## Coming next
 
-`TaskRepository` + `MockTaskRepository`, `TaskSummaryProvider` (for Home)
-and `TaskCreationPort` (for the AI assistant).
+`FirestoreTaskRepository`, DI registration in `tasks_injection.dart`,
+`TaskSummaryProvider` (for Home) and `TaskCreationPort` (for the AI assistant).
