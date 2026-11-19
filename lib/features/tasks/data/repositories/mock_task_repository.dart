@@ -90,7 +90,7 @@ class MockTaskRepository implements TaskRepository {
   /// Use it in tests to check how a Cubit handles errors.
   Failure? failWith;
 
-   @override
+  @override
   Stream<Result<List<Task>>> watchActiveTasks() => _watch(_activeTasks);
 
   @override
@@ -164,9 +164,20 @@ class MockTaskRepository implements TaskRepository {
     return const Result.success(null);
   }
 
+  @override
+  Future<Result<void>> restoreTask(Task task) async {
+    final failure = failWith;
+    if (failure != null) return Result.failure(failure);
+
+    _tasks[task.id] = task;
+    _changes.add(null);
+    return const Result.success(null);
+  }
+
   /// Closes the stream of changes. Call it at the end of a test.
   Future<void> dispose() => _changes.close();
-    /// A stream that sends [read]'s value right away, then again after
+
+  /// A stream that sends [read]'s value right away, then again after
   /// every change. Cancelling it stops listening immediately.
   Stream<T> _watch<T>(T Function() read) {
     StreamSubscription<void>? changes;

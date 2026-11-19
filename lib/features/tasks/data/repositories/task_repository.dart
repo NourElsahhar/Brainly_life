@@ -38,4 +38,8 @@ abstract class TaskRepository {
 
   /// Deletes the task. Does nothing if it does not exist.
   Future<Result<void>> deleteTask(String id);
+
+  /// Saves [task] again with its original id and dates.
+  /// Used to undo a delete.
+  Future<Result<void>> restoreTask(Task task);
 }
