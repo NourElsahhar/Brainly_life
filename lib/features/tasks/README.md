@@ -141,7 +141,35 @@ registered in `tasks_injection.dart` for both modes.
 ```dart
 final result = await getIt<TaskSummaryProvider>().todaySummary();
 ```
+
+## Creating tasks from other features
+
+`TaskCreationPort` (`data/repositories/task_creation_port.dart`) lets
+other features create a task. M5's AI assistant uses it when the user
+confirms a `create_task` action.
+
+Other features import only this file. It also exports `TaskPriority`.
+
+```dart
+final result = await getIt<TaskCreationPort>().createTask(
+  TaskDraft(
+    title: 'Study physics',
+    priority: TaskPriority.high,
+    dueAt: tomorrowAt5pmUtc,
+    subtaskTitles: ['Chapter 1', 'Chapter 2'],
+  ),
+);
+// Success: the new task id. Failed: show failure.userMessage.
+```
+
+`RepositoryTaskCreationPort` is the real one, registered in
+`tasks_injection.dart`. It trims the text, drops empty checklist items,
+saves `dueAt` in UTC, and creates the task as not done and Uncategorized.
+It returns a `ValidationFailure` when the title is empty or longer than
+100 characters, the description is longer than 1000, or there are more
+than 20 checklist items.
+
 ## Coming next
 
-`TaskCreationPort` (for the AI assistant), `TaskFormCubit`,
-`CategoryCubit`, the task screens, and `FirestoreTaskRepository`.
+`TaskFormCubit`, `CategoryCubit`, the task screens, and
+`FirestoreTaskRepository`.
