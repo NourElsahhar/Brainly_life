@@ -174,6 +174,22 @@ class MockTaskRepository implements TaskRepository {
     return const Result.success(null);
   }
 
+  @override
+  Future<Result<void>> clearCategory(String categoryId) async {
+    final failure = failWith;
+    if (failure != null) return Result.failure(failure);
+
+    final now = _now();
+    var changed = false;
+    for (final task in _tasks.values.toList()) {
+      if (task.categoryId != categoryId) continue;
+      _tasks[task.id] = task.copyWith(clearCategory: true, updatedAt: now);
+      changed = true;
+    }
+    if (changed) _changes.add(null);
+    return const Result.success(null);
+  }
+
   /// Closes the stream of changes. Call it at the end of a test.
   Future<void> dispose() => _changes.close();
 

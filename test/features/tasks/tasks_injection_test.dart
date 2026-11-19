@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:brainly_life/features/home/data/repositories/home_summary_port.dart';
 import 'package:brainly_life/features/tasks/data/repositories/task_creation_port.dart';
+import 'package:brainly_life/features/tasks/data/repositories/task_category_repository.dart';
 
 void main() {
   late GetIt getIt;
@@ -34,6 +35,14 @@ void main() {
         const TaskDraft(title: 'From the AI'),
       );
       expect(result.isSuccess, isTrue);
+    });
+    test('registers TaskCategoryRepository (useMocks: $useMocks)', () async {
+      registerTasksFeature(getIt, useMocks: useMocks);
+
+      final result = await getIt<TaskCategoryRepository>()
+          .watchCategories()
+          .first;
+      expect(result.dataOrNull, isNotEmpty);
     });
   }
 }
