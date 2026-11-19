@@ -124,8 +124,24 @@ await cubit.undo();          // puts back the last deleted task
 Calling `loadMore()` many times while scrolling is safe: it loads each
 page once.
 
+## Home summary
+
+`RepositoryTaskSummaryProvider`
+(`data/repositories/repository_task_summary_provider.dart`) is the real
+`TaskSummaryProvider` for the "Today's tasks" card on Home. It is
+registered in `tasks_injection.dart` for both modes.
+
+- `dueTodayCount` and `overdueCount` use `TaskProgressCalculator`, so they
+  match the task list tabs.
+- `nextTaskTitle`: the oldest overdue task, otherwise the nearest task
+  due today, otherwise null.
+- `completedTodayCount`: tasks completed today in the user's time zone.
+  It reads the completed pages until it reaches a task from before today.
+
+```dart
+final result = await getIt<TaskSummaryProvider>().todaySummary();
+```
 ## Coming next
 
-`TaskSummaryProvider` (for Home),
 `TaskCreationPort` (for the AI assistant), `TaskFormCubit`,
 `CategoryCubit`, the task screens, and `FirestoreTaskRepository`.

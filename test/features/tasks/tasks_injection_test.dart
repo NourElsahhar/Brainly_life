@@ -2,6 +2,7 @@ import 'package:brainly_life/features/tasks/data/repositories/task_repository.da
 import 'package:brainly_life/features/tasks/tasks_injection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:brainly_life/features/home/data/repositories/home_summary_port.dart';
 
 void main() {
   late GetIt getIt;
@@ -17,6 +18,13 @@ void main() {
       expect(getIt.isRegistered<TaskRepository>(), isTrue);
       final result = await getIt<TaskRepository>().watchActiveTasks().first;
       expect(result.dataOrNull, isNotEmpty);
+    });
+    test('registers TaskSummaryProvider (useMocks: $useMocks)', () async {
+      registerTasksFeature(getIt, useMocks: useMocks);
+
+      expect(getIt.isRegistered<TaskSummaryProvider>(), isTrue);
+      final result = await getIt<TaskSummaryProvider>().todaySummary();
+      expect(result.isSuccess, isTrue);
     });
   }
 }
