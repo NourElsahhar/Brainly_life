@@ -192,7 +192,33 @@ It returns a `ValidationFailure` when the title is empty or longer than
 100 characters, the description is longer than 1000, or there are more
 than 20 checklist items.
 
+## Categories Cubit
+
+`CategoryCubit` (`logic/category_cubit.dart`) drives the categories
+screen. States (`logic/category_state.dart`): `CategoryInitial`,
+`CategoryLoading`, `CategoryLoaded(categories)` (may be empty),
+`CategoryError` (Retry calls `load()`).
+
+Every action returns `null` when it worked, or the `Failure` to show:
+
+```dart
+final failure = await cubit.create(name, colorValue);
+if (failure == null) {
+  Navigator.pop(context); // close the dialog
+} else {
+  setState(() => error = failure.userMessage); // show it under the field
+}
+```
+
+- `create` and `rename` trim the name and return a `ValidationFailure`
+  when it is empty, longer than 30, or already used (case does not matter).
+- `recolor(category, colorValue)`.
+- `delete(category)` also makes its tasks Uncategorized. Ask the user to
+  confirm first.
+
+Registered with `registerFactory`, so every screen gets a new one.
+
 ## Coming next
 
-`CategoryCubit`, `TaskFormCubit`, `TaskDetailCubit`, the task screens,
-and the Firestore repositories.
+`TaskFormCubit`, `TaskDetailCubit`, the task screens, and the Firestore
+repositories.
