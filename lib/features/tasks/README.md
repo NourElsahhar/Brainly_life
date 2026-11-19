@@ -67,8 +67,8 @@ the mock in both modes. The Firestore one comes later.
 ## Task list Cubit
 
 `TaskListCubit` (`logic/task_list_cubit.dart`) drives the task list
-screen: the Today, Upcoming and Overdue tabs. The Completed tab
-(paginated) comes in its own Cubit.
+screen: the Today, Upcoming and Overdue tabs. The Completed tab has its
+own Cubit (below).
 
 States (`logic/task_list_state.dart`):
 
@@ -93,9 +93,39 @@ cubit.sortBy(TaskSort.priority);
 await cubit.completeTask(task);
 await cubit.undo();
 ```
+## Completed tab Cubit
+
+`CompletedTasksCubit` (`logic/completed_tasks_cubit.dart`) shows done
+tasks from the last 30 days, newest first, 20 at a time.
+
+States (`logic/completed_tasks_state.dart`): `CompletedTasksInitial`,
+`CompletedTasksLoading`, `CompletedTasksLoaded`, `CompletedTasksEmpty`,
+`CompletedTasksError`.
+
+`CompletedTasksLoaded` has:
+
+- `tasks` and `hasMore` (there may be another page).
+- `isLoadingMore`: show a small spinner under the list.
+- `loadMoreFailure`: the next page failed. Keep the list and show Retry
+  under it (it calls `loadMore()` again).
+
+`Loaded` and `Empty` also carry `lastDeleted` (show an Undo snackbar)
+and `actionFailure` (show `userMessage` in a snackbar).
+
+```dart
+final cubit = CompletedTasksCubit(getIt<TaskRepository>());
+await cubit.load();          // every time the tab opens
+await cubit.loadMore();      // when the user scrolls near the end
+await cubit.reopenTask(task); // back to not done, leaves this tab
+await cubit.deleteTask(task);
+await cubit.undo();          // puts back the last deleted task
+```
+
+Calling `loadMore()` many times while scrolling is safe: it loads each
+page once.
 
 ## Coming next
 
-Completed tab Cubit (paginated), `TaskSummaryProvider` (for Home),
+`TaskSummaryProvider` (for Home),
 `TaskCreationPort` (for the AI assistant), `TaskFormCubit`,
 `CategoryCubit`, the task screens, and `FirestoreTaskRepository`.
