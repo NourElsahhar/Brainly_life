@@ -137,6 +137,16 @@ void main() {
       expect(found, [true, false]);
       await subscription.cancel();
     });
+
+    test('restoreTask brings back a deleted task with the same id', () async {
+      final saved = (await repository.createTask(newTask('Read'))).dataOrNull!;
+      await repository.deleteTask(saved.id);
+
+      await repository.restoreTask(saved);
+
+      final restored = await repository.watchTask(saved.id).first;
+      expect(restored.dataOrNull, saved);
+    });
   });
 
   group('getCompletedTasks', () {
