@@ -1,4 +1,4 @@
-// Dependency injection for the home feature (owner: M1).
+// Dependency injection for the home feature (owner: M3).
 // injection.dart calls this function once when the app starts.
 //
 // Register here: repositories, data sources, services and Cubits.
