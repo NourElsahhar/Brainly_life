@@ -147,6 +147,29 @@ void main() {
       final restored = await repository.watchTask(saved.id).first;
       expect(restored.dataOrNull, saved);
     });
+
+    test('clearCategory makes only that category Uncategorized', () async {
+      final uni1 = (await repository.createTask(
+        newTask('Lecture').copyWith(categoryId: 'uni'),
+      )).dataOrNull!;
+      final uni2 = (await repository.createTask(
+        newTask('Exam').copyWith(categoryId: 'uni'),
+      )).dataOrNull!;
+      final home = (await repository.createTask(
+        newTask('Cook').copyWith(categoryId: 'home'),
+      )).dataOrNull!;
+
+      await repository.clearCategory('uni');
+
+      final tasks = {
+        for (final task
+            in (await repository.watchActiveTasks().first).dataOrNull!)
+          task.id: task,
+      };
+      expect(tasks[uni1.id]!.categoryId, isNull);
+      expect(tasks[uni2.id]!.categoryId, isNull);
+      expect(tasks[home.id]!.categoryId, 'home');
+    });
   });
 
   group('getCompletedTasks', () {

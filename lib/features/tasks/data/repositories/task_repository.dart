@@ -42,4 +42,8 @@ abstract class TaskRepository {
   /// Saves [task] again with its original id and dates.
   /// Used to undo a delete.
   Future<Result<void>> restoreTask(Task task);
+
+  /// Makes every task of category [categoryId] Uncategorized.
+  /// Called after the category is deleted.
+  Future<Result<void>> clearCategory(String categoryId);
 }

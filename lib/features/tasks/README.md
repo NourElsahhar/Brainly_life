@@ -53,6 +53,9 @@ Every method returns a `Result`.
 - `restoreTask(task)`: saves a deleted task again with the same id and
   dates. Used by undo.
 
+  - `clearCategory(categoryId)`: makes every task of that category
+  Uncategorized. Called after the category is deleted.
+
 `MockTaskRepository` keeps tasks in memory:
 
 ```dart
@@ -63,6 +66,26 @@ empty.failWith = const NetworkFailure(); // simulate an error
 
 `tasks_injection.dart` registers `TaskRepository` in get_it. For now it is
 the mock in both modes. The Firestore one comes later.
+
+## Categories repository
+
+`TaskCategoryRepository` (`data/repositories/task_category_repository.dart`)
+saves the user's categories. Names are at most
+`TaskCategoryRepository.maxNameLength` (30) characters.
+
+- `watchCategories()`: live list, sorted by name (case does not matter).
+- `createCategory`, `updateCategory` (rename and recolour),
+  `deleteCategory`.
+
+Deleting a category does not touch its tasks. Call
+`TaskRepository.clearCategory(id)` after it, so they become
+Uncategorized. A task whose category is missing should still show as
+Uncategorized.
+
+```dart
+final categories = MockTaskCategoryRepository.withSampleData();
+// University (blue) and Personal (green)
+```
 
 ## Task list Cubit
 
@@ -171,5 +194,5 @@ than 20 checklist items.
 
 ## Coming next
 
-`TaskFormCubit`, `CategoryCubit`, the task screens, and
-`FirestoreTaskRepository`.
+`CategoryCubit`, `TaskFormCubit`, `TaskDetailCubit`, the task screens,
+and the Firestore repositories.
