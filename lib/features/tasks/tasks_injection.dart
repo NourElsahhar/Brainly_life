@@ -20,6 +20,8 @@
 import 'package:brainly_life/features/tasks/data/repositories/mock_task_repository.dart';
 import 'package:brainly_life/features/tasks/data/repositories/task_repository.dart';
 import 'package:get_it/get_it.dart';
+import 'package:brainly_life/features/home/data/repositories/home_summary_port.dart';
+import 'package:brainly_life/features/tasks/data/repositories/repository_task_summary_provider.dart';
 
 void registerTasksFeature(GetIt getIt, {required bool useMocks}) {
   // FirestoreTaskRepository is not ready yet, so both modes use the mock
@@ -29,5 +31,10 @@ void registerTasksFeature(GetIt getIt, {required bool useMocks}) {
   //       : FirestoreTaskRepository(getIt()),
   getIt.registerLazySingleton<TaskRepository>(
     () => MockTaskRepository.withSampleData(),
+  );
+  // The "Today's tasks" card on Home. It reads TaskRepository, so it works
+  // the same with the mock and with Firestore.
+  getIt.registerLazySingleton<TaskSummaryProvider>(
+    () => RepositoryTaskSummaryProvider(getIt()),
   );
 }
