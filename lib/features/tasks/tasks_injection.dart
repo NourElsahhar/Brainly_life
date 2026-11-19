@@ -22,6 +22,8 @@ import 'package:brainly_life/features/tasks/data/repositories/task_repository.da
 import 'package:get_it/get_it.dart';
 import 'package:brainly_life/features/home/data/repositories/home_summary_port.dart';
 import 'package:brainly_life/features/tasks/data/repositories/repository_task_summary_provider.dart';
+import 'package:brainly_life/features/tasks/data/repositories/repository_task_creation_port.dart';
+import 'package:brainly_life/features/tasks/data/repositories/task_creation_port.dart';
 
 void registerTasksFeature(GetIt getIt, {required bool useMocks}) {
   // FirestoreTaskRepository is not ready yet, so both modes use the mock
@@ -36,5 +38,9 @@ void registerTasksFeature(GetIt getIt, {required bool useMocks}) {
   // the same with the mock and with Firestore.
   getIt.registerLazySingleton<TaskSummaryProvider>(
     () => RepositoryTaskSummaryProvider(getIt()),
+  );
+  // Lets other features (M5's AI assistant) create tasks.
+  getIt.registerLazySingleton<TaskCreationPort>(
+    () => RepositoryTaskCreationPort(getIt()),
   );
 }
