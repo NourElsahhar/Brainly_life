@@ -23,8 +23,6 @@ void main() {
       Subtask(id: 's1', title: 'Chapter 3', done: true),
       Subtask(id: 's2', title: 'Chapter 4'),
     ],
-    reminderOffsetMinutes: 60,
-    reminderId: 'task_t1',
   );
 
   group('Task defaults', () {
@@ -78,13 +76,6 @@ void main() {
       final copy = buildFullTask().copyWith(clearCategory: true);
 
       expect(copy.categoryId, isNull);
-    });
-
-    test('clearReminder removes the offset and the reminder id together', () {
-      final copy = buildFullTask().copyWith(clearReminder: true);
-
-      expect(copy.reminderOffsetMinutes, isNull);
-      expect(copy.reminderId, isNull);
     });
   });
 

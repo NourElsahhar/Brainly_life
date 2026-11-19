@@ -22,8 +22,6 @@ class Task extends Equatable {
     this.status = TaskStatus.todo,
     this.completedAt,
     this.subtasks = const [],
-    this.reminderOffsetMinutes,
-    this.reminderId,
   });
 
   static const int maxTitleLength = 100;
@@ -51,13 +49,6 @@ class Task extends Equatable {
 
   final List<Subtask> subtasks;
 
-  /// Minutes before [dueAt] to remind the user:
-  /// 0 = at the due time, 10, 60, or 1440 (one day). Null means no reminder.
-  final int? reminderOffsetMinutes;
-
-  /// Id of the scheduled reminder, e.g. `task_<id>`. Null if there is none.
-  final String? reminderId;
-
   final DateTime createdAt;
 
   final DateTime updatedAt;
@@ -78,15 +69,12 @@ class Task extends Equatable {
     TaskStatus? status,
     DateTime? completedAt,
     List<Subtask>? subtasks,
-    int? reminderOffsetMinutes,
-    String? reminderId,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool clearDescription = false,
     bool clearCategory = false,
     bool clearDueAt = false,
     bool clearCompletedAt = false,
-    bool clearReminder = false,
   }) {
     return Task(
       id: id ?? this.id,
@@ -98,10 +86,6 @@ class Task extends Equatable {
       status: status ?? this.status,
       completedAt: clearCompletedAt ? null : (completedAt ?? this.completedAt),
       subtasks: subtasks ?? this.subtasks,
-      reminderOffsetMinutes: clearReminder
-          ? null
-          : (reminderOffsetMinutes ?? this.reminderOffsetMinutes),
-      reminderId: clearReminder ? null : (reminderId ?? this.reminderId),
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -126,8 +110,6 @@ class Task extends Equatable {
             (item) => Subtask.fromMap(Map<String, dynamic>.from(item as Map)),
           )
           .toList(),
-      reminderOffsetMinutes: map['reminderOffsetMinutes'] as int?,
-      reminderId: map['reminderId'] as String?,
       createdAt: _readDate(map['createdAt'])!,
       updatedAt: _readDate(map['updatedAt'])!,
     );
@@ -143,8 +125,6 @@ class Task extends Equatable {
       'status': status.name,
       'completedAt': _writeDate(completedAt),
       'subtasks': subtasks.map((subtask) => subtask.toMap()).toList(),
-      'reminderOffsetMinutes': reminderOffsetMinutes,
-      'reminderId': reminderId,
       'createdAt': _writeDate(createdAt),
       'updatedAt': _writeDate(updatedAt),
     };
@@ -161,8 +141,6 @@ class Task extends Equatable {
     status,
     completedAt,
     subtasks,
-    reminderOffsetMinutes,
-    reminderId,
     createdAt,
     updatedAt,
   ];
