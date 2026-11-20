@@ -217,8 +217,37 @@ if (failure == null) {
   confirm first.
 
 Registered with `registerFactory`, so every screen gets a new one.
+## Task form Cubit
 
+`TaskFormCubit` (`logic/task_form_cubit.dart`) drives the add / edit task
+screen. It has one state class, `TaskFormState`
+(`logic/task_form_state.dart`), with all the field values and a `status`:
+
+- `loading`: loading the task to edit.
+- `editing`: the user is filling the form.
+- `saving`: disable the Save button.
+- `saved`: close the screen.
+- `notFound`: the task was deleted. Show "This task was deleted".
+- `loadFailed`: show Retry, which calls `startEdit(id)` again.
+
+```dart
+final cubit = getIt<TaskFormCubit>()..startCreate(); // or ..startEdit(id)
+cubit.titleChanged('Study physics');
+cubit.priorityChanged(TaskPriority.high);
+cubit.dueAtChanged(pickedDateTime); // null removes the deadline
+cubit.addSubtask('Chapter 3');
+await cubit.save();
+```
+
+- Field errors (`titleError`, `descriptionError`, `dueAtError`) show only
+  after the first Save, then update while the user types. Put them in each
+  field's `errorText`.
+- The deadline must be in the future, unless it is an old deadline the
+  user did not change.
+- Editing keeps the task id, status, `completedAt` and `createdAt`.
+- `hasChanges`: ask "Discard changes?" before leaving.
+- `canAddSubtask` is false at 20 items.
+- `failure` (save or load failed): show `userMessage` in a snackbar.
 ## Coming next
 
-`TaskFormCubit`, `TaskDetailCubit`, the task screens, and the Firestore
-repositories.
+`TaskDetailCubit`, the task screens, and the Firestore repositories.

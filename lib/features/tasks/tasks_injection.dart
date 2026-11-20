@@ -27,6 +27,7 @@ import 'package:brainly_life/features/tasks/data/repositories/task_creation_port
 import 'package:brainly_life/features/tasks/data/repositories/mock_task_category_repository.dart';
 import 'package:brainly_life/features/tasks/data/repositories/task_category_repository.dart';
 import 'package:brainly_life/features/tasks/logic/category_cubit.dart';
+import 'package:brainly_life/features/tasks/logic/task_form_cubit.dart';
 
 void registerTasksFeature(GetIt getIt, {required bool useMocks}) {
   // FirestoreTaskRepository is not ready yet, so both modes use the mock
@@ -53,4 +54,5 @@ void registerTasksFeature(GetIt getIt, {required bool useMocks}) {
   );
   // Cubits: a new one for every screen.
   getIt.registerFactory(() => CategoryCubit(getIt(), getIt()));
+  getIt.registerFactory(() => TaskFormCubit(getIt()));
 }
