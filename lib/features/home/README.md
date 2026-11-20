@@ -31,3 +31,34 @@ final study = MockStudySummaryProvider.withSampleData();   // session in 2 hours
 final none = MockStudySummaryProvider();                    // no session
 final failing = MockAiTipProvider(failWith: const NetworkFailure());
 ```
+
+## Home Cubit (`logic/home_cubit.dart`)
+
+Every card has its own state, `HomeCard<T>` (`logic/home_state.dart`):
+`HomeCardLoading` (skeleton), `HomeCardLoaded(data)` or
+`HomeCardError(failure)` (Retry). One failing card never hides the others.
+The study card is `HomeCardLoaded(null)` when no session is planned.
+
+```dart
+final cubit = getIt<HomeCubit>()..load();
+await cubit.load();                  // again when the user comes back to Home
+await cubit.retry(HomeSection.tip);  // a card's Retry button
+```
+
+- `load()` asks all five providers at the same time. Cards that already
+  show data keep it until the new data comes (no flashing).
+- An older answer never replaces a newer one.
+
+## Connecting your card (M2, M4, M5)
+
+Register your provider in your own `<feature>_injection.dart`, for example:
+
+```dart
+getIt.registerLazySingleton<HabitSummaryProvider>(
+  () => RepositoryHabitSummaryProvider(getIt()),
+);
+```
+
+That's all. `home_injection.dart` uses your provider when it is
+registered, and the mock until then. The order in `injection.dart` does
+not matter.
