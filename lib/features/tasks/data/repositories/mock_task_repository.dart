@@ -206,7 +206,12 @@ class MockTaskRepository implements TaskRepository {
           onDone: controller.close,
         );
       },
-      onCancel: () => changes?.cancel(),
+      // Do not return the cancel Future: it would finish outside the
+      // widget-test clock, and `.first` (used by TaskFormCubit) would wait
+      // forever in widget tests.
+      onCancel: () {
+        changes?.cancel();
+      },
     );
     return controller.stream;
   }
