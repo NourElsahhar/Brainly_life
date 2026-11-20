@@ -248,6 +248,35 @@ await cubit.save();
 - `hasChanges`: ask "Discard changes?" before leaving.
 - `canAddSubtask` is false at 20 items.
 - `failure` (save or load failed): show `userMessage` in a snackbar.
+
+## Task detail Cubit
+
+`TaskDetailCubit` (`logic/task_detail_cubit.dart`) drives the task detail
+screen. It watches the task live, so edits made in the form show up when
+the user comes back.
+
+States (`logic/task_detail_state.dart`):
+
+- `TaskDetailLoading`, then `TaskDetailLoaded`: the `task`, `progress`
+  (0.0 to 1.0), `isOverdue` and `isDueSoon`.
+- `TaskDetailNotFound`: the task was deleted somewhere else. Show "This
+  task was deleted".
+- `TaskDetailDeleted`: the user deleted it from this screen. Close the
+  screen.
+- `TaskDetailError`: Retry calls `load(id)` again.
+
+```dart
+final cubit = getIt<TaskDetailCubit>()..load(taskId);
+await cubit.toggleSubtask(subtaskId);
+await cubit.markDone(); // or cubit.reopen()
+await cubit.delete();   // ask "Delete this task?" first
+// "Start focus session":
+context.push(AppRoutes.focusPath(taskId: taskId));
+```
+
+Every action returns `null` when it worked, or the `Failure` to show in a
+snackbar.
+
 ## Coming next
 
-`TaskDetailCubit`, the task screens, and the Firestore repositories.
+The task screens, and the Firestore repositories.
