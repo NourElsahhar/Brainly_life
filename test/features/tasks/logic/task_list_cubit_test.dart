@@ -165,6 +165,23 @@ void main() {
       expect(loaded().actionFailure, const NetworkFailure());
       expect(loaded().lastChange, isNull);
     });
+
+    test('completeTask hides the task right away', () async {
+      final future = cubit.completeTask(slides);
+
+      // Before the repository answers.
+      expect(visibleIds(), ['report']);
+      await future;
+    });
+
+    test('a failed delete puts the task back', () async {
+      repository.failWith = const NetworkFailure();
+
+      await cubit.deleteTask(report);
+
+      expect(visibleIds(), ['slides', 'report']);
+      expect(loaded().actionFailure, const NetworkFailure());
+    });
   });
 
   test('selectTab before load does not show a list', () {

@@ -152,6 +152,13 @@ void main() {
       expect(ids().length, 20);
       expect(loaded().hasMore, isTrue);
     });
+
+    test('deleteTask hides the task right away', () async {
+      final future = cubit.deleteTask(done[0]);
+
+      expect(ids(), isNot(contains('done_0')));
+      await future;
+    });
   });
 
   test('no done tasks emits Empty', () async {

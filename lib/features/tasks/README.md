@@ -276,6 +276,15 @@ context.push(AppRoutes.focusPath(taskId: taskId));
 
 Every action returns `null` when it worked, or the `Failure` to show in a
 snackbar.
+## Screens
+
+- `TasksScreen` (`presentation/screens/tasks_screen.dart`) at
+  `AppRoutes.tasks`: tabs with counts, search, sort, swipe to delete,
+  complete with Undo, Completed tab with "load more" while scrolling.
+- `TaskTile` (`presentation/widgets/task_tile.dart`): one task row, used
+  in every tab.
+- `task_display.dart`: `formatDue`, `formatCompleted` and
+  `TaskPriority.level` (for M1's `PriorityChip`).
 
 ## Coming next
 
