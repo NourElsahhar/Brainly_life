@@ -1,54 +1,24 @@
-import 'package:brainly_life/features/study_planner/data/models/plan_constraints_model.dart';
 import 'package:brainly_life/features/study_planner/data/models/study_enums.dart';
 import 'package:brainly_life/features/study_planner/data/models/study_session_model.dart';
 import 'package:brainly_life/features/study_planner/data/models/topic_model.dart';
 import 'package:brainly_life/features/study_planner/logic/plan_adjuster.dart';
-import 'package:brainly_life/features/study_planner/logic/plan_validator.dart';
-import 'package:brainly_life/features/study_planner/logic/planner_types.dart';
 import 'package:clock/clock.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// "Now" is Tuesday 2026-11-17 12:00 UTC in every test.
+// "Now" is Tuesday 2026-11-17 12:00 UTC in every test, and the user's
+// timezone is UTC unless a test says otherwise, so "today" is 2026-11-17.
 final _now = DateTime.utc(2026, 11, 17, 12);
-final _firstDay = DateTime.utc(2026, 11, 17);
-const _exams = {'s1': '2026-11-25'};
-
-/// Test fixture only: consecutive days starting today, as the caller would
-/// build them with DateKeyUtils.
-List<PlannerDay> _days(int count) {
-  return [
-    for (var i = 0; i < count; i++)
-      () {
-        final date = _firstDay.add(Duration(days: i));
-        final month = date.month.toString().padLeft(2, '0');
-        final day = date.day.toString().padLeft(2, '0');
-        return PlannerDay(
-          dateKey: '${date.year}-$month-$day',
-          weekday: date.weekday,
-          startAt: DateTime.utc(date.year, date.month, date.day, 17),
-        );
-      }(),
-  ];
-}
-
-PlanConstraints _constraints({int minutesPerDay = 120}) {
-  return PlanConstraints(
-    minutesPerWeekday: {for (var d = 1; d <= 7; d++) d: minutesPerDay},
-    daysOff: const {},
-    maxSessionMinutes: 60,
-    breakMinutes: 10,
-  );
-}
 
 Topic _topic({
+  String id = 't1',
   int estimated = 300,
   int completed = 60,
   TopicStatus status = TopicStatus.inProgress,
 }) {
   return Topic(
-    id: 't1',
+    id: id,
     subjectId: 's1',
-    title: 't1',
+    title: id,
     difficulty: 3,
     estimatedMinutes: estimated,
     status: status,
@@ -80,9 +50,9 @@ List<StudySession> _planSessions() {
     // Over, never done: will be marked missed.
     _session('p1', '2026-11-16', DateTime.utc(2026, 11, 16, 17)),
     _session('p2', '2026-11-17', DateTime.utc(2026, 11, 17, 9)),
-    // Happening right now (11:30 to 12:30): left alone.
+    // Happening right now (11:30 to 12:30): left alone, booked time.
     _session('p3', '2026-11-17', DateTime.utc(2026, 11, 17, 11, 30)),
-    // Not started yet: removed and planned again.
+    // Not started yet: removed, the AI plans this work again.
     _session('p4', '2026-11-17', DateTime.utc(2026, 11, 17, 17)),
     _session('p5', '2026-11-18', DateTime.utc(2026, 11, 18, 17)),
     // History: never touched.
@@ -107,34 +77,20 @@ List<StudySession> _planSessions() {
   ];
 }
 
-String Function() _ids(String prefix) {
-  var counter = 0;
-  return () => '${prefix}_${++counter}';
-}
-
-AdjustmentResult _adjust({
+PlanAdjustment _adjust({
   List<StudySession>? sessions,
-  Topic? topic,
-  PlanConstraints? constraints,
-  String Function()? ids,
+  List<Topic>? topics,
+  DateTime? now,
+  String timezone = 'UTC',
 }) {
-  return PlanAdjuster(clock: Clock.fixed(_now)).adjust(
-    planId: 'plan_1',
-    sessions: sessions ?? _planSessions(),
-    topics: [topic ?? _topic()],
-    examDateKeys: _exams,
-    constraints: constraints ?? _constraints(),
-    days: _days(10),
-    newSessionId: ids ?? _ids('new'),
-  );
-}
-
-int _sum(Iterable<StudySession> sessions) {
-  return sessions.fold(0, (total, s) => total + s.plannedMinutes);
+  return PlanAdjuster(
+    clock: Clock.fixed(now ?? _now),
+    timezone: timezone,
+  ).adjust(sessions: sessions ?? _planSessions(), topics: topics ?? [_topic()]);
 }
 
 void main() {
-  group('PlanAdjuster', () {
+  group('PlanAdjuster sessions', () {
     test('planned sessions whose time is over become missed', () {
       final result = _adjust();
 
@@ -162,11 +118,13 @@ void main() {
       expect(result.removedSessionIds, unorderedEquals(['p4', 'p5']));
     });
 
-    test('a session happening right now is left alone', () {
+    test('a session happening right now is left alone as booked time', () {
       final result = _adjust();
 
       expect(result.missedSessions.any((s) => s.id == 'p3'), isFalse);
       expect(result.removedSessionIds.contains('p3'), isFalse);
+      expect(result.bookedSessions.map((s) => s.id), ['p3']);
+      expect(result.bookedMinutesByDate, {'2026-11-17': 60});
     });
 
     test('done, skipped and already missed sessions are never touched', () {
@@ -178,100 +136,164 @@ void main() {
         result.removedSessionIds.any((id) => history.contains(id)),
         isFalse,
       );
+      expect(result.bookedSessions.any((s) => history.contains(s.id)), isFalse);
     });
 
-    test('all remaining minutes are planned again, missed ones included', () {
-      // 300 estimated, 60 completed: 240 left. The two missed sessions did
-      // not reduce it, so they are planned again.
-      final result = _adjust();
-
-      expect(_sum(result.newSessions), 240);
-      expect(result.isComplete, isTrue);
-      expect(
-        result.newSessions.every((s) => s.dateKey.compareTo('2026-11-17') >= 0),
-        isTrue,
-      );
-    });
-
-    test('new sessions use the given ids and belong to the plan', () {
-      final result = _adjust();
-
-      expect(result.newSessions.map((s) => s.id).toSet(), hasLength(4));
-      expect(result.newSessions.every((s) => s.id.startsWith('new_')), isTrue);
-      expect(result.newSessions.every((s) => s.planId == 'plan_1'), isTrue);
-    });
-
-    test('with no available time everything is reported as unscheduled', () {
-      final result = _adjust(constraints: _constraints(minutesPerDay: 0));
-
-      expect(result.newSessions, isEmpty);
-      expect(result.unscheduledMinutes, {'t1': 240});
-      expect(result.missedSessions, hasLength(2));
-      expect(result.removedSessionIds, hasLength(2));
-    });
-
-    test('when the topic is finished nothing new is planned', () {
+    test('a session that ends exactly now is missed', () {
       final result = _adjust(
-        topic: _topic(completed: 300, status: TopicStatus.done),
+        sessions: [_session('a', '2026-11-17', DateTime.utc(2026, 11, 17, 11))],
       );
 
-      expect(result.newSessions, isEmpty);
-      expect(result.isComplete, isTrue);
+      expect(result.missedSessions.map((s) => s.id), ['a']);
+    });
+
+    test('a session that starts exactly now is removed', () {
+      final result = _adjust(
+        sessions: [_session('a', '2026-11-17', DateTime.utc(2026, 11, 17, 12))],
+      );
+
+      expect(result.removedSessionIds, ['a']);
+      expect(result.bookedSessions, isEmpty);
+    });
+
+    test('a session done today is booked time', () {
+      final result = _adjust(
+        sessions: [
+          _session(
+            'd',
+            '2026-11-17',
+            DateTime.utc(2026, 11, 17, 8),
+            status: SessionStatus.done,
+          ),
+        ],
+      );
+
+      expect(result.bookedSessions.map((s) => s.id), ['d']);
+      expect(result.bookedMinutesByDate, {'2026-11-17': 60});
+    });
+
+    test('"today" follows the user timezone', () {
+      // 23:30 UTC on the 17th is already 01:30 on the 18th in Cairo (UTC+2).
+      final lateNow = DateTime.utc(2026, 11, 17, 23, 30);
+      final doneOnThe17th = _session(
+        'd',
+        '2026-11-17',
+        DateTime.utc(2026, 11, 17, 15),
+        status: SessionStatus.done,
+      );
+
+      final inUtc = _adjust(sessions: [doneOnThe17th], now: lateNow);
+      final inCairo = _adjust(
+        sessions: [doneOnThe17th],
+        now: lateNow,
+        timezone: 'Africa/Cairo',
+      );
+
+      expect(inUtc.bookedSessions, hasLength(1));
+      expect(inCairo.bookedSessions, isEmpty);
+    });
+  });
+
+  group('PlanAdjuster remaining work', () {
+    test('comes from the topic, minus the session happening now', () {
+      // 300 estimated - 60 completed - 60 of p3 running now = 180. The two
+      // missed sessions did not reduce it, so the AI plans them again.
+      final result = _adjust();
+
+      expect(result.remainingMinutesByTopic, {'t1': 180});
+      expect(result.hasRemainingWork, isTrue);
+    });
+
+    test('is the whole topic when nothing is running', () {
+      final missedOnly = _session(
+        'p1',
+        '2026-11-16',
+        DateTime.utc(2026, 11, 16, 17),
+      );
+      final result = _adjust(sessions: [missedOnly]);
+
+      expect(result.remainingMinutesByTopic, {'t1': 240});
+    });
+
+    test('is empty for a finished topic', () {
+      final result = _adjust(
+        topics: [_topic(completed: 300, status: TopicStatus.done)],
+      );
+
+      expect(result.remainingMinutesByTopic, isEmpty);
+      expect(result.hasRemainingWork, isFalse);
       expect(result.missedSessions, hasLength(2));
     });
 
-    test(
-      'a plan with nothing to repair only gets its remaining work planned',
-      () {
-        final result = _adjust(
-          sessions: [
-            _session(
-              'd',
-              '2026-11-16',
-              DateTime.utc(2026, 11, 16, 15),
-              status: SessionStatus.done,
-            ),
-          ],
-        );
+    test('is empty when the running session covers the rest', () {
+      // 300 - 240 completed = 60 left, all of it running right now.
+      final result = _adjust(topics: [_topic(completed: 240)]);
 
-        expect(result.missedSessions, isEmpty);
-        expect(result.removedSessionIds, isEmpty);
-        expect(_sum(result.newSessions), 240);
-      },
-    );
-
-    test('the new sessions are accepted by the validator', () {
-      final result = _adjust();
-
-      final validation = PlanValidator(clock: Clock.fixed(_now)).validate(
-        sessions: result.newSessions,
-        subjectIds: const {'s1'},
-        topics: [_topic()],
-        examDateKeys: _exams,
-        constraints: _constraints(),
-        days: _days(10),
-      );
-
-      expect(validation.isValid, isTrue);
+      expect(result.remainingMinutesByTopic, isEmpty);
     });
 
-    test('adjusting again right after changes nothing else', () {
+    test('ignores topics that are not in the plan', () {
+      final result = _adjust(
+        topics: [
+          _topic(),
+          _topic(id: 't9'),
+        ],
+      );
+
+      expect(result.remainingMinutesByTopic.keys, ['t1']);
+    });
+  });
+
+  group('PlanAdjuster completion ratio', () {
+    test('is done minutes over due minutes', () {
+      // Done: done1 (60). Not done: skip1, miss0, p1, p2 (240).
+      final result = _adjust();
+
+      expect(result.completionRatio, closeTo(0.2, 1e-9));
+    });
+
+    test('is 1 when nothing was due yet', () {
+      final result = _adjust(
+        sessions: [
+          _session('p4', '2026-11-17', DateTime.utc(2026, 11, 17, 17)),
+          _session('p5', '2026-11-18', DateTime.utc(2026, 11, 18, 17)),
+        ],
+      );
+
+      expect(result.completionRatio, 1.0);
+    });
+  });
+
+  group('PlanAdjuster edge cases', () {
+    test('an empty plan has nothing to adjust', () {
+      final result = _adjust(sessions: const []);
+
+      expect(result.missedSessions, isEmpty);
+      expect(result.removedSessionIds, isEmpty);
+      expect(result.bookedSessions, isEmpty);
+      expect(result.remainingMinutesByTopic, isEmpty);
+      expect(result.completionRatio, 1.0);
+    });
+
+    test('adjusting again right after saving changes nothing else', () {
       final first = _adjust();
+
+      // What the plan looks like after the user accepted the AI preview:
+      // missed sessions saved, removed ones deleted, two new AI sessions.
       final missedById = {for (final s in first.missedSessions) s.id: s};
-      final afterFirst = [
+      final saved = [
         for (final s in _planSessions())
           if (!first.removedSessionIds.contains(s.id)) missedById[s.id] ?? s,
-        ...first.newSessions,
+        _session('ai1', '2026-11-18', DateTime.utc(2026, 11, 18, 17)),
+        _session('ai2', '2026-11-19', DateTime.utc(2026, 11, 19, 17)),
       ];
 
-      final second = _adjust(sessions: afterFirst, ids: _ids('again'));
+      final second = _adjust(sessions: saved);
 
       expect(second.missedSessions, isEmpty);
-      expect(
-        second.removedSessionIds,
-        unorderedEquals(first.newSessions.map((s) => s.id)),
-      );
-      expect(_sum(second.newSessions), 240);
+      expect(second.removedSessionIds, unorderedEquals(['ai1', 'ai2']));
+      expect(second.remainingMinutesByTopic, first.remainingMinutesByTopic);
+      expect(second.completionRatio, closeTo(first.completionRatio, 1e-9));
     });
   });
 }

@@ -5,7 +5,6 @@ import '../data/models/study_enums.dart';
 import '../data/models/study_session_model.dart';
 import '../data/models/topic_model.dart';
 import 'planner_types.dart';
-import 'rule_based_planner.dart';
 
 /// The kinds of problem the validator can find in a plan.
 enum PlanViolationType {
@@ -39,8 +38,9 @@ enum PlanViolationType {
   /// Duration is longer than the user's `maxSessionMinutes`.
   exceedsMaxSession,
 
-  /// The session is after the exam day of its subject.
-  afterExamDay,
+  /// The session is on the exam day of its subject or later. Only the exam
+  /// day is known, not its time, so the exam day itself is not used.
+  onOrAfterExamDay,
 }
 
 /// One problem found in a plan.
@@ -65,18 +65,30 @@ class PlanValidationResult {
   Set<PlanViolationType> get types => {for (final v in violations) v.type};
 }
 
-/// Checks any plan, made by the rules or by the AI, before it is saved.
+/// Checks a plan before it is saved: the sessions the AI generated, the
+/// user's edits in the preview, and the new sessions of an adjustment.
+/// An invalid plan is never saved (Master Document B.2, task 10).
 ///
 /// It reports every problem it finds, not just the first one. It is pure Dart
 /// and reads the time only from the injected [Clock].
+///
+/// The gateway runs the same kind of checks on the AI answer
+/// (`functions/src/ai/features/studyPlan.ts`), so both sides agree on what a
+/// valid plan is.
 class PlanValidator {
   const PlanValidator({required this.clock});
 
   /// The only source of "now" for this class (injected, so tests can fix it).
   final Clock clock;
 
-  /// [days] are the days the plan may use (the same list the planner gets).
-  /// [examDateKeys] maps a subject id to the `yyyy-MM-dd` of its exam.
+  /// Checks every session in [sessions].
+  ///
+  /// [days] are the days the plan may use. [examDateKeys] maps a subject id
+  /// to the `yyyy-MM-dd` of its exam.
+  ///
+  /// [existingSessions] are sessions that stay as they are, for example a
+  /// session done earlier today during an adjustment. They are not checked
+  /// themselves, but their time counts for the daily limits and overlaps.
   PlanValidationResult validate({
     required List<StudySession> sessions,
     required Set<String> subjectIds,
@@ -84,6 +96,7 @@ class PlanValidator {
     required Map<String, String> examDateKeys,
     required PlanConstraints constraints,
     required List<PlannerDay> days,
+    List<StudySession> existingSessions = const [],
   }) {
     final violations = <PlanViolation>[];
     final now = clock.now();
@@ -96,8 +109,8 @@ class PlanValidator {
       }
 
       final minutes = session.plannedMinutes;
-      if (minutes < RuleBasedPlanner.minSessionMinutes ||
-          minutes > RuleBasedPlanner.maxSessionLimit) {
+      if (minutes < StudySession.minPlannedMinutes ||
+          minutes > StudySession.maxPlannedMinutes) {
         report(PlanViolationType.durationOutOfRange);
       }
       if (minutes > constraints.maxSessionMinutes) {
@@ -120,8 +133,8 @@ class PlanValidator {
 
       // `yyyy-MM-dd` strings sort in date order, so comparing is enough.
       final examDateKey = examDateKeys[session.subjectId];
-      if (examDateKey != null && session.dateKey.compareTo(examDateKey) > 0) {
-        report(PlanViolationType.afterExamDay);
+      if (examDateKey != null && session.dateKey.compareTo(examDateKey) >= 0) {
+        report(PlanViolationType.onOrAfterExamDay);
       }
 
       final weekday = weekdayByDateKey[session.dateKey];
@@ -132,10 +145,22 @@ class PlanValidator {
       }
     }
 
-    _checkDailyLimits(sessions, weekdayByDateKey, constraints, violations);
-    _checkOverlaps(sessions, violations);
+    final checkedIds = {for (final session in sessions) session.id};
+    final busy = [
+      for (final session in [...sessions, ...existingSessions])
+        if (_usesTime(session)) session,
+    ];
+    _checkDailyLimits(busy, weekdayByDateKey, constraints, violations);
+    _checkOverlaps(busy, checkedIds, violations);
 
     return PlanValidationResult(violations);
+  }
+
+  /// Skipped and missed sessions keep their place in the history but no
+  /// longer take time on their day.
+  static bool _usesTime(StudySession session) {
+    return session.status == SessionStatus.planned ||
+        session.status == SessionStatus.done;
   }
 
   void _checkDailyLimits(
@@ -169,8 +194,11 @@ class PlanValidator {
     }
   }
 
+  /// Reports a session that starts before an earlier one has ended. When
+  /// only one of the two is in [checkedIds], that one is reported.
   void _checkOverlaps(
     List<StudySession> sessions,
+    Set<String> checkedIds,
     List<PlanViolation> violations,
   ) {
     final ordered = [...sessions]
@@ -179,21 +207,29 @@ class PlanValidator {
         return byStart != 0 ? byStart : a.id.compareTo(b.id);
       });
 
+    StudySession? latest;
     DateTime? latestEnd;
     for (final session in ordered) {
       final end = session.startAt.add(
         Duration(minutes: session.plannedMinutes),
       );
+      final previous = latest;
       final previousEnd = latestEnd;
-      if (previousEnd != null && session.startAt.isBefore(previousEnd)) {
-        violations.add(
-          PlanViolation(
-            PlanViolationType.overlappingSessions,
-            sessionId: session.id,
-          ),
-        );
+      if (previous != null &&
+          previousEnd != null &&
+          session.startAt.isBefore(previousEnd)) {
+        final culprit = checkedIds.contains(session.id) ? session : previous;
+        if (checkedIds.contains(culprit.id)) {
+          violations.add(
+            PlanViolation(
+              PlanViolationType.overlappingSessions,
+              sessionId: culprit.id,
+            ),
+          );
+        }
       }
       if (previousEnd == null || end.isAfter(previousEnd)) {
+        latest = session;
         latestEnd = end;
       }
     }
