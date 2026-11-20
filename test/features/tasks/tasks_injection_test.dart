@@ -6,6 +6,7 @@ import 'package:brainly_life/features/home/data/repositories/home_summary_port.d
 import 'package:brainly_life/features/tasks/data/repositories/task_creation_port.dart';
 import 'package:brainly_life/features/tasks/data/repositories/task_category_repository.dart';
 import 'package:brainly_life/features/tasks/logic/category_cubit.dart';
+import 'package:brainly_life/features/tasks/logic/task_form_cubit.dart';
 
 void main() {
   late GetIt getIt;
@@ -52,6 +53,18 @@ void main() {
 
         final first = getIt<CategoryCubit>();
         final second = getIt<CategoryCubit>();
+        expect(identical(first, second), isFalse);
+        await first.close();
+        await second.close();
+      },
+    );
+    test(
+      'registers a new TaskFormCubit each time (useMocks: $useMocks)',
+      () async {
+        registerTasksFeature(getIt, useMocks: useMocks);
+
+        final first = getIt<TaskFormCubit>();
+        final second = getIt<TaskFormCubit>();
         expect(identical(first, second), isFalse);
         await first.close();
         await second.close();
