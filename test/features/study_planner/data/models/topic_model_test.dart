@@ -1,7 +1,6 @@
-import 'package:brainly_life/features/study/data/models/study_enums.dart';
-import 'package:brainly_life/features/study/data/models/topic_model.dart';
+import 'package:brainly_life/features/study_planner/data/models/study_enums.dart';
+import 'package:brainly_life/features/study_planner/data/models/topic_model.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 
 void main() {
   group('Topic', () {
@@ -41,19 +40,13 @@ void main() {
     test('fromFirestore throws FormatException for an unknown status', () {
       final data = topic.toFirestore()..['status'] = 'finished';
 
-      expect(
-        () => Topic.fromFirestore('topic_1', data),
-        throwsFormatException,
-      );
+      expect(() => Topic.fromFirestore('topic_1', data), throwsFormatException);
     });
 
     test('fromFirestore throws FormatException when a field is missing', () {
       final data = topic.toFirestore()..remove('subjectId');
 
-      expect(
-        () => Topic.fromFirestore('topic_1', data),
-        throwsFormatException,
-      );
+      expect(() => Topic.fromFirestore('topic_1', data), throwsFormatException);
     });
 
     test('copyWith changes only the given fields', () {

@@ -4,7 +4,6 @@ import 'firestore_mapping.dart';
 
 part 'plan_constraints_model.freezed.dart';
 
-
 @freezed
 abstract class PlanConstraints with _$PlanConstraints {
   const PlanConstraints._();
