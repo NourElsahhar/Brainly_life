@@ -27,12 +27,15 @@ class AppRoutes {
   static const String settings = '/profile/settings';
 
   // Full screen (open on top of the bottom bar)
-  static const String tasks = '/tasks';
+    static const String tasks = '/tasks';
+  static const String newTask = '/tasks/new';
+  static const String taskCategories = '/tasks/categories';
   static const String taskDetail = '/tasks/:id';
+  static const String editTask = '/tasks/:id/edit';
   static const String focus = '/focus'; // ?taskId=&studySessionId=
 
   static String taskPath(String id) => '/tasks/$id';
-
+  static String editTaskPath(String id) => '/tasks/$id/edit';
   static String focusPath({String? taskId, String? studySessionId}) {
     // The ? means "add this only when it is not null".
     final query = <String, String>{
