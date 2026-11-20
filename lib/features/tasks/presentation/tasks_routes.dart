@@ -1,11 +1,10 @@
 // Routes of the tasks feature (owner: M3).
 // app_router.dart combines the route lists of all features.
-// Replace each PlaceholderScreen with the real screen when it is ready.
 
 import 'package:brainly_life/core/routes/app_routes.dart';
-import 'package:brainly_life/core/routes/placeholder_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:brainly_life/features/tasks/presentation/screens/tasks_screen.dart';
+import 'package:brainly_life/features/tasks/presentation/screens/task_categories_screen.dart';
 import 'package:brainly_life/features/tasks/presentation/screens/task_detail_screen.dart';
 import 'package:brainly_life/features/tasks/presentation/screens/task_form_screen.dart';
 
@@ -22,7 +21,7 @@ final List<RouteBase> tasksRoutes = [
   ),
   GoRoute(
     path: AppRoutes.taskCategories,
-    builder: (context, state) => const PlaceholderScreen(title: 'Categories'),
+    builder: (context, state) => const TaskCategoriesScreen(),
   ),
   GoRoute(
     path: AppRoutes.taskDetail,
