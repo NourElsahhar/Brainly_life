@@ -105,10 +105,13 @@ class TaskDetailCubit extends Cubit<TaskDetailState> {
       return failure;
     }
 
-    await _subscription?.cancel();
+    // Tell the screen first, then stop listening. `_deleting` stays true,
+    // so a late "not found" from the stream is ignored.
+    final subscription = _subscription;
     _subscription = null;
     _task = null;
     if (!isClosed) emit(const TaskDetailDeleted());
+    await subscription?.cancel();
     return null;
   }
 
