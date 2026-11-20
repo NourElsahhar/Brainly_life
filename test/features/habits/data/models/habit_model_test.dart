@@ -9,7 +9,6 @@ void main() {
     colorValue: 0xFF2196F3,
     frequencyType: HabitFrequencyType.weekdays,
     weekdays: const [1, 3, 5],
-    reminderTime: '20:00',
     startDate: '2026-11-01',
     currentStreak: 2,
     bestStreak: 5,
@@ -26,10 +25,6 @@ void main() {
     final copy = habit.copyWith(name: 'Write');
     expect(copy.name, 'Write');
     expect(copy.icon, habit.icon);
-  });
-
-  test('clearReminderTime sets reminderTime to null', () {
-    expect(habit.copyWith(clearReminderTime: true).reminderTime, isNull);
   });
 
   test('defaults are daily, not archived, zero streaks', () {
