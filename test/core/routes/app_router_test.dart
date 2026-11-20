@@ -5,6 +5,8 @@ import 'package:brainly_life/core/routes/app_router.dart';
 import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:brainly_life/core/routes/router_auth_state.dart';
 import 'package:brainly_life/core/theme/app_theme.dart';
+import 'package:brainly_life/features/tasks/tasks_injection.dart';
+import 'package:brainly_life/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -59,6 +61,9 @@ void main() {
   });
 
   group('router screens', () {
+        // The real tasks screens get their Cubits from getIt.
+    setUp(() => registerTasksFeature(getIt, useMocks: true));
+    tearDown(() => getIt.reset());
     Finder appBarTitle(String title) => find.descendant(
           of: find.byType(AppBar),
           matching: find.text(title),
@@ -130,7 +135,7 @@ void main() {
 
       router.go(AppRoutes.taskPath('abc'));
       await tester.pumpAndSettle();
-      expect(appBarTitle('Task abc'), findsOneWidget);
+      expect(appBarTitle('Task'), findsOneWidget);
       expect(find.byType(NavigationBar), findsNothing);
 
       router.go(AppRoutes.focusPath(taskId: 'abc'));

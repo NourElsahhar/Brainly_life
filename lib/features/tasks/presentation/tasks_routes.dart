@@ -6,6 +6,7 @@ import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:brainly_life/core/routes/placeholder_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:brainly_life/features/tasks/presentation/screens/tasks_screen.dart';
+import 'package:brainly_life/features/tasks/presentation/screens/task_detail_screen.dart';
 import 'package:brainly_life/features/tasks/presentation/screens/task_form_screen.dart';
 
 // Order matters: '/tasks/new' and '/tasks/categories' must come before
@@ -26,7 +27,7 @@ final List<RouteBase> tasksRoutes = [
   GoRoute(
     path: AppRoutes.taskDetail,
     builder: (context, state) =>
-        PlaceholderScreen(title: 'Task ${state.pathParameters['id']}'),
+        TaskDetailScreen(taskId: state.pathParameters['id']!),
   ),
   GoRoute(
     path: AppRoutes.editTask,
