@@ -5,13 +5,14 @@
 import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:brainly_life/core/routes/placeholder_screen.dart';
 import 'package:go_router/go_router.dart';
+import 'package:brainly_life/features/tasks/presentation/screens/tasks_screen.dart';
 
 // Order matters: '/tasks/new' and '/tasks/categories' must come before
 // '/tasks/:id', or "new" would be read as a task id.
 final List<RouteBase> tasksRoutes = [
   GoRoute(
     path: AppRoutes.tasks,
-    builder: (context, state) => const PlaceholderScreen(title: 'Tasks'),
+    builder: (context, state) => const TasksScreen(),
   ),
   GoRoute(
     path: AppRoutes.newTask,

@@ -8,7 +8,8 @@ import 'package:brainly_life/features/tasks/data/repositories/task_category_repo
 import 'package:brainly_life/features/tasks/logic/category_cubit.dart';
 import 'package:brainly_life/features/tasks/logic/task_form_cubit.dart';
 import 'package:brainly_life/features/tasks/logic/task_detail_cubit.dart';
-
+import 'package:brainly_life/features/tasks/logic/completed_tasks_cubit.dart';
+import 'package:brainly_life/features/tasks/logic/task_list_cubit.dart';
 
 void main() {
   late GetIt getIt;
@@ -72,7 +73,7 @@ void main() {
         await second.close();
       },
     );
-        test(
+    test(
       'registers a new TaskDetailCubit each time (useMocks: $useMocks)',
       () async {
         registerTasksFeature(getIt, useMocks: useMocks);
@@ -84,5 +85,14 @@ void main() {
         await second.close();
       },
     );
+    test('registers the task list Cubits (useMocks: $useMocks)', () async {
+      registerTasksFeature(getIt, useMocks: useMocks);
+
+      final list = getIt<TaskListCubit>();
+      final completed = getIt<CompletedTasksCubit>();
+      expect(identical(list, getIt<TaskListCubit>()), isFalse);
+      await list.close();
+      await completed.close();
+    });
   }
 }

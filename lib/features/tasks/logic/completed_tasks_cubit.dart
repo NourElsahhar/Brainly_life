@@ -89,15 +89,19 @@ class CompletedTasksCubit extends Cubit<CompletedTasksState> {
   }
 
   Future<void> deleteTask(Task task) async {
+    // Off the screen right away (swipe to delete needs it).
+    _removeLocally(task);
+    _emitList();
+
     final result = await _repository.deleteTask(task.id);
     if (isClosed) return;
 
     switch (result) {
       case Success():
-        _removeLocally(task);
         _lastDeleted = task;
         _emitList();
       case Failed(:final failure):
+        _tasks = [..._tasks, task]..sort(_newestFirst);
         _emitList(actionFailure: failure);
     }
   }

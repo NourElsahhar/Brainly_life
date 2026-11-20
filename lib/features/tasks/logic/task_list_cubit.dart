@@ -70,6 +70,7 @@ class TaskListCubit extends Cubit<TaskListState> {
   }
 
   Future<void> completeTask(Task task) async {
+    _hideNow(task);
     final done = task.copyWith(
       status: TaskStatus.done,
       completedAt: _now().toUtc(),
@@ -78,12 +79,18 @@ class TaskListCubit extends Cubit<TaskListState> {
     _afterAction(
       result,
       TaskChange(type: TaskChangeType.completed, task: task),
+      original: task,
     );
   }
 
   Future<void> deleteTask(Task task) async {
+    _hideNow(task);
     final result = await _repository.deleteTask(task.id);
-    _afterAction(result, TaskChange(type: TaskChangeType.deleted, task: task));
+    _afterAction(
+      result,
+      TaskChange(type: TaskChangeType.deleted, task: task),
+      original: task,
+    );
   }
 
   /// Puts back the task of the last complete or delete.
@@ -106,14 +113,28 @@ class TaskListCubit extends Cubit<TaskListState> {
     return super.close();
   }
 
-  void _afterAction(Result<void> result, TaskChange? change) {
+  /// [original] is put back on screen when the action failed.
+  void _afterAction(Result<void> result, TaskChange? change, {Task? original}) {
     switch (result) {
       case Success():
         _lastChange = change;
         _emitList();
       case Failed(:final failure):
+        if (original != null && !_active.any((t) => t.id == original.id)) {
+          _active = [..._active, original];
+        }
         _emitList(actionFailure: failure);
     }
+  }
+
+  /// Takes the task off the screen right away, before the repository
+  /// answers. Swipe to delete needs this.
+  void _hideNow(Task task) {
+    _active = [
+      for (final t in _active)
+        if (t.id != task.id) t,
+    ];
+    _emitList();
   }
 
   /// Emits again only when the list is already on screen.

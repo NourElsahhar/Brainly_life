@@ -4,8 +4,12 @@ import 'package:brainly_life/features/tasks/presentation/tasks_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:brainly_life/features/tasks/tasks_injection.dart';
+import 'package:brainly_life/injection.dart';
 
 void main() {
+  setUp(() => registerTasksFeature(getIt, useMocks: true));
+  tearDown(() => getIt.reset());
   Future<GoRouter> pumpRoutes(WidgetTester tester) async {
     final router = GoRouter(
       initialLocation: AppRoutes.tasks,
