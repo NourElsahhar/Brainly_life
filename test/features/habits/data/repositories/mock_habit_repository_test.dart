@@ -2,6 +2,7 @@ import 'package:brainly_life/core/errors/failure.dart';
 import 'package:brainly_life/features/habits/data/models/habit_model.dart';
 import 'package:brainly_life/features/habits/data/repositories/mock_habit_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:clock/clock.dart';
 
 void main() {
   final fixedNow = DateTime.utc(2026, 11, 15, 10);
@@ -105,5 +106,20 @@ void main() {
       dateKey: '2026-11-15',
     );
     expect(result.failureOrNull, isA<NotFoundFailure>());
+  });
+
+  test('toggleCompletion updates the streak fields of the habit', () async {
+    await withClock(Clock.fixed(DateTime.utc(2026, 11, 15, 10)), () async {
+      final created = (await repository.createHabit(newHabit('Read')))
+          .dataOrNull!;
+      for (final day in ['2026-11-13', '2026-11-14', '2026-11-15']) {
+        await repository.toggleCompletion(habitId: created.id, dateKey: day);
+      }
+
+      final habit = (await repository.getHabits()).dataOrNull!.single;
+      expect(habit.currentStreak, 3);
+      expect(habit.bestStreak, 3);
+      expect(habit.lastCompletedDate, '2026-11-15');
+    });
   });
 }

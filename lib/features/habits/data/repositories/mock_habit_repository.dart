@@ -7,6 +7,8 @@ import 'package:brainly_life/features/habits/data/models/habit_log_model.dart';
 import 'package:brainly_life/features/habits/data/models/habit_model.dart';
 import 'package:brainly_life/features/habits/data/repositories/habit_repository.dart';
 import 'package:clock/clock.dart';
+import 'package:brainly_life/core/utils/utils.dart';
+import 'package:brainly_life/features/habits/logic/streak_calculator.dart';
 
 /// In-memory [HabitRepository] for development and tests.
 class MockHabitRepository implements HabitRepository {
@@ -133,8 +135,43 @@ class MockHabitRepository implements HabitRepository {
       return const Result.failure(NotFoundFailure());
     }
     final id = HabitLog.buildId(habitId, dateKey);
-    if (_logs.remove(id) != null) return const Result.success(false);
-    _logs[id] = HabitLog(habitId: habitId, date: dateKey, completedAt: _now());
-    return const Result.success(true);
+    final isNowDone = _logs.remove(id) == null;
+    if (isNowDone) {
+      _logs[id] = HabitLog(
+        habitId: habitId,
+        date: dateKey,
+        completedAt: _now(),
+      );
+    }
+    _recalculateStreaks(habitId, dateKey);
+    return Result.success(isNowDone);
+  }
+
+  /// Does what the Firestore transaction will do later: keeps the streak
+  /// fields of the habit in line with its logs.
+  void _recalculateStreaks(String habitId, String changedDate) {
+    final habit = _habits[habitId]!;
+    final doneDates = {
+      for (final log in _logs.values)
+        if (log.habitId == habitId) log.date,
+    };
+    final realToday = DateKeyUtils.todayKey(timezone: 'UTC');
+    final today = changedDate.compareTo(realToday) > 0
+        ? changedDate
+        : realToday;
+    final streak = const StreakCalculator().calculate(
+      habit: habit,
+      completedDates: doneDates,
+      today: today,
+    );
+    final lastDone = doneDates.isEmpty
+        ? null
+        : (doneDates.toList()..sort()).last;
+    _habits[habitId] = habit.copyWith(
+      currentStreak: streak.currentStreak,
+      bestStreak: streak.bestStreak,
+      lastCompletedDate: lastDone,
+      clearLastCompletedDate: lastDone == null,
+    );
   }
 }
