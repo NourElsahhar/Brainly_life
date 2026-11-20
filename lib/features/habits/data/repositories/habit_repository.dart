@@ -1,3 +1,6 @@
+// HabitRepository is the contract (interface) for reading and writing
+// habits and their daily logs. Cubits depend on this, not on Firebase.
+
 import 'package:brainly_life/core/errors/result.dart';
 import 'package:brainly_life/features/habits/data/models/habit_log_model.dart';
 import 'package:brainly_life/features/habits/data/models/habit_model.dart';

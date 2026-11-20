@@ -2,8 +2,8 @@
 
 **Owner:** M3
 
-Task management: tasks with priorities, categories, deadlines,
-checklists (subtasks) and reminders.
+Task management: tasks with priorities, categories, deadlines
+and checklists (subtasks).
 
 ## Models
 
@@ -24,8 +24,8 @@ checklists (subtasks) and reminders.
 ```dart
 task.copyWith(clearDueAt: true);    // remove the deadline
 task.copyWith(clearCategory: true); // make it uncategorized
-task.copyWith(clearReminder: true); // remove the reminder
 ```
+
 ## Task list tabs
 
 `TaskProgressCalculator` (`logic/task_progress_calculator.dart`) decides
@@ -39,7 +39,253 @@ which tab a task appears in. Every task appears in exactly one tab:
 It also gives `progress` (checked subtasks, 0.0 to 1.0) and `isDueSoon`
 (less than 24 hours left). Pass `now` in, never call `DateTime.now()`
 inside, so tests stay deterministic.
+
+## Repository
+
+`TaskRepository` (`data/repositories/task_repository.dart`) is the contract.
+Every method returns a `Result`.
+
+- `watchActiveTasks()`: live list of every task that is not done, earliest
+  deadline first. The Cubit splits it into tabs with `TaskProgressCalculator`.
+- `getCompletedTasks(afterTaskId:, limit:)`: completed tasks from the last
+  30 days, newest first, 20 per page.
+- `watchTask(id)`, `createTask`, `updateTask`, `deleteTask`.
+- `restoreTask(task)`: saves a deleted task again with the same id and
+  dates. Used by undo.
+
+  - `clearCategory(categoryId)`: makes every task of that category
+  Uncategorized. Called after the category is deleted.
+
+`MockTaskRepository` keeps tasks in memory:
+
+```dart
+final tasks = MockTaskRepository.withSampleData(); // 5 sample tasks
+final empty = MockTaskRepository(now: () => fixedTime); // for tests
+empty.failWith = const NetworkFailure(); // simulate an error
+```
+
+`tasks_injection.dart` registers `TaskRepository` in get_it. For now it is
+the mock in both modes. The Firestore one comes later.
+
+## Categories repository
+
+`TaskCategoryRepository` (`data/repositories/task_category_repository.dart`)
+saves the user's categories. Names are at most
+`TaskCategoryRepository.maxNameLength` (30) characters.
+
+- `watchCategories()`: live list, sorted by name (case does not matter).
+- `createCategory`, `updateCategory` (rename and recolour),
+  `deleteCategory`.
+
+Deleting a category does not touch its tasks. Call
+`TaskRepository.clearCategory(id)` after it, so they become
+Uncategorized. A task whose category is missing should still show as
+Uncategorized.
+
+```dart
+final categories = MockTaskCategoryRepository.withSampleData();
+// University (blue) and Personal (green)
+```
+
+## Task list Cubit
+
+`TaskListCubit` (`logic/task_list_cubit.dart`) drives the task list
+screen: the Today, Upcoming and Overdue tabs. The Completed tab has its
+own Cubit (below).
+
+States (`logic/task_list_state.dart`):
+
+- `TaskListInitial`, then `TaskListLoading` while the first list loads.
+- `TaskListLoaded`: the visible `tasks`, the selected `tab`, `counts`
+  per tab, `query` and `sort`.
+- `TaskListEmpty`: the user has no task left to do.
+- `TaskListError`: the list could not load. Call `load()` again to retry.
+
+`Loaded` and `Empty` also carry:
+
+- `lastChange`: the last complete or delete. Show an Undo snackbar and
+  call `undo()`.
+- `actionFailure`: a complete, delete or undo that failed. Show
+  `userMessage` in a snackbar. The list stays as it was.
+
+```dart
+final cubit = TaskListCubit(getIt<TaskRepository>())..load();
+cubit.selectTab(TaskBucket.overdue);
+cubit.search('report'); // waits 400 ms after the last key
+cubit.sortBy(TaskSort.priority);
+await cubit.completeTask(task);
+await cubit.undo();
+```
+## Completed tab Cubit
+
+`CompletedTasksCubit` (`logic/completed_tasks_cubit.dart`) shows done
+tasks from the last 30 days, newest first, 20 at a time.
+
+States (`logic/completed_tasks_state.dart`): `CompletedTasksInitial`,
+`CompletedTasksLoading`, `CompletedTasksLoaded`, `CompletedTasksEmpty`,
+`CompletedTasksError`.
+
+`CompletedTasksLoaded` has:
+
+- `tasks` and `hasMore` (there may be another page).
+- `isLoadingMore`: show a small spinner under the list.
+- `loadMoreFailure`: the next page failed. Keep the list and show Retry
+  under it (it calls `loadMore()` again).
+
+`Loaded` and `Empty` also carry `lastDeleted` (show an Undo snackbar)
+and `actionFailure` (show `userMessage` in a snackbar).
+
+```dart
+final cubit = CompletedTasksCubit(getIt<TaskRepository>());
+await cubit.load();          // every time the tab opens
+await cubit.loadMore();      // when the user scrolls near the end
+await cubit.reopenTask(task); // back to not done, leaves this tab
+await cubit.deleteTask(task);
+await cubit.undo();          // puts back the last deleted task
+```
+
+Calling `loadMore()` many times while scrolling is safe: it loads each
+page once.
+
+## Home summary
+
+`RepositoryTaskSummaryProvider`
+(`data/repositories/repository_task_summary_provider.dart`) is the real
+`TaskSummaryProvider` for the "Today's tasks" card on Home. It is
+registered in `tasks_injection.dart` for both modes.
+
+- `dueTodayCount` and `overdueCount` use `TaskProgressCalculator`, so they
+  match the task list tabs.
+- `nextTaskTitle`: the oldest overdue task, otherwise the nearest task
+  due today, otherwise null.
+- `completedTodayCount`: tasks completed today in the user's time zone.
+  It reads the completed pages until it reaches a task from before today.
+
+```dart
+final result = await getIt<TaskSummaryProvider>().todaySummary();
+```
+
+## Creating tasks from other features
+
+`TaskCreationPort` (`data/repositories/task_creation_port.dart`) lets
+other features create a task. M5's AI assistant uses it when the user
+confirms a `create_task` action.
+
+Other features import only this file. It also exports `TaskPriority`.
+
+```dart
+final result = await getIt<TaskCreationPort>().createTask(
+  TaskDraft(
+    title: 'Study physics',
+    priority: TaskPriority.high,
+    dueAt: tomorrowAt5pmUtc,
+    subtaskTitles: ['Chapter 1', 'Chapter 2'],
+  ),
+);
+// Success: the new task id. Failed: show failure.userMessage.
+```
+
+`RepositoryTaskCreationPort` is the real one, registered in
+`tasks_injection.dart`. It trims the text, drops empty checklist items,
+saves `dueAt` in UTC, and creates the task as not done and Uncategorized.
+It returns a `ValidationFailure` when the title is empty or longer than
+100 characters, the description is longer than 1000, or there are more
+than 20 checklist items.
+
+## Categories Cubit
+
+`CategoryCubit` (`logic/category_cubit.dart`) drives the categories
+screen. States (`logic/category_state.dart`): `CategoryInitial`,
+`CategoryLoading`, `CategoryLoaded(categories)` (may be empty),
+`CategoryError` (Retry calls `load()`).
+
+Every action returns `null` when it worked, or the `Failure` to show:
+
+```dart
+final failure = await cubit.create(name, colorValue);
+if (failure == null) {
+  Navigator.pop(context); // close the dialog
+} else {
+  setState(() => error = failure.userMessage); // show it under the field
+}
+```
+
+- `create` and `rename` trim the name and return a `ValidationFailure`
+  when it is empty, longer than 30, or already used (case does not matter).
+- `recolor(category, colorValue)`.
+- `delete(category)` also makes its tasks Uncategorized. Ask the user to
+  confirm first.
+
+Registered with `registerFactory`, so every screen gets a new one.
+## Task form Cubit
+
+`TaskFormCubit` (`logic/task_form_cubit.dart`) drives the add / edit task
+screen. It has one state class, `TaskFormState`
+(`logic/task_form_state.dart`), with all the field values and a `status`:
+
+- `loading`: loading the task to edit.
+- `editing`: the user is filling the form.
+- `saving`: disable the Save button.
+- `saved`: close the screen.
+- `notFound`: the task was deleted. Show "This task was deleted".
+- `loadFailed`: show Retry, which calls `startEdit(id)` again.
+
+```dart
+final cubit = getIt<TaskFormCubit>()..startCreate(); // or ..startEdit(id)
+cubit.titleChanged('Study physics');
+cubit.priorityChanged(TaskPriority.high);
+cubit.dueAtChanged(pickedDateTime); // null removes the deadline
+cubit.addSubtask('Chapter 3');
+await cubit.save();
+```
+
+- Field errors (`titleError`, `descriptionError`, `dueAtError`) show only
+  after the first Save, then update while the user types. Put them in each
+  field's `errorText`.
+- The deadline must be in the future, unless it is an old deadline the
+  user did not change.
+- Editing keeps the task id, status, `completedAt` and `createdAt`.
+- `hasChanges`: ask "Discard changes?" before leaving.
+- `canAddSubtask` is false at 20 items.
+- `failure` (save or load failed): show `userMessage` in a snackbar.
+
+## Task detail Cubit
+
+`TaskDetailCubit` (`logic/task_detail_cubit.dart`) drives the task detail
+screen. It watches the task live, so edits made in the form show up when
+the user comes back.
+
+States (`logic/task_detail_state.dart`):
+
+- `TaskDetailLoading`, then `TaskDetailLoaded`: the `task`, `progress`
+  (0.0 to 1.0), `isOverdue` and `isDueSoon`.
+- `TaskDetailNotFound`: the task was deleted somewhere else. Show "This
+  task was deleted".
+- `TaskDetailDeleted`: the user deleted it from this screen. Close the
+  screen.
+- `TaskDetailError`: Retry calls `load(id)` again.
+
+```dart
+final cubit = getIt<TaskDetailCubit>()..load(taskId);
+await cubit.toggleSubtask(subtaskId);
+await cubit.markDone(); // or cubit.reopen()
+await cubit.delete();   // ask "Delete this task?" first
+// "Start focus session":
+context.push(AppRoutes.focusPath(taskId: taskId));
+```
+
+Every action returns `null` when it worked, or the `Failure` to show in a
+snackbar.
+## Screens
+
+- `TasksScreen` (`presentation/screens/tasks_screen.dart`) at
+  `AppRoutes.tasks`: tabs with counts, search, sort, swipe to delete,
+  complete with Undo, Completed tab with "load more" while scrolling.
+- `TaskTile` (`presentation/widgets/task_tile.dart`): one task row, used
+  in every tab.
+- `task_display.dart`: `formatDue`, `formatCompleted` and
+  `TaskPriority.level` (for M1's `PriorityChip`).
+
 ## Coming next
 
-`TaskRepository` + `MockTaskRepository`, `TaskSummaryProvider` (for Home)
-and `TaskCreationPort` (for the AI assistant).
+The task screens, and the Firestore repositories.
