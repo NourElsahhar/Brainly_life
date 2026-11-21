@@ -60,7 +60,7 @@ Future<void> configureDependencies({bool? useMocks}) async {
   // Router. It starts as "unknown" (the splash screen).
   // app.dart updates it from AuthCubit (signed in or signed out).
   getIt.registerLazySingleton<RouterAuthState>(
-    () => RouterAuthState(),
+    () => RouterAuthState.withSplash(),
   );
   getIt.registerLazySingleton<GoRouter>(
     () => createAppRouter(getIt<RouterAuthState>()),

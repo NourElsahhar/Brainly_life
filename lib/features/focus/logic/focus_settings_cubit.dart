@@ -3,6 +3,8 @@
 // Values stay inside the limits below. If saving fails, the change is undone
 // and the failure is reported so the screen can show a snackbar.
 
+// ignore_for_file: prefer_initializing_formals
+
 import 'package:brainly_life/core/errors/result.dart';
 import 'package:brainly_life/features/focus/data/models/focus_settings_model.dart';
 import 'package:brainly_life/features/focus/data/repositories/focus_repository.dart';
