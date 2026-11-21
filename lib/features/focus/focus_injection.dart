@@ -17,8 +17,17 @@
 // Other features' contracts (like TaskSummaryProvider) are registered by their
 // own owner. Ask for them with getIt<TaskSummaryProvider>().
 
+import 'package:brainly_life/features/focus/data/repositories/focus_repository.dart';
+import 'package:brainly_life/features/focus/data/repositories/mock_focus_repository.dart';
+import 'package:brainly_life/features/focus/logic/focus_settings_cubit.dart';
 import 'package:get_it/get_it.dart';
 
 void registerFocusFeature(GetIt getIt, {required bool useMocks}) {
-  // Nothing to register yet.
+  // The Firestore repository comes in Phase 3. Until then the mock is used
+  // in both modes.
+  getIt.registerLazySingleton<FocusRepository>(() => MockFocusRepository());
+
+  getIt.registerFactory(
+    () => FocusSettingsCubit(repository: getIt<FocusRepository>()),
+  );
 }

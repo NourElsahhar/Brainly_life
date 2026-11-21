@@ -4,6 +4,7 @@
 
 import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:brainly_life/core/routes/placeholder_screen.dart';
+import 'package:brainly_life/features/focus/presentation/screens/focus_settings_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final List<RouteBase> focusRoutes = [
@@ -13,5 +14,12 @@ final List<RouteBase> focusRoutes = [
       title: 'Focus',
       message: 'Opens with optional ?taskId= and ?studySessionId=',
     ),
+    routes: [
+      // Full path: /focus/settings (AppRoutes.focusSettings).
+      GoRoute(
+        path: 'settings',
+        builder: (context, state) => const FocusSettingsScreen(),
+      ),
+    ],
   ),
 ];
