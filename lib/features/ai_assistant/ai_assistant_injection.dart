@@ -1,24 +1,108 @@
-// Dependency injection for the ai_assistant feature (owner: M5).
-// injection.dart calls this function once when the app starts.
-//
-// Register here: repositories, data sources, services and Cubits.
-//   - Repositories and data sources: registerLazySingleton (one copy for the app)
-//   - Cubits: registerFactory (a new one for every screen)
-//   - useMocks is true when the app runs with --dart-define=USE_MOCKS=true.
-//     Then register the Mock repository instead of the Firestore one.
-//
-// Example:
-//   getIt.registerLazySingleton<TaskRepository>(
-//     () => useMocks ? MockTaskRepository() : FirestoreTaskRepository(getIt()),
-//   );
-//   getIt.registerFactory(() => TaskListCubit(getIt()));
-//
-// Ready to use from getIt: FirebaseAuth, FirebaseFirestore, FirebaseFunctions.
-// Other features' contracts (like TaskSummaryProvider) are registered by their
-// own owner. Ask for them with getIt<TaskSummaryProvider>().
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart' show FirebaseFunctions;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'data/repositories/daily_ai_tip_provider.dart';
+
+import '../../core/ai/ai.dart';
+import '../../core/errors/failure.dart';
+import '../../core/errors/result.dart';
+import '../../core/utils/date_key_utils.dart';
+import '../auth/data/models/user_settings_model.dart';
+import '../home/data/repositories/home_summary_port.dart' as home;
+import '../tasks/data/repositories/task_creation_port.dart';
+import 'data/datasources/chat_remote_data_source.dart';
+import 'data/repositories/chat_repository.dart';
+import 'data/repositories/firestore_chat_repository.dart';
+import 'data/repositories/mock_chat_repository.dart';
+import 'logic/ai_action_handler.dart';
+import 'logic/chat_cubit.dart';
+
+class AiAccount {
+  AiAccount(this.services, this.useMocks);
+  final GetIt services;
+  final bool useMocks;
+  String get uid =>
+      useMocks ? 'demo' : services<FirebaseAuth>().currentUser?.uid ?? '';
+  Future<UserSettings> settings() async {
+    if (useMocks) return UserSettings.defaults();
+    if (uid.isEmpty) throw StateError('Sign in required');
+    final doc = await services<FirebaseFirestore>()
+        .collection('users')
+        .doc(uid)
+        .get();
+    return UserSettings.fromMap(
+      doc.data()?['settings'] as Map<String, dynamic>?,
+    );
+  }
+}
+
+class TeamAiTipProvider implements home.AiTipProvider {
+  TeamAiTipProvider(this.account, this.client);
+  final AiAccount account;
+  final AiClient client;
+  final _providers = <String, DailyAiTipProvider>{};
+  @override
+  Future<Result<String>> dailyTip() async {
+    try {
+      final settings = await account.settings();
+      final key = '${account.uid}:${settings.timezone}';
+      final provider = _providers.putIfAbsent(
+        key,
+        () => DailyAiTipProvider(
+          client: client,
+          preferences: SharedPreferencesAsync(),
+          accountKey: account.uid,
+          today: () => DateKeyUtils.todayKey(timezone: settings.timezone),
+          isEnabled: () async => (await account.settings()).aiEnabled,
+        ),
+      );
+      return await provider.dailyTip();
+    } catch (_) {
+      return const Result.success('Choose one small task to start your day.');
+    }
+  }
+}
 
 void registerAiAssistantFeature(GetIt getIt, {required bool useMocks}) {
-  // Nothing to register yet.
+  getIt.registerLazySingleton(() => AiAccount(getIt, useMocks));
+  getIt.registerLazySingleton<AiClient>(
+    () => useMocks
+        ? MockAiClient()
+        : CloudFunctionsAiClient.firebase(
+            getIt<FirebaseFunctions>(),
+            isEnabled: () async =>
+                (await getIt<AiAccount>().settings()).aiEnabled,
+          ),
+  );
+  final mockChat = MockChatRepository();
+  getIt.registerFactory<ChatRepository>(
+    () => useMocks
+        ? mockChat
+        : FirestoreChatRepository(
+            ChatRemoteDataSource(
+              getIt<FirebaseFirestore>(),
+              getIt<AiAccount>().uid,
+            ),
+          ),
+  );
+  getIt.registerFactory(
+    () => ChatCubit(repository: getIt(), client: getIt(), now: DateTime.now),
+  );
+  getIt.registerLazySingleton(
+    () => AiActionHandler(
+      createTask: (title) =>
+          getIt<TaskCreationPort>().createTask(TaskDraft(title: title)),
+      createHabit: (title) async => const Result.failure(
+        ValidationFailure(
+          userMessage: 'Open Habits and add this suggestion. Habit creation integration is not available yet.',
+        ),
+      ),
+    ),
+  );
+  getIt.registerLazySingleton<home.AiTipProvider>(
+    () => TeamAiTipProvider(getIt(), getIt()),
+  );
 }

@@ -1,24 +1,49 @@
-// Dependency injection for the analytics feature (owner: M5).
-// injection.dart calls this function once when the app starts.
-//
-// Register here: repositories, data sources, services and Cubits.
-//   - Repositories and data sources: registerLazySingleton (one copy for the app)
-//   - Cubits: registerFactory (a new one for every screen)
-//   - useMocks is true when the app runs with --dart-define=USE_MOCKS=true.
-//     Then register the Mock repository instead of the Firestore one.
-//
-// Example:
-//   getIt.registerLazySingleton<TaskRepository>(
-//     () => useMocks ? MockTaskRepository() : FirestoreTaskRepository(getIt()),
-//   );
-//   getIt.registerFactory(() => TaskListCubit(getIt()));
-//
-// Ready to use from getIt: FirebaseAuth, FirebaseFirestore, FirebaseFunctions.
-// Other features' contracts (like TaskSummaryProvider) are registered by their
-// own owner. Ask for them with getIt<TaskSummaryProvider>().
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
+import 'package:timezone/data/latest.dart' as tzdata;
+
+import '../ai_assistant/ai_assistant_injection.dart';
+import '../../core/ai/ai.dart';
+import 'data/datasources/analytics_remote_data_source.dart';
+import 'data/repositories/firestore_analytics_repository.dart';
+import 'data/repositories/mock_analytics_repository.dart';
+import 'data/repositories/mock_weekly_insight_client.dart';
+import 'logic/analytics_cubit.dart';
+import 'logic/iana_analytics_calendar.dart';
+
+class AnalyticsFactory {
+  AnalyticsFactory(this.services, this.useMocks);
+  final GetIt services;
+  final bool useMocks;
+  final _mock = MockAnalyticsRepository();
+  Future<AnalyticsCubit> create() async {
+    final account = services<AiAccount>();
+    final settings = await account.settings();
+    tzdata.initializeTimeZones();
+    final calendar = ianaAnalyticsCalendar(
+      timezone: settings.timezone,
+      weekStartDay: settings.weekStartDay,
+    );
+    final ai = services<AiClient>();
+    return AnalyticsCubit(
+      repository: useMocks
+          ? _mock
+          : FirestoreAnalyticsRepository(
+              AnalyticsRemoteDataSource(
+                firestore: services<FirebaseFirestore>(),
+                uid: account.uid,
+                calendar: calendar,
+              ),
+            ),
+      calendar: calendar,
+      ai: useMocks
+          ? MockWeeklyInsightClient(client: ai, repository: _mock)
+          : ai,
+      now: DateTime.now,
+    );
+  }
+}
 
 void registerAnalyticsFeature(GetIt getIt, {required bool useMocks}) {
-  // Nothing to register yet.
+  getIt.registerLazySingleton(() => AnalyticsFactory(getIt, useMocks));
 }
