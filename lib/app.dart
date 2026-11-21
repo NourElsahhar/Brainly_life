@@ -31,7 +31,7 @@ class BrainlyLifeApp extends StatelessWidget {
           authStatusFor(state, routerAuthState.status),
         ),
         child: MaterialApp.router(
-          title: 'Brainly Life',
+          title: 'Baseet',
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           themeMode: ThemeMode.system,

@@ -3,6 +3,8 @@
 // state so the screen shows them under each field (never in a snackbar).
 // `timezone` is the user's timezone, used for the default start date (today).
 
+// ignore_for_file: prefer_initializing_formals
+
 import 'package:brainly_life/core/errors/result.dart';
 import 'package:brainly_life/core/utils/utils.dart';
 import 'package:brainly_life/features/habits/data/models/habit_model.dart';
