@@ -68,6 +68,18 @@ void main() {
     expect(find.byTooltip('Settings'), findsNothing);
   });
 
+    testWidgets('inner: titleWidget is shown instead of the title', (
+    tester,
+  ) async {
+    await pumpBar(
+      tester,
+      const BaseetAppBar.inner(title: 'Tasks', titleWidget: Text('Search')),
+    );
+
+    expect(find.text('Search'), findsOneWidget);
+    expect(find.text('Tasks'), findsNothing);
+  });
+
   testWidgets('the bar is 64 high, as in the design', (tester) async {
     await pumpBar(tester, const BaseetAppBar.main());
 
