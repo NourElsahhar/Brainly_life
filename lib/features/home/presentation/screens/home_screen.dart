@@ -1,5 +1,6 @@
 import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:brainly_life/core/theme/theme.dart';
+import 'package:brainly_life/core/widgets/widgets.dart';
 import 'package:brainly_life/features/home/logic/home_cubit.dart';
 import 'package:brainly_life/features/home/logic/home_state.dart';
 import 'package:brainly_life/features/home/presentation/widgets/home_card_contents.dart';
@@ -49,7 +50,7 @@ class HomeView extends StatelessWidget {
     final now = clock.now();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
+      appBar: const BaseetAppBar.main(),
       body: BlocBuilder<HomeCubit, HomeState>(
         builder: (context, state) => RefreshIndicator(
           onRefresh: cubit.load,
