@@ -1,7 +1,6 @@
 import 'package:brainly_life/core/errors/failure.dart';
 import 'package:brainly_life/core/errors/result.dart';
 import 'package:brainly_life/core/utils/date_key_utils.dart';
-import 'package:brainly_life/features/study_planner/data/models/study_enums.dart';
 import 'package:brainly_life/features/study_planner/data/models/subject_model.dart';
 import 'package:brainly_life/features/study_planner/data/models/topic_model.dart';
 import 'package:brainly_life/features/study_planner/data/repositories/study_repository.dart';
@@ -65,29 +64,16 @@ class SubjectsCubit extends Cubit<SubjectsState> {
     emit(
       SubjectsLoaded(
         subjects: [
-          for (final subject in subjects) _overview(subject, topics, todayKey),
+          for (final subject in subjects)
+            SubjectOverview.of(
+              subject,
+              topics,
+              todayKey: todayKey,
+              timezone: _timezone,
+            ),
         ],
         deletedName: deletedName,
       ),
-    );
-  }
-
-  SubjectOverview _overview(
-    Subject subject,
-    List<Topic> allTopics,
-    String todayKey,
-  ) {
-    final topics = allTopics.where((t) => t.subjectId == subject.id);
-    final examKey = DateKeyUtils.toDateKey(
-      subject.examDate,
-      timezone: _timezone,
-    );
-    return SubjectOverview(
-      subject: subject,
-      topicCount: topics.length,
-      doneTopicCount: topics.where((t) => t.status == TopicStatus.done).length,
-      examDateKey: examKey,
-      daysUntilExam: DateKeyUtils.daysBetween(todayKey, examKey),
     );
   }
 
