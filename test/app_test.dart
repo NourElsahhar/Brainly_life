@@ -1,64 +1,60 @@
 // Tests that the app wiring works: AuthCubit -> RouterAuthState -> router.
 // Run with: fvm flutter test test/app_test.dart
 //
-// Widget tests run in "fake time". Setting up and closing the dependencies
-// needs REAL async, so we do both inside tester.runAsync.
-// Each test has a 20 second limit, so a problem fails fast (no endless wait).
+// It checks OUR parts (splash, bottom bar, login). It does not check what is
+// inside the Home screen, because that screen belongs to M3.
 
 import 'package:brainly_life/app.dart';
 import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
+import 'package:brainly_life/features/auth/presentation/screens/splash_screen.dart';
 import 'package:brainly_life/injection.dart';
-import 'package:brainly_life/features/home/presentation/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const limit = Timeout(Duration(seconds: 20));
+  tearDown(() => getIt.reset());
 
   Finder appBarTitle(String title) => find.descendant(
         of: find.byType(AppBar),
         matching: find.text(title),
       );
 
-  /// Starts the app with mocks and waits until it is ready.
-  Future<void> startApp(WidgetTester tester) async {
-    await tester.runAsync(() => configureDependencies(useMocks: true));
+  Future<void> openApp(WidgetTester tester) async {
+    await configureDependencies(useMocks: true);
     await tester.pumpWidget(const BrainlyLifeApp());
+    await tester.pump(const Duration(milliseconds: 300));
+  }
+
+  Future<void> waitForSplash(WidgetTester tester) async {
+    await tester.pump(SplashScreen.duration);
     await tester.pumpAndSettle();
   }
 
-  /// Removes the app and closes everything.
-  Future<void> stopApp(WidgetTester tester) async {
-    await tester.pumpWidget(const SizedBox());
-    await tester.runAsync(() => getIt.reset());
-  }
+  testWidgets('the splash is shown first, even if the user is known',
+      (tester) async {
+    await openApp(tester);
 
-  testWidgets(
-    'with mocks the demo user is signed in and sees Home',
-    timeout: limit,
-    (tester) async {
-      await startApp(tester);
+    expect(find.byType(SplashScreen), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+  });
 
-      expect(find.byType(HomeView), findsOneWidget);
-      expect(find.byType(NavigationBar), findsOneWidget);
+  testWidgets('with mocks the demo user sees the app after the splash',
+      (tester) async {
+    await openApp(tester);
+    await waitForSplash(tester);
 
-      await stopApp(tester);
-    },
-  );
+    expect(find.byType(SplashScreen), findsNothing);
+    expect(find.byType(NavigationBar), findsOneWidget);
+  });
 
-  testWidgets(
-    'signing out sends the user to Login',
-    timeout: limit,
-    (tester) async {
-      await startApp(tester);
+  testWidgets('signing out sends the user to Login', (tester) async {
+    await openApp(tester);
+    await waitForSplash(tester);
 
-      getIt<AuthCubit>().signOut();
-      await tester.pumpAndSettle();
+    getIt<AuthCubit>().signOut();
+    await tester.pumpAndSettle();
 
-      expect(appBarTitle('Login'), findsOneWidget);
-      expect(find.byType(NavigationBar), findsNothing);
-
-      await stopApp(tester);
-    },
-  );
+    expect(appBarTitle('Login'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+  });
 }

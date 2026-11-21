@@ -6,13 +6,19 @@
 // list after the shell, like tasksRoutes and focusRoutes.
 //
 // The redirect rules (appRedirect):
+//   splash not finished -> always the splash screen
 //   unknown    -> splash
-//   signedOut  -> only splash/onboarding/login/register/forgot-password
+//   signedOut  -> only onboarding/login/register/forgot-password
 //                 are allowed, everything else goes to login
 //   signedIn   -> the auth screens are not allowed, they go to home
+//
+// createAppRouter has two optional parameters (tabs and fullScreenRoutes).
+// They are only for tests, so a router test can use simple placeholder
+// screens and does not break when another feature builds its real screen.
 
 import 'package:brainly_life/features/ai_assistant/presentation/ai_assistant_routes.dart';
 import 'package:brainly_life/features/auth/presentation/auth_routes.dart';
+import 'package:brainly_life/features/auth/presentation/screens/splash_screen.dart';
 import 'package:brainly_life/features/focus/presentation/focus_routes.dart';
 import 'package:brainly_life/features/habits/presentation/habits_routes.dart';
 import 'package:brainly_life/features/home/presentation/home_routes.dart';
@@ -68,7 +74,16 @@ const Set<String> _publicPages = {
 };
 
 /// Where should the user go? Returns null to stay where they are.
-String? appRedirect(AuthStatus status, String location) {
+String? appRedirect(
+  AuthStatus status,
+  String location, {
+  bool splashDone = true,
+}) {
+  // The splash screen stays until its animation has finished.
+  if (!splashDone) {
+    return location == AppRoutes.splash ? null : AppRoutes.splash;
+  }
+
   return switch (status) {
     AuthStatus.unknown =>
       location == AppRoutes.splash ? null : AppRoutes.splash,
@@ -81,24 +96,45 @@ String? appRedirect(AuthStatus status, String location) {
   };
 }
 
-GoRouter createAppRouter(RouterAuthState authState) {
+/// [tabs] and [fullScreenRoutes] are only for tests. Leave them empty in the app.
+GoRouter createAppRouter(
+  RouterAuthState authState, {
+  List<AppTab>? tabs,
+  List<RouteBase>? fullScreenRoutes,
+}) {
+  final shellTabs = tabs ?? appTabs;
+
   return GoRouter(
     initialLocation: AppRoutes.splash,
     refreshListenable: authState,
-    redirect: (context, state) =>
-        appRedirect(authState.status, state.matchedLocation),
+    redirect: (context, state) => appRedirect(
+      authState.status,
+      state.matchedLocation,
+      splashDone: authState.splashDone,
+    ),
     routes: [
+      // The splash fades out smoothly when the app opens.
+      GoRoute(
+        path: AppRoutes.splash,
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          transitionDuration: const Duration(milliseconds: 300),
+          reverseTransitionDuration: const Duration(milliseconds: 500),
+          child: SplashScreen(onFinished: authState.finishSplash),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
+        ),
+      ),
       ...authRoutes,
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
-            MainShell(navigationShell: navigationShell, tabs: appTabs),
+            MainShell(navigationShell: navigationShell, tabs: shellTabs),
         branches: [
-          for (final tab in appTabs) StatefulShellBranch(routes: tab.routes),
+          for (final tab in shellTabs) StatefulShellBranch(routes: tab.routes),
         ],
       ),
       // Full screen (open on top of the bottom bar).
-      ...tasksRoutes,
-      ...focusRoutes,
+      ...(fullScreenRoutes ?? [...tasksRoutes, ...focusRoutes]),
     ],
   );
 }

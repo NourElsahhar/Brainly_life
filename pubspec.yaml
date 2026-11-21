@@ -81,6 +81,8 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/branding/baseet_logo_light.png
+    - assets/branding/baseet_logo_dark.png
     - assets/branding/baseet_app_bar_logo_light.png
     - assets/branding/baseet_app_bar_logo_dark.png
 
