@@ -23,7 +23,6 @@ class Habit extends Equatable {
     this.frequencyType = HabitFrequencyType.daily,
     this.weekdays = const [],
     this.timesPerWeek,
-    this.reminderTime,
     this.archived = false,
     this.currentStreak = 0,
     this.bestStreak = 0,
@@ -53,9 +52,6 @@ class Habit extends Equatable {
   /// Target per week (1 to 7). Used only when [frequencyType] is
   /// `timesPerWeek`.
   final int? timesPerWeek;
-
-  /// Daily reminder time as `HH:mm`. Null means no reminder.
-  final String? reminderTime;
 
   /// First day of the habit, as a dateKey.
   final String startDate;
@@ -107,9 +103,6 @@ class Habit extends Equatable {
       timesPerWeek: clearTimesPerWeek
           ? null
           : (timesPerWeek ?? this.timesPerWeek),
-      reminderTime: clearReminderTime
-          ? null
-          : (reminderTime ?? this.reminderTime),
       startDate: startDate ?? this.startDate,
       archived: archived ?? this.archived,
       currentStreak: currentStreak ?? this.currentStreak,
@@ -137,7 +130,6 @@ class Habit extends Equatable {
       ),
       weekdays: (map['weekdays'] as List? ?? const []).cast<int>().toList(),
       timesPerWeek: map['timesPerWeek'] as int?,
-      reminderTime: map['reminderTime'] as String?,
       startDate: map['startDate'] as String,
       archived: map['archived'] as bool? ?? false,
       currentStreak: map['currentStreak'] as int? ?? 0,
@@ -156,7 +148,6 @@ class Habit extends Equatable {
       'frequencyType': frequencyType.name,
       'weekdays': weekdays,
       'timesPerWeek': timesPerWeek,
-      'reminderTime': reminderTime,
       'startDate': startDate,
       'archived': archived,
       'currentStreak': currentStreak,
@@ -176,7 +167,6 @@ class Habit extends Equatable {
     frequencyType,
     weekdays,
     timesPerWeek,
-    reminderTime,
     startDate,
     archived,
     currentStreak,

@@ -1,0 +1,237 @@
+import 'package:clock/clock.dart';
+
+import '../data/models/plan_constraints_model.dart';
+import '../data/models/study_enums.dart';
+import '../data/models/study_session_model.dart';
+import '../data/models/topic_model.dart';
+import 'planner_types.dart';
+
+/// The kinds of problem the validator can find in a plan.
+enum PlanViolationType {
+  /// A planned session starts before "now".
+  sessionInPast,
+
+  /// The session's day is not one of the days the plan may use.
+  dateOutsidePlanDays,
+
+  /// The session is on a weekday the user marked as a day off.
+  dayOff,
+
+  /// The sessions of one day add up to more than that weekday's limit.
+  dailyLimitExceeded,
+
+  /// Two sessions overlap in time.
+  overlappingSessions,
+
+  /// The session points to a subject that does not exist.
+  unknownSubject,
+
+  /// The session points to a topic that does not exist.
+  unknownTopic,
+
+  /// The topic exists but belongs to a different subject.
+  topicSubjectMismatch,
+
+  /// Duration is not between 10 and 180 minutes.
+  durationOutOfRange,
+
+  /// Duration is longer than the user's `maxSessionMinutes`.
+  exceedsMaxSession,
+
+  /// The session is on the exam day of its subject or later. Only the exam
+  /// day is known, not its time, so the exam day itself is not used.
+  onOrAfterExamDay,
+}
+
+/// One problem found in a plan.
+///
+/// [sessionId] is null for problems about a whole day, in which case
+/// [dateKey] says which day.
+class PlanViolation {
+  const PlanViolation(this.type, {this.sessionId, this.dateKey});
+
+  final PlanViolationType type;
+  final String? sessionId;
+  final String? dateKey;
+}
+
+class PlanValidationResult {
+  const PlanValidationResult(this.violations);
+
+  final List<PlanViolation> violations;
+
+  bool get isValid => violations.isEmpty;
+
+  Set<PlanViolationType> get types => {for (final v in violations) v.type};
+}
+
+/// Checks a plan before it is saved: the sessions the AI generated, the
+/// user's edits in the preview, and the new sessions of an adjustment.
+/// An invalid plan is never saved (Master Document B.2, task 10).
+///
+/// It reports every problem it finds, not just the first one. It is pure Dart
+/// and reads the time only from the injected [Clock].
+///
+/// The gateway runs the same kind of checks on the AI answer
+/// (`functions/src/ai/features/studyPlan.ts`), so both sides agree on what a
+/// valid plan is.
+class PlanValidator {
+  const PlanValidator({required this.clock});
+
+  /// The only source of "now" for this class (injected, so tests can fix it).
+  final Clock clock;
+
+  /// Checks every session in [sessions].
+  ///
+  /// [days] are the days the plan may use. [examDateKeys] maps a subject id
+  /// to the `yyyy-MM-dd` of its exam.
+  ///
+  /// [existingSessions] are sessions that stay as they are, for example a
+  /// session done earlier today during an adjustment. They are not checked
+  /// themselves, but their time counts for the daily limits and overlaps.
+  PlanValidationResult validate({
+    required List<StudySession> sessions,
+    required Set<String> subjectIds,
+    required List<Topic> topics,
+    required Map<String, String> examDateKeys,
+    required PlanConstraints constraints,
+    required List<PlannerDay> days,
+    List<StudySession> existingSessions = const [],
+  }) {
+    final violations = <PlanViolation>[];
+    final now = clock.now();
+    final weekdayByDateKey = {for (final day in days) day.dateKey: day.weekday};
+    final topicById = {for (final topic in topics) topic.id: topic};
+
+    for (final session in sessions) {
+      void report(PlanViolationType type) {
+        violations.add(PlanViolation(type, sessionId: session.id));
+      }
+
+      final minutes = session.plannedMinutes;
+      if (minutes < StudySession.minPlannedMinutes ||
+          minutes > StudySession.maxPlannedMinutes) {
+        report(PlanViolationType.durationOutOfRange);
+      }
+      if (minutes > constraints.maxSessionMinutes) {
+        report(PlanViolationType.exceedsMaxSession);
+      }
+      if (session.status == SessionStatus.planned &&
+          session.startAt.isBefore(now)) {
+        report(PlanViolationType.sessionInPast);
+      }
+
+      if (!subjectIds.contains(session.subjectId)) {
+        report(PlanViolationType.unknownSubject);
+      }
+      final topic = topicById[session.topicId];
+      if (topic == null) {
+        report(PlanViolationType.unknownTopic);
+      } else if (topic.subjectId != session.subjectId) {
+        report(PlanViolationType.topicSubjectMismatch);
+      }
+
+      // `yyyy-MM-dd` strings sort in date order, so comparing is enough.
+      final examDateKey = examDateKeys[session.subjectId];
+      if (examDateKey != null && session.dateKey.compareTo(examDateKey) >= 0) {
+        report(PlanViolationType.onOrAfterExamDay);
+      }
+
+      final weekday = weekdayByDateKey[session.dateKey];
+      if (weekday == null) {
+        report(PlanViolationType.dateOutsidePlanDays);
+      } else if (constraints.daysOff.contains(weekday)) {
+        report(PlanViolationType.dayOff);
+      }
+    }
+
+    final checkedIds = {for (final session in sessions) session.id};
+    final busy = [
+      for (final session in [...sessions, ...existingSessions])
+        if (_usesTime(session)) session,
+    ];
+    _checkDailyLimits(busy, weekdayByDateKey, constraints, violations);
+    _checkOverlaps(busy, checkedIds, violations);
+
+    return PlanValidationResult(violations);
+  }
+
+  /// Skipped and missed sessions keep their place in the history but no
+  /// longer take time on their day.
+  static bool _usesTime(StudySession session) {
+    return session.status == SessionStatus.planned ||
+        session.status == SessionStatus.done;
+  }
+
+  void _checkDailyLimits(
+    List<StudySession> sessions,
+    Map<String, int> weekdayByDateKey,
+    PlanConstraints constraints,
+    List<PlanViolation> violations,
+  ) {
+    final minutesByDay = <String, int>{};
+    for (final session in sessions) {
+      if (weekdayByDateKey.containsKey(session.dateKey)) {
+        minutesByDay[session.dateKey] =
+            (minutesByDay[session.dateKey] ?? 0) + session.plannedMinutes;
+      }
+    }
+    for (final entry in minutesByDay.entries) {
+      final weekday = weekdayByDateKey[entry.key];
+      // Sessions on a day off are already reported as dayOff.
+      if (weekday == null || constraints.daysOff.contains(weekday)) {
+        continue;
+      }
+      final limit = constraints.minutesPerWeekday[weekday] ?? 0;
+      if (entry.value > limit) {
+        violations.add(
+          PlanViolation(
+            PlanViolationType.dailyLimitExceeded,
+            dateKey: entry.key,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Reports a session that starts before an earlier one has ended. When
+  /// only one of the two is in [checkedIds], that one is reported.
+  void _checkOverlaps(
+    List<StudySession> sessions,
+    Set<String> checkedIds,
+    List<PlanViolation> violations,
+  ) {
+    final ordered = [...sessions]
+      ..sort((a, b) {
+        final byStart = a.startAt.compareTo(b.startAt);
+        return byStart != 0 ? byStart : a.id.compareTo(b.id);
+      });
+
+    StudySession? latest;
+    DateTime? latestEnd;
+    for (final session in ordered) {
+      final end = session.startAt.add(
+        Duration(minutes: session.plannedMinutes),
+      );
+      final previous = latest;
+      final previousEnd = latestEnd;
+      if (previous != null &&
+          previousEnd != null &&
+          session.startAt.isBefore(previousEnd)) {
+        final culprit = checkedIds.contains(session.id) ? session : previous;
+        if (checkedIds.contains(culprit.id)) {
+          violations.add(
+            PlanViolation(
+              PlanViolationType.overlappingSessions,
+              sessionId: culprit.id,
+            ),
+          );
+        }
+      }
+      if (previousEnd == null || end.isAfter(previousEnd)) {
+        latest = session;
+        latestEnd = end;
+      }
+    }
+  }
+}

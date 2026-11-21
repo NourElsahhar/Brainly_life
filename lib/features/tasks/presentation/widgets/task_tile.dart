@@ -84,9 +84,9 @@ class TaskTile extends StatelessWidget {
                   runSpacing: AppSpacing.s1,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    _CategoryChip(category: category),
+                    TaskCategoryChip(category: category),
                     if (!task.isDone && dueAt != null)
-                      _DueLabel(
+                      TaskDueLabel(
                         text: formatDue(dueAt, now),
                         isOverdue: isOverdue,
                         isDueSoon: isDueSoon,
@@ -176,8 +176,8 @@ class _CheckCircle extends StatelessWidget {
   }
 }
 
-class _CategoryChip extends StatelessWidget {
-  const _CategoryChip({this.category});
+class TaskCategoryChip extends StatelessWidget {
+  const TaskCategoryChip({super.key, this.category});
 
   final TaskCategory? category;
 
@@ -218,8 +218,9 @@ class _CategoryChip extends StatelessWidget {
   }
 }
 
-class _DueLabel extends StatelessWidget {
-  const _DueLabel({
+class TaskDueLabel extends StatelessWidget {
+  const TaskDueLabel({
+    super.key,
     required this.text,
     required this.isOverdue,
     required this.isDueSoon,
