@@ -57,10 +57,10 @@ Future<void> configureDependencies({bool? useMocks}) async {
     () => FirebaseFunctions.instance,
   );
 
-  // Router. TEMPORARY: it starts as signed in, so the team can see the tabs.
-  // When AuthCubit is ready it will update RouterAuthState with the real status.
+  // Router. It starts as "unknown" (the splash screen).
+  // app.dart updates it from AuthCubit (signed in or signed out).
   getIt.registerLazySingleton<RouterAuthState>(
-    () => RouterAuthState(AuthStatus.signedIn),
+    () => RouterAuthState(),
   );
   getIt.registerLazySingleton<GoRouter>(
     () => createAppRouter(getIt<RouterAuthState>()),

@@ -1,7 +1,8 @@
 // MockAuthRepository = a fake AuthRepository that lives in memory.
 // Used when the app runs with --dart-define=USE_MOCKS=true, and in tests.
 //
-// It starts signed out. A demo account already exists:
+// It starts signed out (or signed in as the demo user with startSignedIn).
+// A demo account already exists:
 //   email:    MockAuthRepository.demoEmail      (demo@example.com)
 //   password: MockAuthRepository.demoPassword   (password123)
 // Register works too (new accounts live until the app restarts).
@@ -19,8 +20,11 @@ import 'package:brainly_life/features/auth/data/repositories/auth_repository.dar
 import 'package:clock/clock.dart';
 
 class MockAuthRepository implements AuthRepository {
-  MockAuthRepository({this.delay = Duration.zero}) {
-    _accounts[demoEmail] = _MockAccount(
+  MockAuthRepository({
+    this.delay = Duration.zero,
+    bool startSignedIn = false,
+  }) {
+    final demo = _MockAccount(
       password: demoPassword,
       profile: _newProfile(
         uid: 'mock-user-1',
@@ -28,6 +32,8 @@ class MockAuthRepository implements AuthRepository {
         email: demoEmail,
       ),
     );
+    _accounts[demoEmail] = demo;
+    if (startSignedIn) _current = demo.profile;
   }
 
   static const String demoEmail = 'demo@example.com';
