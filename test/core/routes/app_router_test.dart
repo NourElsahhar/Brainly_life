@@ -62,8 +62,6 @@ void main() {
   });
 
   group('router screens', () {
-        // The real tasks screens get their Cubits from getIt.
-        // The real tasks and study planner screens get their Cubits from getIt.
     setUp(() {
       registerTasksFeature(getIt, useMocks: true);
       registerStudyPlannerFeature(getIt, useMocks: true);
