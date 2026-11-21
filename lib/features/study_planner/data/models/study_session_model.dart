@@ -10,6 +10,13 @@ part 'study_session_model.freezed.dart';
 abstract class StudySession with _$StudySession {
   const StudySession._();
 
+  /// Shortest allowed session (Master Document B.2, task 10). The AI
+  /// response schema and the Firestore rules use the same limits.
+  static const int minPlannedMinutes = 10;
+
+  /// Longest allowed session.
+  static const int maxPlannedMinutes = 180;
+
   const factory StudySession({
     required String id,
     required String planId,

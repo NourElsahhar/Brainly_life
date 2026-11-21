@@ -177,7 +177,8 @@ class StudySampleData {
         title: 'Midterms preparation',
         startDate: at(day(-2), 0),
         endDate: at(day(9), 0),
-        generatedBy: PlanGenerator.rules,
+        generatedBy: PlanGenerator.ai,
+        promptVersion: 1,
         constraints: PlanConstraints(
           minutesPerWeekday: {for (var d = 1; d <= 7; d++) d: 120},
           daysOff: {5},
