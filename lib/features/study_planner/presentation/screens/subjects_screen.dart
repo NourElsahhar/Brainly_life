@@ -39,6 +39,21 @@ class SubjectsView extends StatelessWidget {
     await cubit.load();
   }
 
+  /// Opens the subject page, then reloads the list: topics or the subject
+  /// may have changed there. The page closes with the name if it deleted
+  /// the subject.
+  Future<void> _openDetail(BuildContext context, String subjectId) async {
+    final cubit = context.read<SubjectsCubit>();
+    final deletedName = await context.push<String>(
+      StudyPlannerPaths.subjectDetail(subjectId),
+    );
+    if (!context.mounted) return;
+    if (deletedName != null) {
+      AppSnackBar.success(context, '"$deletedName" deleted');
+    }
+    await cubit.load();
+  }
+
   Future<void> _confirmDelete(
     BuildContext context,
     SubjectOverview overview,
@@ -122,6 +137,7 @@ class SubjectsView extends StatelessWidget {
                   onEdit: () =>
                       _openForm(context, subjectId: overview.subject.id),
                   onDelete: () => _confirmDelete(context, overview),
+                  onTap: () => _openDetail(context, overview.subject.id),
                 );
               },
             ),

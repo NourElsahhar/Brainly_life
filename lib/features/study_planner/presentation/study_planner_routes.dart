@@ -2,6 +2,7 @@
 // app_router.dart combines the route lists of all features.
 
 import 'package:brainly_life/core/routes/app_routes.dart';
+import 'package:brainly_life/features/study_planner/presentation/screens/subject_detail_screen.dart';
 import 'package:brainly_life/features/study_planner/presentation/screens/subject_form_screen.dart';
 import 'package:brainly_life/features/study_planner/presentation/screens/subjects_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -20,9 +21,16 @@ final List<RouteBase> studyPlannerRoutes = [
         builder: (context, state) => const SubjectFormScreen(),
       ),
       GoRoute(
-        path: 'subjects/:id/edit',
+        path: 'subjects/:id',
         builder: (context, state) =>
-            SubjectFormScreen(subjectId: state.pathParameters['id']),
+            SubjectDetailScreen(subjectId: state.pathParameters['id']!),
+        routes: [
+          GoRoute(
+            path: 'edit',
+            builder: (context, state) =>
+                SubjectFormScreen(subjectId: state.pathParameters['id']),
+          ),
+        ],
       ),
     ],
   ),
