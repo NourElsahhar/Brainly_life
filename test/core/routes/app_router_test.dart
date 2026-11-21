@@ -6,6 +6,7 @@ import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:brainly_life/core/routes/router_auth_state.dart';
 import 'package:brainly_life/core/theme/app_theme.dart';
 import 'package:brainly_life/features/tasks/tasks_injection.dart';
+import 'package:brainly_life/features/study_planner/study_planner_injection.dart';
 import 'package:brainly_life/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -62,7 +63,11 @@ void main() {
 
   group('router screens', () {
         // The real tasks screens get their Cubits from getIt.
-    setUp(() => registerTasksFeature(getIt, useMocks: true));
+        // The real tasks and study planner screens get their Cubits from getIt.
+    setUp(() {
+      registerTasksFeature(getIt, useMocks: true);
+      registerStudyPlannerFeature(getIt, useMocks: true);
+    });
     tearDown(() => getIt.reset());
     Finder appBarTitle(String title) => find.descendant(
           of: find.byType(AppBar),
@@ -116,7 +121,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(appBarTitle('Plan'), findsOneWidget);
+      expect(appBarTitle('Subjects'), findsOneWidget);
     });
 
     testWidgets('settings opens inside the Profile tab', (tester) async {
