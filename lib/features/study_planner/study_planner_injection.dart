@@ -6,9 +6,10 @@
 
 import 'package:brainly_life/features/study_planner/data/repositories/mock_study_repository.dart';
 import 'package:brainly_life/features/study_planner/data/repositories/study_repository.dart';
+import 'package:brainly_life/features/study_planner/logic/subject_detail_cubit.dart';
+import 'package:brainly_life/features/study_planner/logic/subject_form_cubit.dart';
 import 'package:brainly_life/features/study_planner/logic/subjects_cubit.dart';
 import 'package:get_it/get_it.dart';
-import 'package:brainly_life/features/study_planner/logic/subject_form_cubit.dart';
 
 /// The timezone used until the user's `settings.timezone` is available to
 /// features (M1's settings work). Change it in this one place.
@@ -28,5 +29,8 @@ void registerStudyPlannerFeature(GetIt getIt, {required bool useMocks}) {
   );
   getIt.registerFactory(
     () => SubjectFormCubit(getIt(), timezone: studyPlannerFallbackTimezone),
+  );
+  getIt.registerFactory(
+    () => SubjectDetailCubit(getIt(), timezone: studyPlannerFallbackTimezone),
   );
 }

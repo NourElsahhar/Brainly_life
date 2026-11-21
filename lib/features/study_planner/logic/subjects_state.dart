@@ -1,44 +1,9 @@
 import 'package:brainly_life/core/errors/failure.dart';
-import 'package:brainly_life/features/study_planner/data/models/subject_model.dart';
+import 'package:brainly_life/features/study_planner/logic/subject_overview.dart';
 import 'package:equatable/equatable.dart';
 
-/// Everything one card of the subjects list shows.
-class SubjectOverview extends Equatable {
-  const SubjectOverview({
-    required this.subject,
-    required this.topicCount,
-    required this.examDateKey,
-    required this.doneTopicCount,
-    required this.daysUntilExam,
-  });
-
-  final Subject subject;
-
-  /// All topics of the subject.
-  final int topicCount;
-
-  /// Topics with the status `done`.
-  final int doneTopicCount;
-
-  /// Days from today to the exam day, in the user's timezone.
-  /// 0 means the exam is today, a negative number means it is over.
-  final String examDateKey;
-  final int daysUntilExam;
-
-  /// From 0 to 1, for the progress bar. 0 when there are no topics yet.
-  double get progress => topicCount == 0 ? 0 : doneTopicCount / topicCount;
-
-  bool get isExamOver => daysUntilExam < 0;
-
-  @override
-  List<Object?> get props => [
-    subject,
-    topicCount,
-    examDateKey,
-    doneTopicCount,
-    daysUntilExam,
-  ];
-}
+// The screens that use SubjectsState also need SubjectOverview.
+export 'package:brainly_life/features/study_planner/logic/subject_overview.dart';
 
 sealed class SubjectsState extends Equatable {
   const SubjectsState();

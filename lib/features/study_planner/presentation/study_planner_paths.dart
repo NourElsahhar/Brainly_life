@@ -5,6 +5,9 @@ import 'package:brainly_life/core/routes/app_routes.dart';
 abstract final class StudyPlannerPaths {
   static const String newSubject = '${AppRoutes.plan}/subjects/new';
 
+  static String subjectDetail(String subjectId) =>
+      '${AppRoutes.plan}/subjects/$subjectId';
+
   static String editSubject(String subjectId) =>
       '${AppRoutes.plan}/subjects/$subjectId/edit';
 }
