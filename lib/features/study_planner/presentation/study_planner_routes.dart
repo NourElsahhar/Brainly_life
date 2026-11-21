@@ -5,6 +5,7 @@ import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:brainly_life/features/study_planner/presentation/screens/subject_detail_screen.dart';
 import 'package:brainly_life/features/study_planner/presentation/screens/subject_form_screen.dart';
 import 'package:brainly_life/features/study_planner/presentation/screens/subjects_screen.dart';
+import 'package:brainly_life/features/study_planner/presentation/screens/topic_form_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final List<RouteBase> studyPlannerRoutes = [
@@ -29,6 +30,20 @@ final List<RouteBase> studyPlannerRoutes = [
             path: 'edit',
             builder: (context, state) =>
                 SubjectFormScreen(subjectId: state.pathParameters['id']),
+          ),
+          // 'topics/new' comes before 'topics/:topicId/edit' for the same
+          // reason as 'subjects/new'.
+          GoRoute(
+            path: 'topics/new',
+            builder: (context, state) =>
+                TopicFormScreen(subjectId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: 'topics/:topicId/edit',
+            builder: (context, state) => TopicFormScreen(
+              subjectId: state.pathParameters['id']!,
+              topicId: state.pathParameters['topicId'],
+            ),
           ),
         ],
       ),

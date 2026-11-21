@@ -9,6 +9,7 @@ import 'package:brainly_life/features/study_planner/data/repositories/study_repo
 import 'package:brainly_life/features/study_planner/logic/subject_detail_cubit.dart';
 import 'package:brainly_life/features/study_planner/logic/subject_form_cubit.dart';
 import 'package:brainly_life/features/study_planner/logic/subjects_cubit.dart';
+import 'package:brainly_life/features/study_planner/logic/topic_form_cubit.dart';
 import 'package:get_it/get_it.dart';
 
 /// The timezone used until the user's `settings.timezone` is available to
@@ -33,4 +34,5 @@ void registerStudyPlannerFeature(GetIt getIt, {required bool useMocks}) {
   getIt.registerFactory(
     () => SubjectDetailCubit(getIt(), timezone: studyPlannerFallbackTimezone),
   );
+  getIt.registerFactory(() => TopicFormCubit(getIt()));
 }

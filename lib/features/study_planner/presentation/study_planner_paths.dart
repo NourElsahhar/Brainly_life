@@ -10,4 +10,10 @@ abstract final class StudyPlannerPaths {
 
   static String editSubject(String subjectId) =>
       '${AppRoutes.plan}/subjects/$subjectId/edit';
+
+  static String newTopic(String subjectId) =>
+      '${AppRoutes.plan}/subjects/$subjectId/topics/new';
+
+  static String editTopic(String subjectId, String topicId) =>
+      '${AppRoutes.plan}/subjects/$subjectId/topics/$topicId/edit';
 }

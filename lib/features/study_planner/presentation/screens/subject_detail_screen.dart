@@ -9,6 +9,7 @@ import 'package:brainly_life/features/study_planner/presentation/widgets/topic_t
 import 'package:brainly_life/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:brainly_life/features/study_planner/logic/topic_form_state.dart';
 import 'package:go_router/go_router.dart';
 
 /// The page of one subject. Closes with the subject name when the subject
@@ -71,13 +72,26 @@ class SubjectDetailView extends StatelessWidget {
     if (ok) await cubit.deleteTopic(topic);
   }
 
-  // Step 6.3 replaces these two with the topic form.
-  void _addTopic(BuildContext context) {
-    AppSnackBar.info(context, 'Adding topics comes in the next update');
-  }
-
-  void _editTopic(BuildContext context, Topic topic) {
-    AppSnackBar.info(context, 'Editing topics comes in the next update');
+  /// Opens the topic form (new when [topic] is null), then refreshes the
+  /// page if the topic was saved or deleted there.
+  Future<void> _openTopicForm(
+    BuildContext context,
+    String subjectId, {
+    Topic? topic,
+  }) async {
+    final cubit = context.read<SubjectDetailCubit>();
+    final path = topic == null
+        ? StudyPlannerPaths.newTopic(subjectId)
+        : StudyPlannerPaths.editTopic(subjectId, topic.id);
+    final result = await context.push<TopicFormResult>(path);
+    if (result == null || !context.mounted) return;
+    switch (result) {
+      case TopicFormResult.saved:
+        AppSnackBar.success(context, 'Topic saved');
+      case TopicFormResult.deleted:
+        AppSnackBar.success(context, '"${topic?.title}" deleted');
+    }
+    await cubit.reload();
   }
 
   // The plan wizard is the next milestone.
@@ -165,8 +179,13 @@ class SubjectDetailView extends StatelessWidget {
           ),
           SubjectDetailLoaded() => _LoadedBody(
             state: state,
-            onAddTopic: () => _addTopic(context),
-            onEditTopic: (topic) => _editTopic(context, topic),
+            onAddTopic: () =>
+                _openTopicForm(context, state.overview.subject.id),
+            onEditTopic: (topic) => _openTopicForm(
+              context,
+              state.overview.subject.id,
+              topic: topic,
+            ),
             onDeleteTopic: (topic) => _deleteTopic(context, topic),
           ),
         },
