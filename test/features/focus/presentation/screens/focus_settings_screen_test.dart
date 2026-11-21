@@ -45,7 +45,7 @@ void main() {
     expect(find.text(AppStrings.focusMinutesValue(30)), findsOneWidget);
   });
 
-    testWidgets('a switch can be turned on', (tester) async {
+  testWidgets('a switch can be turned on', (tester) async {
     final cubit = await pumpScreen(tester);
 
     final label = find.text(AppStrings.focusKeepScreenOn);
