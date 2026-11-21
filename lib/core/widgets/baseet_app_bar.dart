@@ -41,8 +41,9 @@ class BaseetAppBar extends StatelessWidget implements PreferredSizeWidget {
   static const double height = 64;
 
   /// Path of the logo for each theme.
-  static const String lightLogo = 'assets/branding/baseet_logo_light.png';
-  static const String darkLogo = 'assets/branding/baseet_logo_dark.png';
+  static const String lightLogo =
+      'assets/branding/baseet_app_bar_logo_light.png';
+  static const String darkLogo = 'assets/branding/baseet_app_bar_logo_dark.png';
 
   /// null means this is the main bar (logo instead of a title).
   final String? title;
