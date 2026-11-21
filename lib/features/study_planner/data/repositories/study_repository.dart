@@ -13,7 +13,7 @@ import '../models/topic_model.dart';
 abstract class StudyRepository {
   /// New ids are created on the device (Firestore can do this without the
   /// network), so a plan and its sessions already have their final ids while
-  /// can then be built before saving.
+  /// the user is still previewing them.
   String newPlanId();
   String newSessionId();
 
