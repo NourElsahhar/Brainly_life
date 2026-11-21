@@ -1,35 +1,18 @@
 import 'package:clock/clock.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// Replace brainly_life with the `name:` value from pubspec.yaml.
 import 'package:brainly_life/features/study_planner/data/models/plan_constraints_model.dart';
 import 'package:brainly_life/features/study_planner/data/models/study_enums.dart';
 import 'package:brainly_life/features/study_planner/data/models/study_session_model.dart';
 import 'package:brainly_life/features/study_planner/data/models/topic_model.dart';
 import 'package:brainly_life/features/study_planner/logic/plan_validator.dart';
 import 'package:brainly_life/features/study_planner/logic/planner_types.dart';
-import 'package:brainly_life/features/study_planner/logic/rule_based_planner.dart';
 
 // "Now" is Monday 2026-11-16 08:00 UTC in every test.
 final _now = DateTime.utc(2026, 11, 16, 8);
-final _firstDay = DateTime.utc(2026, 11, 16);
 
-/// Test fixture only: consecutive days as the caller would build them.
-List<PlannerDay> _days(int count) {
-  return [
-    for (var i = 0; i < count; i++)
-      () {
-        final date = _firstDay.add(Duration(days: i));
-        final month = date.month.toString().padLeft(2, '0');
-        final day = date.day.toString().padLeft(2, '0');
-        return PlannerDay(
-          dateKey: '${date.year}-$month-$day',
-          weekday: date.weekday,
-          startAt: DateTime.utc(date.year, date.month, date.day, 17),
-        );
-      }(),
-  ];
-}
+/// The plan may use Monday 16 to Monday 30 November 2026.
+final _days = PlannerDay.range('2026-11-16', '2026-11-30');
 
 PlanConstraints _constraints({
   int minutesPerDay = 120,
@@ -84,6 +67,7 @@ PlanValidationResult _validate(
   List<Topic>? topics,
   Map<String, String> exams = const {'s1': '2026-11-25'},
   PlanConstraints? constraints,
+  List<StudySession> existing = const [],
 }) {
   return PlanValidator(clock: Clock.fixed(_now)).validate(
     sessions: sessions,
@@ -91,7 +75,8 @@ PlanValidationResult _validate(
     topics: topics ?? [_topic('t1', 's1'), _topic('t2', 's1')],
     examDateKeys: exams,
     constraints: constraints ?? _constraints(),
-    days: _days(15),
+    days: _days,
+    existingSessions: existing,
   );
 }
 
@@ -245,16 +230,32 @@ void main() {
         exams: const {'s1': '2026-11-20'},
       );
 
-      expect(result.types, {PlanViolationType.afterExamDay});
+      expect(result.types, {PlanViolationType.onOrAfterExamDay});
     });
 
-    test('a session on the exam day itself is allowed by the validator', () {
+    test('a session on the exam day itself is rejected', () {
+      // Only the exam day is known, not its time.
       final result = _validate(
         [
           _session(
             'a',
             dateKey: '2026-11-20',
             startAt: DateTime.utc(2026, 11, 20, 17),
+          ),
+        ],
+        exams: const {'s1': '2026-11-20'},
+      );
+
+      expect(result.types, {PlanViolationType.onOrAfterExamDay});
+    });
+
+    test('a session the day before the exam is allowed', () {
+      final result = _validate(
+        [
+          _session(
+            'a',
+            dateKey: '2026-11-19',
+            startAt: DateTime.utc(2026, 11, 19, 17),
           ),
         ],
         exams: const {'s1': '2026-11-20'},
@@ -280,72 +281,116 @@ void main() {
     });
   });
 
-  group('PlanValidator with RuleBasedPlanner output', () {
-    String Function() ids() {
-      var counter = 0;
-      return () => 'session_${++counter}';
+  group('PlanValidator with existing sessions', () {
+    StudySession kept(
+      String id, {
+      int hour = 9,
+      int minutes = 60,
+      SessionStatus status = SessionStatus.done,
+      String topicId = 't1',
+    }) {
+      return _session(
+        id,
+        topicId: topicId,
+        startAt: DateTime.utc(2026, 11, 17, hour),
+        minutes: minutes,
+        status: status,
+      );
     }
 
-    test('a plan made by the planner is always valid', () {
-      final topics = [
-        for (var i = 0; i < 12; i++)
-          Topic(
-            id: 't$i',
-            subjectId: i.isEven ? 's1' : 's2',
-            title: 't$i',
-            difficulty: 1 + i % 5,
-            estimatedMinutes: 40 + i * 25,
-            status: TopicStatus.notStarted,
-            completedMinutes: 0,
-          ),
+    test('their minutes count for the daily limit', () {
+      final newSessions = [
+        _session('a'),
+        _session('b', startAt: DateTime.utc(2026, 11, 17, 18, 10)),
       ];
-      final exams = {'s1': '2026-11-27', 's2': '2026-11-22'};
-      final constraints = _constraints(daysOff: {7});
 
-      final planned = const RuleBasedPlanner().plan(
-        planId: 'plan_1',
-        topics: topics,
-        examDateKeys: exams,
-        constraints: constraints,
-        days: _days(15),
-        newSessionId: ids(),
+      // 120 minutes fit the 120-minute day on their own...
+      expect(_validate(newSessions).isValid, isTrue);
+
+      // ...but not after a 60-minute session done earlier that day.
+      final result = _validate(newSessions, existing: [kept('kept')]);
+
+      expect(result.types, {PlanViolationType.dailyLimitExceeded});
+      expect(result.violations.single.dateKey, '2026-11-17');
+    });
+
+    test('a new session overlapping one of them is reported', () {
+      final later = _validate(
+        [_session('a', startAt: DateTime.utc(2026, 11, 17, 17, 30))],
+        existing: [kept('kept', hour: 17)],
       );
-      final result = PlanValidator(clock: Clock.fixed(_now)).validate(
-        sessions: planned.sessions,
-        subjectIds: const {'s1', 's2'},
-        topics: topics,
-        examDateKeys: exams,
-        constraints: constraints,
-        days: _days(15),
+      final earlier = _validate(
+        [_session('a', startAt: DateTime.utc(2026, 11, 17, 16, 30))],
+        existing: [kept('kept', hour: 17)],
       );
 
-      expect(planned.sessions, isNotEmpty);
+      for (final result in [later, earlier]) {
+        expect(result.types, {PlanViolationType.overlappingSessions});
+        expect(result.violations.single.sessionId, 'a');
+      }
+    });
+
+    test('they are not checked themselves', () {
+      // A planned session in the past, with an unknown topic.
+      final result = _validate(
+        [_session('a')],
+        existing: [
+          _session(
+            'old',
+            topicId: 'ghost',
+            dateKey: '2026-11-16',
+            startAt: DateTime.utc(2026, 11, 16, 7),
+          ),
+        ],
+      );
+
       expect(result.isValid, isTrue);
     });
 
-    test('a partial plan (not everything fits) is still valid', () {
-      final topics = [for (var i = 0; i < 40; i++) _topic('t$i', 's1')];
-      final exams = {'s1': '2026-12-01'};
-
-      final planned = const RuleBasedPlanner().plan(
-        planId: 'plan_1',
-        topics: topics,
-        examDateKeys: exams,
-        constraints: _constraints(),
-        days: _days(15),
-        newSessionId: ids(),
-      );
-      final result = PlanValidator(clock: Clock.fixed(_now)).validate(
-        sessions: planned.sessions,
-        subjectIds: const {'s1'},
-        topics: topics,
-        examDateKeys: exams,
-        constraints: _constraints(),
-        days: _days(15),
+    test('skipped and missed sessions take no time', () {
+      final result = _validate(
+        [_session('a'), _session('b', startAt: DateTime.utc(2026, 11, 17, 18))],
+        existing: [
+          kept('skipped', hour: 17, status: SessionStatus.skipped),
+          kept('missed', hour: 17, minutes: 120, status: SessionStatus.missed),
+        ],
       );
 
-      expect(planned.isComplete, isFalse);
       expect(result.isValid, isTrue);
+    });
+  });
+
+  group('PlannerDay.range', () {
+    test('lists every day with its weekday, both ends included', () {
+      final days = PlannerDay.range('2026-11-16', '2026-11-22');
+
+      expect(days.map((d) => d.dateKey), [
+        '2026-11-16',
+        '2026-11-17',
+        '2026-11-18',
+        '2026-11-19',
+        '2026-11-20',
+        '2026-11-21',
+        '2026-11-22',
+      ]);
+      // Monday 16 to Sunday 22.
+      expect(days.map((d) => d.weekday), [1, 2, 3, 4, 5, 6, 7]);
+    });
+
+    test('crosses the end of a month and a year', () {
+      final days = PlannerDay.range('2026-12-30', '2027-01-02');
+
+      expect(days.map((d) => d.dateKey), [
+        '2026-12-30',
+        '2026-12-31',
+        '2027-01-01',
+        '2027-01-02',
+      ]);
+    });
+
+    test('one day, and nothing when the end is before the start', () {
+      expect(PlannerDay.range('2026-11-16', '2026-11-16'), hasLength(1));
+      expect(PlannerDay.range('2026-11-16', '2026-11-15'), isEmpty);
     });
   });
 }

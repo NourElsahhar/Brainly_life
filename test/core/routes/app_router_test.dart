@@ -7,6 +7,7 @@ import 'package:brainly_life/core/routes/router_auth_state.dart';
 import 'package:brainly_life/core/theme/app_theme.dart';
 import 'package:brainly_life/features/home/home_injection.dart';
 import 'package:brainly_life/features/tasks/tasks_injection.dart';
+import 'package:brainly_life/features/study_planner/study_planner_injection.dart';
 import 'package:brainly_life/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -65,6 +66,7 @@ void main() {
         // The real tasks and home screens get their Cubits from getIt.
     setUp(() {
       registerTasksFeature(getIt, useMocks: true);
+      registerStudyPlannerFeature(getIt, useMocks: true);
       registerHomeFeature(getIt, useMocks: true);
     });
     tearDown(() => getIt.reset());
@@ -120,7 +122,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(appBarTitle('Plan'), findsOneWidget);
+      expect(appBarTitle('Subjects'), findsOneWidget);
     });
 
     testWidgets('settings opens inside the Profile tab', (tester) async {

@@ -1,40 +1,33 @@
-import '../data/models/study_session_model.dart';
+import '../../../core/utils/date_key_utils.dart';
 
-/// One calendar day that the planner is allowed to use.
+/// One calendar day that a study plan may use.
 ///
-/// The planner never calculates dates itself. The caller builds the list of
-/// days with `DateKeyUtils` (user timezone, Master Document E.8) and hands it
-/// over, so this file and the planner stay pure and easy to test.
+/// Build the days with [PlannerDay.range]. It uses M1's `DateKeyUtils`, so
+/// this feature never does its own calendar math (Master Document E.8).
 class PlannerDay {
-  const PlannerDay({
-    required this.dateKey,
-    required this.weekday,
-    required this.startAt,
-  });
+  const PlannerDay({required this.dateKey, required this.weekday});
+
+  /// The day of [dateKey], with its weekday.
+  factory PlannerDay.of(String dateKey) {
+    return PlannerDay(
+      dateKey: dateKey,
+      weekday: DateKeyUtils.parse(dateKey).weekday,
+    );
+  }
+
+  /// Every day from [firstDateKey] to [lastDateKey], both included.
+  /// Empty when [lastDateKey] is before [firstDateKey].
+  static List<PlannerDay> range(String firstDateKey, String lastDateKey) {
+    final count = DateKeyUtils.daysBetween(firstDateKey, lastDateKey) + 1;
+    return [
+      for (var i = 0; i < count; i++)
+        PlannerDay.of(DateKeyUtils.addDays(firstDateKey, i)),
+    ];
+  }
 
   /// `yyyy-MM-dd` in the user's timezone.
   final String dateKey;
 
   /// 1 = Monday ... 7 = Sunday.
   final int weekday;
-
-  /// UTC moment at which the first session of this day starts.
-  final DateTime startAt;
-}
-
-/// What the planner produced.
-class PlannerResult {
-  const PlannerResult({
-    required this.sessions,
-    required this.unscheduledMinutes,
-  });
-
-  /// Planned sessions ordered by day.
-  final List<StudySession> sessions;
-
-  /// Minutes that did not fit before the exams, keyed by topic id.
-  /// Empty when the whole workload was scheduled.
-  final Map<String, int> unscheduledMinutes;
-
-  bool get isComplete => unscheduledMinutes.isEmpty;
 }

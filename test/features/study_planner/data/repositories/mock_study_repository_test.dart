@@ -62,7 +62,8 @@ StudyPlan _plan(String id) {
     title: 'New plan',
     startDate: DateTime.utc(2026, 11, 16),
     endDate: DateTime.utc(2026, 11, 30),
-    generatedBy: PlanGenerator.rules,
+    generatedBy: PlanGenerator.ai,
+    promptVersion: 1,
     constraints: _constraints(),
   );
 }
