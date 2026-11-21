@@ -19,7 +19,6 @@
 import 'package:flutter/material.dart';
 
 import '../theme/theme.dart';
-import 'app_button.dart';
 
 class ConfirmDialog extends StatelessWidget {
   const ConfirmDialog({
@@ -83,24 +82,24 @@ class ConfirmDialog extends StatelessWidget {
               style: context.text.bodyMedium?.copyWith(color: p.textSecondary),
             ),
             const SizedBox(height: AppSpacing.s6),
+                        // The design: two text buttons on the right. The confirm one is
+            // bold, and red when it deletes something.
             Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(
-                  child: AppButton(
-                    label: cancelLabel,
-                    type: AppButtonType.secondary,
-                    onPressed: () => Navigator.of(context).pop(false),
-                  ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  style: TextButton.styleFrom(foregroundColor: p.primary),
+                  child: Text(cancelLabel),
                 ),
-                const SizedBox(width: AppSpacing.s3),
-                Expanded(
-                  child: AppButton(
-                    label: confirmLabel,
-                    type: isDestructive
-                        ? AppButtonType.destructive
-                        : AppButtonType.primary,
-                    onPressed: () => Navigator.of(context).pop(true),
+                const SizedBox(width: AppSpacing.s2),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: isDestructive ? p.error : p.primary,
+                    textStyle: AppTextStyles.button,
                   ),
+                  child: Text(confirmLabel),
                 ),
               ],
             ),
