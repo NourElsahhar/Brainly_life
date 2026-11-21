@@ -54,7 +54,7 @@ class CompletedTasksView extends StatelessWidget {
       },
       builder: (context, state) => switch (state) {
         CompletedTasksInitial() ||
-        CompletedTasksLoading() => const LoadingView(),
+        CompletedTasksLoading() => const TasksLoadingList(),
         CompletedTasksError(:final failure) => ErrorView(
           failure: failure,
           onRetry: cubit.load,
