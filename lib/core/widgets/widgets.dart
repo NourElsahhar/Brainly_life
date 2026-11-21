@@ -5,6 +5,7 @@ export 'app_button.dart';
 export 'app_card.dart';
 export 'app_snack_bar.dart';
 export 'app_text_field.dart';
+export 'baseet_app_bar.dart';
 export 'color_picker_row.dart';
 export 'confirm_dialog.dart';
 export 'date_time_picker_field.dart';

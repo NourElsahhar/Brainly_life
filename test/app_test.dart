@@ -8,6 +8,7 @@
 import 'package:brainly_life/app.dart';
 import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
 import 'package:brainly_life/injection.dart';
+import 'package:brainly_life/features/home/presentation/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,7 +39,7 @@ void main() {
     (tester) async {
       await startApp(tester);
 
-      expect(appBarTitle('Home'), findsOneWidget);
+      expect(find.byType(HomeView), findsOneWidget);
       expect(find.byType(NavigationBar), findsOneWidget);
 
       await stopApp(tester);

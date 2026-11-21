@@ -9,6 +9,7 @@ import 'package:brainly_life/features/home/home_injection.dart';
 import 'package:brainly_life/features/tasks/tasks_injection.dart';
 import 'package:brainly_life/features/study_planner/study_planner_injection.dart';
 import 'package:brainly_life/injection.dart';
+import 'package:brainly_life/features/home/presentation/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -91,7 +92,7 @@ void main() {
     testWidgets('signed in: shows Home and the 5 tabs', (tester) async {
       await pumpApp(tester, RouterAuthState(AuthStatus.signedIn));
 
-      expect(appBarTitle('Home'), findsOneWidget);
+      expect(find.byType(HomeView), findsOneWidget);
       expect(find.byType(NavigationBar), findsOneWidget);
       expect(appTabs.map((tab) => tab.label).toList(), [
         'Home',
@@ -156,7 +157,7 @@ void main() {
       router.go(AppRoutes.login);
       await tester.pumpAndSettle();
 
-      expect(appBarTitle('Home'), findsOneWidget);
+      expect(find.byType(HomeView), findsOneWidget);
     });
 
     testWidgets('signed out goes to login', (tester) async {
@@ -181,7 +182,7 @@ void main() {
       authState.update(AuthStatus.signedIn);
       await tester.pumpAndSettle();
 
-      expect(appBarTitle('Home'), findsOneWidget);
+      expect(find.byType(HomeView), findsOneWidget);
     });
   });
 }
