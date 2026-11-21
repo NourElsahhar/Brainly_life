@@ -56,6 +56,8 @@ flutter_launcher_icons:
   adaptive_icon_background: "#F2F3FF"
   adaptive_icon_foreground: "assets/branding/baseet_app_icon.png"
   adaptive_icon_foreground_inset: 16
+  shared_preferences: 2.5.6
+  wakelock_plus: 1.8.2
 dev_dependencies:
   flutter_test:
     sdk: flutter 

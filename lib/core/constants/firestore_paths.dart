@@ -39,6 +39,5 @@ class FirestorePaths {
   static String userDoc(String uid) => '$users/$uid';
 
   /// 'users/{uid}/{name}', for example users/abc/tasks
-  static String userCollection(String uid, String name) =>
-      '$users/$uid/$name';
+  static String userCollection(String uid, String name) => '$users/$uid/$name';
 }
