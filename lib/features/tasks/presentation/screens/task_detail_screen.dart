@@ -94,19 +94,21 @@ class TaskDetailView extends StatelessWidget {
       builder: (context, state) {
         final loaded = state is TaskDetailLoaded ? state : null;
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Task'),
+                    appBar: BaseetAppBar.inner(
+            title: 'Task',
             actions: [
               if (loaded != null) ...[
-                IconButton(
+                AppBarIconButton(
                   tooltip: 'Edit',
-                  icon: const Icon(Icons.edit_outlined),
+                  icon: Icons.edit_outlined,
+                  filled: false,
                   onPressed: () =>
                       context.push(AppRoutes.editTaskPath(loaded.task.id)),
                 ),
-                IconButton(
+                AppBarIconButton(
                   tooltip: 'Delete',
-                  icon: const Icon(Icons.delete_outline_rounded),
+                  icon: Icons.delete_outline_rounded,
+                  filled: false,
                   onPressed: () => _delete(context),
                 ),
               ],
