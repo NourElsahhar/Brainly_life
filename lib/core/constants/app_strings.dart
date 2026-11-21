@@ -63,6 +63,22 @@ class AppStrings {
   static const String focusResumeAction = 'Resume';
   static const String focusStopAction = 'Stop';
   static const String focusSkipBreakAction = 'Skip break';
+    static const String focusSettingsTitle = 'Focus settings';
+  static const String focusSettingsTimerSection = 'Timer';
+  static const String focusSettingsBehaviourSection = 'Behaviour';
+  static const String focusLabelFocus = 'Focus';
+  static const String focusLabelShortBreak = 'Short break';
+  static const String focusLabelLongBreak = 'Long break';
+  static const String focusLabelSessionsBeforeLong = 'Sessions before long break';
+  static const String focusAutoStart = 'Auto-start next session';
+  static const String focusSound = 'Sound';
+  static const String focusVibration = 'Vibration';
+  static const String focusKeepScreenOn = 'Keep screen on';
+  static const String focusResetDefaults = 'Reset to defaults';
+  static const String focusDecrease = 'Decrease';
+  static const String focusIncrease = 'Increase';
+
+  static String focusMinutesValue(int minutes) => '$minutes min';
 
   // ===== Analytics and AI (M5) =====
 }
