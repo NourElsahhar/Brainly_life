@@ -66,7 +66,6 @@ class ErrorView extends StatelessWidget {
               AppButton(
                 label: 'Try again',
                 icon: Icons.refresh_rounded,
-                type: AppButtonType.secondary,
                 expanded: false,
                 onPressed: onRetry,
               ),
