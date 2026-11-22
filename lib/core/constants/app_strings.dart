@@ -63,7 +63,7 @@ class AppStrings {
   static const String focusResumeAction = 'Resume';
   static const String focusStopAction = 'Stop';
   static const String focusSkipBreakAction = 'Skip break';
-    static const String focusSettingsTitle = 'Focus settings';
+  static const String focusSettingsTitle = 'Focus settings';
   static const String focusSettingsTimerSection = 'Timer';
   static const String focusSettingsBehaviourSection = 'Behaviour';
   static const String focusLabelFocus = 'Focus';
@@ -79,6 +79,17 @@ class AppStrings {
   static const String focusIncrease = 'Increase';
 
   static String focusMinutesValue(int minutes) => '$minutes min';
+  static const String focusStatsTooltip = 'Statistics';
+  static const String focusSettingsTooltip = 'Settings';
+  static const String focusLinkedTask = 'Linked to a task';
+  static const String focusLinkedStudySession = 'Linked to a study session';
+  static const String focusFocusDone = 'Focus block finished';
+  static const String focusBreakDone = 'Break is over';
+  static const String focusStartShortBreak = 'Start short break';
+  static const String focusStartLongBreak = 'Start long break';
+
+  static String focusCycleLabel(int done, int total) =>
+      '$done of $total focus blocks done';
 
   // ===== Analytics and AI (M5) =====
 }
