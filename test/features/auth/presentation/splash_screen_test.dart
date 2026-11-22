@@ -39,7 +39,7 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('everything fades in, in order', (tester) async {
+        testWidgets('everything fades in, in order', (tester) async {
       await pumpSplash(tester);
       final name = find.text('Baseet');
       final tagline = find.text('Your day, made simpler.');
@@ -47,7 +47,8 @@ void main() {
       expect(opacityOf(tester, name), 0);
       expect(opacityOf(tester, tagline), 0);
 
-      await tester.pump(const Duration(milliseconds: 700));
+      // Halfway through the animation. This works for any SplashScreen.duration.
+      await tester.pump(SplashScreen.duration * 0.5);
       expect(opacityOf(tester, name), greaterThan(0.5));
       expect(opacityOf(tester, tagline), lessThan(opacityOf(tester, name)));
 
@@ -55,7 +56,6 @@ void main() {
       expect(opacityOf(tester, name), 1);
       expect(opacityOf(tester, tagline), 1);
     });
-
     testWidgets('calls onFinished once, after the full duration',
         (tester) async {
       var finished = 0;
