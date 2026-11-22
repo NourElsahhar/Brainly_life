@@ -91,5 +91,27 @@ class AppStrings {
   static String focusCycleLabel(int done, int total) =>
       '$done of $total focus blocks done';
 
+  static const String focusStatsTitle = 'Focus stats';
+  static const String focusStatsToday = 'Today';
+  static const String focusStatsYesterday = 'Yesterday';
+  static const String focusStatsThisWeek = 'This week';
+  static const String focusStatsStreak = 'Focus-day streak';
+  static const String focusStatsLast7Days = 'Last 7 days';
+  static const String focusStatsBestTime = 'Best time of day';
+  static const String focusStatsTotalSessions = 'Total sessions';
+  static const String focusStatsHistory = 'History';
+  static const String focusStatsEmptyTitle = 'No focus sessions yet';
+  static const String focusStatsEmptyMessage =
+      'Start a session to see your stats here.';
+  static const String focusStatsStartFocus = 'Start focus';
+  static const String focusDayPartMorning = 'Morning (5 AM–12 PM)';
+  static const String focusDayPartAfternoon = 'Afternoon (12–6 PM)';
+  static const String focusDayPartEvening = 'Evening (6–9 PM)';
+  static const String focusDayPartNight = 'Night (9 PM–5 AM)';
+
+  static String focusHoursValue(String hours) => '$hours h';
+
+  static String focusHistoryItem(String day, String time, int minutes) =>
+      '$day $time · $minutes min';
   // ===== Analytics and AI (M5) =====
 }
