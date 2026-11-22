@@ -4,7 +4,7 @@
 // ?studySessionId= (the timer is linked to that task or study session).
 
 import 'package:brainly_life/core/routes/app_routes.dart';
-import 'package:brainly_life/core/routes/placeholder_screen.dart';
+import 'package:brainly_life/features/focus/presentation/screens/focus_stats_screen.dart';
 import 'package:brainly_life/features/focus/presentation/screens/focus_screen.dart';
 import 'package:brainly_life/features/focus/presentation/screens/focus_settings_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -26,8 +26,7 @@ final List<RouteBase> focusRoutes = [
       // comes in the next step.
       GoRoute(
         path: 'stats',
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'Focus stats'),
+        builder: (context, state) => const FocusStatsScreen(),
       ),
     ],
   ),
