@@ -26,6 +26,7 @@ class BaseetAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// The bar of the 5 main tabs: logo on the left, Settings on the right.
   const BaseetAppBar.main({super.key, this.onSettings})
     : title = null,
+      titleWidget = null,
       actions = const [],
       bottom = null;
 
@@ -33,6 +34,7 @@ class BaseetAppBar extends StatelessWidget implements PreferredSizeWidget {
   const BaseetAppBar.inner({
     super.key,
     required String this.title,
+    this.titleWidget,
     this.actions = const [],
     this.bottom,
   }) : onSettings = null;
@@ -47,6 +49,9 @@ class BaseetAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// null means this is the main bar (logo instead of a title).
   final String? title;
+  
+  /// Shown instead of [title] when set, like a search box.
+  final Widget? titleWidget;
 
   final List<Widget> actions;
 
@@ -69,7 +74,7 @@ class BaseetAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       toolbarHeight: height,
       titleSpacing: _isMain ? AppSpacing.s4 : null,
-      title: title == null ? const _Logo() : Text(title),
+      title: title == null ? const _Logo() : titleWidget ?? Text(title),
       actions: [
         if (_isMain)
           AppBarIconButton(

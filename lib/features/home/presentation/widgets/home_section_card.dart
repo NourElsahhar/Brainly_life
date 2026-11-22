@@ -62,7 +62,7 @@ class HomeSectionCard<T> extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.s3),
           switch (card) {
-            HomeCardLoading<T>() => const _Skeleton(),
+            HomeCardLoading<T>() => const SkeletonLines(),
             HomeCardError<T>(:final failure) => Row(
               children: [
                 Expanded(
@@ -84,35 +84,3 @@ class HomeSectionCard<T> extends StatelessWidget {
   }
 }
 
-/// Two grey bars that stand in for the text while the card loads.
-class _Skeleton extends StatelessWidget {
-  const _Skeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    final p = context.palette;
-
-    Widget bar(double widthFactor) => FractionallySizedBox(
-      widthFactor: widthFactor,
-      child: Container(
-        height: AppSpacing.s3,
-        decoration: BoxDecoration(
-          color: p.surfaceMuted,
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-        ),
-      ),
-    );
-
-    return Semantics(
-      label: 'Loading',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          bar(0.7),
-          const SizedBox(height: AppSpacing.s2),
-          bar(0.4),
-        ],
-      ),
-    );
-  }
-}

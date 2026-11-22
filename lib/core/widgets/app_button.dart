@@ -14,15 +14,18 @@
 //
 // Types:
 //   primary     -> main action of a screen (violet gradient). Use once per screen.
-//   secondary   -> second action (soft violet).
+//   secondary   -> second action (violet outline).
+//   teal        -> focus / study actions (teal outline), like "Mark done".
 //   text        -> small actions like "Forgot password?".
 //   destructive -> deleting things (red).
+//
+// Disabled buttons (onPressed: null) are grey, as in the design.
 
 import 'package:flutter/material.dart';
 
 import '../theme/theme.dart';
 
-enum AppButtonType { primary, secondary, text, destructive }
+enum AppButtonType { primary, secondary, teal, text, destructive }
 
 class AppButton extends StatelessWidget {
   const AppButton({
@@ -78,36 +81,32 @@ class AppButton extends StatelessWidget {
       ],
     );
 
+    final border = look.border;
+
     return Semantics(
       button: true,
       enabled: canTap,
       label: label,
-      child: Opacity(
-        // Disabled looks faded. Loading keeps full color.
-        opacity: onPressed == null ? 0.5 : 1,
-        child: SizedBox(
-          height: AppSizes.primaryButtonHeight,
-          width: expanded ? double.infinity : null,
-          child: Material(
-            color: Colors.transparent,
-            child: Ink(
-              decoration: BoxDecoration(
-                gradient: look.gradient,
-                color: look.background,
-                borderRadius: radius,
-              ),
-              child: InkWell(
-                onTap: canTap ? onPressed : null,
-                borderRadius: radius,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s6,
-                  ),
-                  child: Center(
-                    widthFactor: expanded ? null : 1,
-                    child: content,
-                  ),
-                ),
+      child: SizedBox(
+        height: AppSizes.primaryButtonHeight,
+        width: expanded ? double.infinity : null,
+        child: Material(
+          color: Colors.transparent,
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: look.gradient,
+              color: look.background,
+              borderRadius: radius,
+              border: border == null
+                  ? null
+                  : Border.all(color: border, width: 1.5),
+            ),
+            child: InkWell(
+              onTap: canTap ? onPressed : null,
+              borderRadius: radius,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s6),
+                child: Center(widthFactor: expanded ? null : 1, child: content),
               ),
             ),
           ),
@@ -119,6 +118,15 @@ class AppButton extends StatelessWidget {
   _ButtonLook _lookFor(BuildContext context) {
     final p = context.palette;
 
+    // Disabled (not loading): grey, whatever the type.
+    if (onPressed == null && type != AppButtonType.text) {
+      return _ButtonLook(
+        background: p.surfaceMuted,
+        foreground: p.textTertiary,
+      );
+    }
+    if (onPressed == null) return _ButtonLook(foreground: p.textTertiary);
+
     switch (type) {
       case AppButtonType.primary:
         return _ButtonLook(
@@ -126,7 +134,9 @@ class AppButton extends StatelessWidget {
           foreground: p.onPrimary,
         );
       case AppButtonType.secondary:
-        return _ButtonLook(background: p.primarySoft, foreground: p.primary);
+        return _ButtonLook(border: p.primary, foreground: p.primary);
+      case AppButtonType.teal:
+        return _ButtonLook(border: p.teal, foreground: p.tealStrong);
       case AppButtonType.text:
         return _ButtonLook(foreground: p.primary);
       case AppButtonType.destructive:
@@ -139,9 +149,17 @@ class AppButton extends StatelessWidget {
 }
 
 class _ButtonLook {
-  const _ButtonLook({required this.foreground, this.background, this.gradient});
+  const _ButtonLook({
+    required this.foreground,
+    this.background,
+    this.gradient,
+    this.border,
+  });
 
   final Color foreground;
   final Color? background;
   final Gradient? gradient;
+
+  /// Outline colour for the outlined types (secondary, teal).
+  final Color? border;
 }

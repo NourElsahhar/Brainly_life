@@ -34,6 +34,7 @@ class AppRoutes {
   static const String editTask = '/tasks/:id/edit';
   static const String focus = '/focus'; // ?taskId=&studySessionId=
   static const String focusSettings = '/focus/settings';
+  static const String focusStats = '/focus/stats';
   static String taskPath(String id) => '/tasks/$id';
   static String editTaskPath(String id) => '/tasks/$id/edit';
   static String focusPath({String? taskId, String? studySessionId}) {

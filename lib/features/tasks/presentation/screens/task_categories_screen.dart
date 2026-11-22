@@ -30,7 +30,7 @@ class TaskCategoriesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Categories')),
+            appBar: const BaseetAppBar.inner(title: 'Categories'),
       floatingActionButton: FloatingActionButton(
         tooltip: 'New category',
         onPressed: () => CategoryEditorSheet.show(context),
