@@ -15,6 +15,19 @@ class AppStrings {
   // ===== Common (M1) =====
 
   // ===== Auth (M1) =====
+    static const String onboardingSkip = 'Skip';
+  static const String onboardingNext = 'Next';
+  static const String onboardingGetStarted = 'Get started';
+  static const String onboardingHaveAccount = 'I already have an account';
+  static const String onboardingTitle1 = 'Plan your studies with AI';
+  static const String onboardingSubtitle1 =
+      'Tell us your subjects and exam dates. Baseet builds your study plan for you.';
+  static const String onboardingTitle2 = 'Build habits, stay focused';
+  static const String onboardingSubtitle2 =
+      'Track daily habits and use the focus timer to get more done.';
+  static const String onboardingTitle3 = 'See your week clearly';
+  static const String onboardingSubtitle3 =
+      'Weekly reports show your progress and give you tips to improve.';
 
   // ===== Home (M3) =====
 

@@ -27,7 +27,7 @@ class AppRoutes {
   static const String settings = '/profile/settings';
 
   // Full screen (open on top of the bottom bar)
-    static const String tasks = '/tasks';
+  static const String tasks = '/tasks';
   static const String newTask = '/tasks/new';
   static const String taskCategories = '/tasks/categories';
   static const String taskDetail = '/tasks/:id';
