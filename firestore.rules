@@ -146,23 +146,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // ---------- users/{uid}/weeklyReports/{weekKey} (M5, Cloud Functions) ----------
-    // Written by the gateway's persist hook only. The app reads it.
-
-    match /users/{uid}/weeklyReports/{weekKey} {
-      allow read: if isOwner(uid);
-      allow write: if false;
-    }
-
     // ---------- every other collection of the user ----------
     // Owner only, no shape checks yet. When you validate your collection,
     // add a block above AND add its name to this list.
 
     match /users/{uid}/{collection}/{document=**} {
       allow read, write: if isOwner(uid)
-        && !(collection in [
-          'tasks', 'taskCategories', 'aiUsage', 'weeklyReports'
-        ]);
+        && !(collection in ['tasks', 'taskCategories', 'aiUsage']);
     }
   }
 }
