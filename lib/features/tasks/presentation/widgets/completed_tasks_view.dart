@@ -6,6 +6,7 @@ import 'package:brainly_life/features/tasks/data/models/task_model.dart';
 import 'package:brainly_life/features/tasks/logic/completed_tasks_cubit.dart';
 import 'package:brainly_life/features/tasks/logic/completed_tasks_state.dart';
 import 'package:brainly_life/features/tasks/presentation/widgets/task_tile.dart';
+import 'package:brainly_life/features/tasks/presentation/widgets/tasks_loading_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -53,7 +54,7 @@ class CompletedTasksView extends StatelessWidget {
       },
       builder: (context, state) => switch (state) {
         CompletedTasksInitial() ||
-        CompletedTasksLoading() => const LoadingView(),
+        CompletedTasksLoading() => const TasksLoadingList(),
         CompletedTasksError(:final failure) => ErrorView(
           failure: failure,
           onRetry: cubit.load,

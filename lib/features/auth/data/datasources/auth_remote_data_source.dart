@@ -1,5 +1,5 @@
-// AuthRemoteDataSource = talks to FirebaseAuth and to Firestore (users/{uid}).
-// It only does the calls. It THROWS exceptions (FirebaseAuthException,
+// AuthRemoteDataSource = talks to FirebaseAuth, Google Sign-In and
+// Firestore (users/{uid}). It only does the calls. It THROWS exceptions (FirebaseAuthException,
 // FirebaseException). The repository catches them and returns a Result.
 //
 // Do not use this class from a Cubit. Use AuthRepository.
@@ -12,16 +12,26 @@ import 'package:brainly_life/features/auth/data/models/user_settings_model.dart'
 import 'package:clock/clock.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' show FirebaseFirestore, FieldValue, CollectionReference;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthRemoteDataSource {
-    AuthRemoteDataSource({
+  AuthRemoteDataSource({
     required FirebaseAuth auth,
     required FirebaseFirestore firestore,
+    GoogleSignIn? googleSignIn,
   })  : _auth = auth,
-        _firestore = firestore;
+        _firestore = firestore,
+        _googleSignIn = googleSignIn;
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
+
+  // Taken only when Google is used, so tests never touch the real plugin.
+  final GoogleSignIn? _googleSignIn;
+  GoogleSignIn get _google => _googleSignIn ?? GoogleSignIn.instance;
+
+  // initialize() must run exactly once, before the first Google call.
+  Future<void>? _googleReady;
 
   CollectionReference<Map<String, dynamic>> get _users =>
       _firestore.collection(FirestorePaths.users);
@@ -72,10 +82,54 @@ class AuthRemoteDataSource {
     }
   }
 
+  /// Opens the Google account picker, then signs in to Firebase with the
+  /// Google ID token. Returns null when the user closes the picker.
+  /// The profile (users/{uid}) is created by loadOrCreateProfile.
+  Future<User?> signInWithGoogle() async {
+    final google = _google;
+    try {
+      await (_googleReady ??= google.initialize());
+    } catch (_) {
+      _googleReady = null; // so the next tap tries again
+      rethrow;
+    }
+    if (!google.supportsAuthenticate()) {
+      throw FirebaseAuthException(code: 'operation-not-allowed');
+    }
+
+    final GoogleSignInAccount account;
+    try {
+      account = await google.authenticate();
+    } on GoogleSignInException catch (error) {
+      if (error.code == GoogleSignInExceptionCode.canceled) return null;
+      rethrow;
+    }
+
+    final idToken = account.authentication.idToken;
+    if (idToken == null) {
+      throw FirebaseAuthException(code: 'invalid-credential');
+    }
+    final credential = await _auth.signInWithCredential(
+      GoogleAuthProvider.credential(idToken: idToken),
+    );
+    return _requireUser(credential);
+  }
+
   Future<void> sendPasswordReset({required String email}) =>
       _auth.sendPasswordResetEmail(email: email);
 
-  Future<void> signOut() => _auth.signOut();
+  Future<void> signOut() async {
+    // Also forget the Google account, so the picker shows next time.
+    // Only when Google was used in this session (never in tests).
+    if (_googleReady != null) {
+      try {
+        await _google.signOut();
+      } catch (_) {
+        // Not important: the Firebase sign out below is what matters.
+      }
+    }
+    await _auth.signOut();
+  }
 
   /// Reads users/{uid}. If it does not exist yet (for example the first
   /// sign in), it is created with the default settings.

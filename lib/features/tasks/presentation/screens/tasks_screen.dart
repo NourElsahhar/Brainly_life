@@ -1,4 +1,5 @@
 import 'package:brainly_life/core/routes/app_routes.dart';
+import 'package:brainly_life/core/widgets/widgets.dart';
 import 'package:brainly_life/features/tasks/data/models/task_category_model.dart';
 import 'package:brainly_life/features/tasks/logic/category_cubit.dart';
 import 'package:brainly_life/features/tasks/logic/category_state.dart';
@@ -101,8 +102,9 @@ class _TasksViewState extends State<TasksView>
         counts == null ? name : '$name ${counts[bucket] ?? 0}';
 
     return Scaffold(
-      appBar: AppBar(
-        title: _searching
+          appBar: BaseetAppBar.inner(
+        title: 'Tasks',
+        titleWidget: _searching
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
@@ -112,23 +114,23 @@ class _TasksViewState extends State<TasksView>
                 ),
                 onChanged: context.read<TaskListCubit>().search,
               )
-            : const Text('Tasks'),
+            : null,
         actions: [
           if (!_onCompleted) ...[
-            IconButton(
+            AppBarIconButton(
               tooltip: _searching ? 'Close search' : 'Search',
-              icon: Icon(
-                _searching ? Icons.close_rounded : Icons.search_rounded,
-              ),
+              icon: _searching ? Icons.close_rounded : Icons.search_rounded,
+              filled: false,
               onPressed: _searching
                   ? _clearSearch
                   : () => setState(() => _searching = true),
             ),
             const _SortButton(),
           ],
-          IconButton(
+          AppBarIconButton(
             tooltip: 'Categories',
-            icon: const Icon(Icons.folder_outlined),
+            icon: Icons.folder_outlined,
+            filled: false,
             onPressed: () => context.push(AppRoutes.taskCategories),
           ),
         ],

@@ -34,8 +34,8 @@ void main() {
     AppRoutes.tasks: 'Tasks',
     AppRoutes.newTask: 'New task', // not a task called "new"
     AppRoutes.taskCategories: 'Categories',
-    AppRoutes.taskPath('abc'): 'Task abc',
-    AppRoutes.editTaskPath('abc'): 'Edit task abc',
+    AppRoutes.taskPath('abc'): 'Task',
+    AppRoutes.editTaskPath('abc'): 'Edit task',
   };
 
   cases.forEach((path, title) {

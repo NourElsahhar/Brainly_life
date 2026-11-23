@@ -56,6 +56,7 @@ class HabitsLoaded extends HabitsState {
   const HabitsLoaded({
     required this.items,
     required this.today,
+    this.userName,
     this.toggleFailure,
   });
 
@@ -63,6 +64,9 @@ class HabitsLoaded extends HabitsState {
 
   /// Today as a dateKey.
   final String today;
+
+  /// First name of the user, for the greeting. Null when unknown.
+  final String? userName;
 
   /// Set when a toggle failed and was rolled back. The screen shows it from
   /// a BlocListener (snackbar).
@@ -76,5 +80,5 @@ class HabitsLoaded extends HabitsState {
   double get progress => totalCount == 0 ? 0 : completedCount / totalCount;
 
   @override
-  List<Object?> get props => [items, today, toggleFailure];
+  List<Object?> get props => [items, today, userName, toggleFailure];
 }
