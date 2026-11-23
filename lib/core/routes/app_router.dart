@@ -68,6 +68,9 @@ final List<AppTab> appTabs = [
   ),
 ];
 
+/// Readable signed in AND signed out (Register links to them, Settings too).
+const Set<String> _openToAll = {AppRoutes.terms, AppRoutes.privacy};
+
 const Set<String> _publicPages = {
   AppRoutes.splash,
   AppRoutes.onboarding,
@@ -92,6 +95,10 @@ String? appRedirect(
   final signedOutStart = onboardingSeen
       ? AppRoutes.login
       : AppRoutes.onboarding;
+
+  if (status != AuthStatus.unknown && _openToAll.contains(location)) {
+    return null;
+  }
 
   return switch (status) {
     AuthStatus.unknown =>

@@ -6,6 +6,7 @@ import 'package:brainly_life/core/constants/app_strings.dart';
 import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:brainly_life/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:brainly_life/features/auth/logic/auth_state.dart';
+import 'package:brainly_life/features/auth/presentation/screens/legal_screen.dart';
 import 'package:brainly_life/features/auth/presentation/screens/login_screen.dart';
 import 'package:brainly_life/features/auth/presentation/widgets/auth_layout.dart';
 import 'package:flutter/material.dart';
@@ -132,5 +133,17 @@ void main() {
     await pumpAuthScreen(tester, AppRoutes.register);
     await tapAndSettle(tester, find.byIcon(Icons.arrow_back_rounded));
     expect(find.byType(LoginScreen), findsOneWidget);
+  });
+
+  testWidgets('Terms and Privacy Policy open their pages', (tester) async {
+    await pumpAuthScreen(tester, AppRoutes.register);
+
+    await tapAndSettle(tester, find.text(AppStrings.registerTerms));
+    expect(find.text('Terms of Use'), findsOneWidget);
+    expect(find.byType(LegalScreen), findsOneWidget);
+
+    await tapAndSettle(tester, find.byType(BackButton));
+    await tapAndSettle(tester, find.text(AppStrings.registerPrivacy));
+    expect(find.text('Privacy Policy'), findsWidgets);
   });
 }

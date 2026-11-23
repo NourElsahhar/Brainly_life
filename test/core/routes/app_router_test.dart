@@ -69,6 +69,14 @@ final List<RouteBase> testFullScreenRoutes = [
 
 void main() {
   group('appRedirect', () {
+    test('Terms and Privacy are open signed in and signed out', () {
+      for (final page in [AppRoutes.terms, AppRoutes.privacy]) {
+        expect(appRedirect(AuthStatus.signedOut, page), isNull);
+        expect(appRedirect(AuthStatus.signedIn, page), isNull);
+        expect(appRedirect(AuthStatus.unknown, page), AppRoutes.splash);
+      }
+    });
+
     test('unknown: everything goes to splash', () {
       expect(appRedirect(AuthStatus.unknown, AppRoutes.splash), isNull);
       expect(appRedirect(AuthStatus.unknown, AppRoutes.login), AppRoutes.splash);

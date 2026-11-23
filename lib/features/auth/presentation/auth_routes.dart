@@ -11,6 +11,7 @@
 
 import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:brainly_life/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:brainly_life/features/auth/presentation/screens/legal_screen.dart';
 import 'package:brainly_life/features/auth/presentation/screens/login_screen.dart';
 import 'package:brainly_life/features/auth/presentation/screens/profile_screen.dart';
 import 'package:brainly_life/features/auth/presentation/screens/register_screen.dart';
@@ -29,6 +30,14 @@ final List<RouteBase> authRoutes = [
   GoRoute(
     path: AppRoutes.forgotPassword,
     builder: (context, state) => const ForgotPasswordScreen(),
+  ),
+  GoRoute(
+    path: AppRoutes.terms,
+    builder: (context, state) => const LegalScreen(page: LegalPage.terms),
+  ),
+  GoRoute(
+    path: AppRoutes.privacy,
+    builder: (context, state) => const LegalScreen(page: LegalPage.privacy),
   ),
 ];
 
