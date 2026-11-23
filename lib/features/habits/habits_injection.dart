@@ -29,6 +29,7 @@ import 'package:brainly_life/features/habits/logic/habit_form_cubit.dart';
 import 'package:brainly_life/features/habits/logic/habits_cubit.dart';
 import 'package:brainly_life/features/home/data/repositories/home_summary_port.dart';
 import 'package:get_it/get_it.dart';
+import 'package:brainly_life/features/habits/logic/habit_templates.dart';
 
 /// The settings of the signed-in user (timezone, week start day), or the
 /// defaults when nobody is signed in.
@@ -68,14 +69,20 @@ void registerHabitsFeature(GetIt getIt, {required bool useMocks}) {
     ),
   );
 
-  // The form gets the habit to edit, or null to create a new one.
-  getIt.registerFactoryParam<HabitFormCubit, Habit?, void>(
-    (habit, _) => HabitFormCubit(
+  // The form gets the habit to edit (or null) and an optional template.
+  getIt.registerFactoryParam<HabitFormCubit, Habit?, HabitTemplate?>((
+    habit,
+    template,
+  ) {
+    final settings = _settings(getIt);
+    return HabitFormCubit(
       repository: getIt<HabitRepository>(),
-      timezone: _settings(getIt).timezone,
+      timezone: settings.timezone,
+      weekStartDay: settings.weekStartDay,
       habit: habit,
-    ),
-  );
+      template: template,
+    );
+  });
 
   getIt.registerFactoryParam<HabitDetailCubit, String, void>((habitId, _) {
     final settings = _settings(getIt);

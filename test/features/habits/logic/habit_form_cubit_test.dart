@@ -11,6 +11,8 @@ import 'package:brainly_life/features/habits/logic/habit_form_cubit.dart';
 import 'package:brainly_life/features/habits/logic/habit_form_state.dart';
 import 'package:clock/clock.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:brainly_life/core/theme/theme.dart';
+import 'package:brainly_life/features/habits/logic/habit_templates.dart';
 
 class _FailingCreateRepository extends MockHabitRepository {
   @override
@@ -194,4 +196,31 @@ void main() {
           .having((s) => s.failure, 'failure', const NetworkFailure()),
     ],
   );
+  test('create mode starts with the teal color and the book icon', () {
+    final state = createCubit().state;
+    expect(state.colorValue, AppColors.teal.toARGB32());
+    expect(state.icon, 'book');
+  });
+
+  test('a template fills the name and the icon of a new habit', () {
+    final cubit = withClock(
+      fixed,
+      () => HabitFormCubit(
+        repository: repository,
+        timezone: 'UTC',
+        template: const HabitTemplate(name: 'Drink water', icon: 'water'),
+      ),
+    );
+    expect(cubit.state.name, 'Drink water');
+    expect(cubit.state.icon, 'water');
+  });
+
+  test('earliestStartDate is today for a new habit', () {
+    expect(createCubit().earliestStartDate, '2026-11-16');
+  });
+
+  test('earliestStartDate keeps an older start date when editing', () {
+    // The habit in this file starts on 2026-11-01.
+    expect(createCubit(habit: existing).earliestStartDate, '2026-11-01');
+  });
 }

@@ -1,15 +1,20 @@
 // HabitFormCubit drives the add/edit habit form. Pass an existing [habit] to
-// edit it, or nothing to create a new one. Validation errors are put in the
-// state so the screen shows them under each field (never in a snackbar).
-// `timezone` is the user's timezone, used for the default start date (today).
+// edit it, or nothing to create a new one. A [template] (a quick-start habit
+// or an AI tip) fills the name and the icon of a new habit. Validation errors
+// are put in the state so the screen shows them under each field (never in a
+// snackbar). `timezone` is the user's timezone, used for the default start
+// date (today). `weekStartDay` is the first day of the week for the day row.
 
 // ignore_for_file: prefer_initializing_formals
 
+import 'package:brainly_life/core/constants/app_strings.dart';
 import 'package:brainly_life/core/errors/result.dart';
+import 'package:brainly_life/core/theme/theme.dart';
 import 'package:brainly_life/core/utils/utils.dart';
 import 'package:brainly_life/features/habits/data/models/habit_model.dart';
 import 'package:brainly_life/features/habits/data/repositories/habit_repository.dart';
 import 'package:brainly_life/features/habits/logic/habit_form_state.dart';
+import 'package:brainly_life/features/habits/logic/habit_templates.dart';
 import 'package:clock/clock.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,29 +22,43 @@ class HabitFormCubit extends Cubit<HabitFormState> {
   HabitFormCubit({
     required HabitRepository repository,
     required String timezone,
+    this.weekStartDay = DateTime.monday,
     Habit? habit,
+    HabitTemplate? template,
   }) : _repository = repository,
        _original = habit,
-       super(_initialState(habit, timezone));
+       earliestStartDate = _earliestStart(habit, timezone),
+       super(_initialState(habit, template, timezone));
 
-  static const String defaultIcon = 'check';
-  static const int defaultColorValue = 0xFF4CAF50;
+  static const String defaultIcon = 'book';
+  static final int defaultColorValue = AppColors.teal.toARGB32();
   static const int _defaultTimesPerWeek = 3;
-
-  // these messages move to core/constants/app_strings.dart.
-  static const String _nameTakenMessage =
-      'You already have an active habit with this name.';
-  static const String _weekdaysMessage = 'Choose at least one day.';
-  static const String _timesPerWeekMessage = 'Choose a number from 1 to 7.';
 
   final HabitRepository _repository;
   final Habit? _original;
 
-  static HabitFormState _initialState(Habit? habit, String timezone) {
+  /// First day of the week (1 = Monday ... 7 = Sunday), for the day row.
+  final int weekStartDay;
+
+  /// The earliest start date the user can pick: today for a new habit, or the
+  /// old start date (if it is older than today) when editing.
+  final String earliestStartDate;
+
+  static String _earliestStart(Habit? habit, String timezone) {
+    final today = DateKeyUtils.todayKey(timezone: timezone);
+    if (habit == null) return today;
+    return habit.startDate.compareTo(today) < 0 ? habit.startDate : today;
+  }
+
+  static HabitFormState _initialState(
+    Habit? habit,
+    HabitTemplate? template,
+    String timezone,
+  ) {
     if (habit == null) {
       return HabitFormState(
-        name: '',
-        icon: defaultIcon,
+        name: template?.name ?? '',
+        icon: template?.icon ?? defaultIcon,
         colorValue: defaultColorValue,
         frequencyType: HabitFrequencyType.daily,
         weekdays: const [],
@@ -101,13 +120,13 @@ class HabitFormCubit extends Cubit<HabitFormState> {
     final weekdaysError =
         state.frequencyType == HabitFrequencyType.weekdays &&
             state.weekdays.isEmpty
-        ? _weekdaysMessage
+        ? AppStrings.habitWeekdaysRequired
         : null;
     final timesPerWeekError =
         state.frequencyType == HabitFrequencyType.timesPerWeek &&
             (state.timesPerWeek < Habit.minTimesPerWeek ||
                 state.timesPerWeek > Habit.maxTimesPerWeek)
-        ? _timesPerWeekMessage
+        ? AppStrings.habitTimesPerWeekRange
         : null;
 
     if (nameError != null ||
@@ -146,7 +165,7 @@ class HabitFormCubit extends Cubit<HabitFormState> {
       emit(
         state.copyWith(
           status: HabitFormStatus.editing,
-          nameError: _nameTakenMessage,
+          nameError: AppStrings.habitNameTaken,
         ),
       );
       return;
