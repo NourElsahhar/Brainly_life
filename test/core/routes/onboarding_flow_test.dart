@@ -8,10 +8,14 @@ import 'package:brainly_life/core/routes/main_shell.dart';
 import 'package:brainly_life/core/routes/placeholder_screen.dart';
 import 'package:brainly_life/core/routes/router_auth_state.dart';
 import 'package:brainly_life/core/theme/app_theme.dart';
+import 'package:brainly_life/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:brainly_life/features/auth/data/repositories/onboarding_store.dart';
+import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
+import 'package:brainly_life/features/auth/presentation/screens/login_screen.dart';
 import 'package:brainly_life/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:brainly_life/injection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -137,7 +141,14 @@ void main() {
       addTearDown(router.dispose);
 
       await tester.pumpWidget(
-        MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+        // The auth screens need the AuthCubit (app.dart gives it in the app).
+        BlocProvider<AuthCubit>(
+          create: (_) => AuthCubit(MockAuthRepository()),
+          child: MaterialApp.router(
+            theme: AppTheme.light,
+            routerConfig: router,
+          ),
+        ),
       );
       await tester.pumpAndSettle();
       return authState;
@@ -160,7 +171,7 @@ void main() {
       await pumpApp(tester, status: AuthStatus.signedOut);
 
       expect(find.byType(OnboardingScreen), findsNothing);
-      expect(appBarTitle('Login'), findsOneWidget);
+      expect(find.byType(LoginScreen), findsOneWidget);
     });
 
     testWidgets('signed in goes to Home and never sees the onboarding', (
@@ -192,7 +203,7 @@ void main() {
       await tester.tap(find.text('Skip'));
       await tester.pumpAndSettle();
 
-      expect(appBarTitle('Login'), findsOneWidget);
+      expect(find.byType(LoginScreen), findsOneWidget);
     });
   });
 }

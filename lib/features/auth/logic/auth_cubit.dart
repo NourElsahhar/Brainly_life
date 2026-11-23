@@ -8,6 +8,7 @@
 // Actions (each one shows AuthLoading while it runs):
 //   context.read<AuthCubit>().signIn(email: e, password: p);
 //   context.read<AuthCubit>().register(displayName: n, email: e, password: p);
+//   context.read<AuthCubit>().signInWithGoogle();
 //   context.read<AuthCubit>().sendPasswordReset(email: e);
 //   context.read<AuthCubit>().signOut();
 //
@@ -84,6 +85,25 @@ class AuthCubit extends Cubit<AuthState> {
 
     result.fold(
       onSuccess: (profile) => _setSession(Authenticated(profile)),
+      onFailure: (failure) => emit(AuthError(failure)),
+    );
+  }
+
+  /// "Continue with Google". If the user closes the Google picker, the
+  /// state goes back to what it was (no error is shown).
+  Future<void> signInWithGoogle() async {
+    if (state is AuthLoading) return;
+    emit(const AuthLoading());
+
+    final result = await _repository.signInWithGoogle();
+    if (isClosed) return;
+
+    result.fold(
+      onSuccess: (profile) => _setSession(
+        profile != null
+            ? Authenticated(profile)
+            : (_session is Authenticated ? _session : const Unauthenticated()),
+      ),
       onFailure: (failure) => emit(AuthError(failure)),
     );
   }
