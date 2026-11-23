@@ -36,6 +36,10 @@ abstract class AuthRepository {
     required String password,
   });
 
+  /// Signs in (or signs up) with a Google account.
+  /// success(null) means the user closed the Google picker: not an error.
+  Future<Result<UserProfile?>> signInWithGoogle();
+
   Future<Result<void>> sendPasswordReset({required String email});
 
   Future<Result<void>> signOut();

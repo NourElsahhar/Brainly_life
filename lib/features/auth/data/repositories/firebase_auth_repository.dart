@@ -9,6 +9,8 @@
 // "a user signed in" BEFORE the profile document is written. Without the lock,
 // authStateChanges() would try to create the profile at the same time.
 // So while a registration is running, authStateChanges() waits for it.
+// Google sign in uses the same lock (a first Google sign in creates the
+// profile too).
 
 // ignore_for_file: prefer_initializing_formals
 
@@ -23,6 +25,7 @@ import 'package:brainly_life/features/auth/data/models/user_profile_model.dart';
 import 'package:brainly_life/features/auth/data/models/user_settings_model.dart';
 import 'package:brainly_life/features/auth/data/repositories/auth_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart' show GoogleSignInException;
 
 class FirebaseAuthRepository implements AuthRepository {
   FirebaseAuthRepository({
@@ -90,6 +93,36 @@ class FirebaseAuthRepository implements AuthRepository {
       return Result.success(profile);
     } catch (error) {
       return Result.failure(_fail(error, 'Register'));
+    } finally {
+      registration.complete();
+      if (identical(_registration, registration)) _registration = null;
+    }
+  }
+
+  @override
+  Future<Result<UserProfile?>> signInWithGoogle() async {
+    final registration = Completer<void>();
+    _registration = registration;
+
+    try {
+      final user = await _dataSource.signInWithGoogle();
+      if (user == null) return const Result<UserProfile?>.success(null);
+
+      final profile = await _dataSource.loadOrCreateProfile(
+        user,
+        timezone: await _timezone(),
+      );
+      return Result<UserProfile?>.success(profile);
+    } on GoogleSignInException catch (error) {
+      AppLogger.warning('Google sign in failed (${error.code.name})', tag: 'Auth');
+      return Result.failure(
+        AuthFailure(
+          userMessage: 'Google sign in failed. Please try again.',
+          code: 'google-${error.code.name}',
+        ),
+      );
+    } catch (error) {
+      return Result.failure(_fail(error, 'Google sign in'));
     } finally {
       registration.complete();
       if (identical(_registration, registration)) _registration = null;

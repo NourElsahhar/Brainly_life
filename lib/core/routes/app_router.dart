@@ -8,9 +8,11 @@
 // The redirect rules (appRedirect):
 //   splash not finished -> always the splash screen
 //   unknown    -> splash
-//   signedOut  -> only onboarding/login/register/forgot-password
-//                 are allowed, everything else goes to login
+//   signedOut  -> a NEW user (onboarding not seen yet) goes to the onboarding,
+//                 everyone else goes to login. The onboarding, login,
+//                 register and forgot-password screens stay as they are.
 //   signedIn   -> the auth screens are not allowed, they go to home
+//                 (so someone who signs in never sees the onboarding)
 //
 // createAppRouter has two optional parameters (tabs and fullScreenRoutes).
 // They are only for tests, so a router test can use simple placeholder
@@ -18,6 +20,7 @@
 
 import 'package:brainly_life/features/ai_assistant/presentation/ai_assistant_routes.dart';
 import 'package:brainly_life/features/auth/presentation/auth_routes.dart';
+import 'package:brainly_life/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:brainly_life/features/auth/presentation/screens/splash_screen.dart';
 import 'package:brainly_life/features/focus/presentation/focus_routes.dart';
 import 'package:brainly_life/features/habits/presentation/habits_routes.dart';
@@ -78,22 +81,40 @@ String? appRedirect(
   AuthStatus status,
   String location, {
   bool splashDone = true,
+  bool onboardingSeen = true,
 }) {
   // The splash screen stays until its animation has finished.
   if (!splashDone) {
     return location == AppRoutes.splash ? null : AppRoutes.splash;
   }
 
+  // Signed out: a new user sees the onboarding once, everyone else sees login.
+  final signedOutStart = onboardingSeen
+      ? AppRoutes.login
+      : AppRoutes.onboarding;
+
   return switch (status) {
     AuthStatus.unknown =>
       location == AppRoutes.splash ? null : AppRoutes.splash,
-    AuthStatus.signedOut =>
-      _publicPages.contains(location) && location != AppRoutes.splash
-          ? null
-          : AppRoutes.login,
+    AuthStatus.signedOut => switch (location) {
+      AppRoutes.splash => signedOutStart,
+      _ when _publicPages.contains(location) => null,
+      _ => signedOutStart,
+    },
     AuthStatus.signedIn =>
       _publicPages.contains(location) ? AppRoutes.home : null,
   };
+}
+
+CustomTransitionPage<void> _fadePage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    transitionDuration: const Duration(milliseconds: 400),
+    reverseTransitionDuration: const Duration(milliseconds: 400),
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+        FadeTransition(opacity: animation, child: child),
+  );
 }
 
 /// [tabs] and [fullScreenRoutes] are only for tests. Leave them empty in the app.
@@ -111,6 +132,7 @@ GoRouter createAppRouter(
       authState.status,
       state.matchedLocation,
       splashDone: authState.splashDone,
+      onboardingSeen: authState.onboardingSeen,
     ),
     routes: [
       // The splash fades out smoothly when the app opens.
@@ -124,6 +146,12 @@ GoRouter createAppRouter(
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
               FadeTransition(opacity: animation, child: child),
         ),
+      ),
+      // Shown once, to a new user. It marks itself as seen (OnboardingStore).
+      GoRoute(
+        path: AppRoutes.onboarding,
+        pageBuilder: (context, state) =>
+            _fadePage(state, const OnboardingScreen()),
       ),
       ...authRoutes,
       StatefulShellRoute.indexedStack(

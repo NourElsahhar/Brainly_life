@@ -6,6 +6,8 @@
 //   email:    MockAuthRepository.demoEmail      (demo@example.com)
 //   password: MockAuthRepository.demoPassword   (password123)
 // Register works too (new accounts live until the app restarts).
+// "Continue with Google" signs in as MockAuthRepository.googleEmail
+// (set googleCancels: true to act as if the user closed the picker).
 //
 // delay: makes every call slower, to see your loading states:
 //   MockAuthRepository(delay: const Duration(seconds: 1))
@@ -23,6 +25,7 @@ class MockAuthRepository implements AuthRepository {
   MockAuthRepository({
     this.delay = Duration.zero,
     bool startSignedIn = false,
+    this.googleCancels = false,
   }) {
     final demo = _MockAccount(
       password: demoPassword,
@@ -38,8 +41,10 @@ class MockAuthRepository implements AuthRepository {
 
   static const String demoEmail = 'demo@example.com';
   static const String demoPassword = 'password123';
+  static const String googleEmail = 'google.student@gmail.com';
 
   final Duration delay;
+  final bool googleCancels;
 
   final Map<String, _MockAccount> _accounts = {};
   final StreamController<Result<UserProfile?>> _changes =
@@ -61,7 +66,10 @@ class MockAuthRepository implements AuthRepository {
     await Future<void>.delayed(delay);
 
     final account = _accounts[_key(email)];
-    if (account == null || account.password != password) {
+    // A Google account has no password, so email sign in never works for it.
+    if (account == null ||
+        account.password == null ||
+        account.password != password) {
       return const Result.failure(
         AuthFailure(
           userMessage: 'Incorrect email or password.',
@@ -104,6 +112,27 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<Result<UserProfile?>> signInWithGoogle() async {
+    await Future<void>.delayed(delay);
+    if (googleCancels) return const Result<UserProfile?>.success(null);
+
+    // The same Google account every time (created on the first use).
+    final account = _accounts.putIfAbsent(
+      googleEmail,
+      () => _MockAccount(
+        password: null,
+        profile: _newProfile(
+          uid: 'mock-google-user',
+          displayName: 'Google Student',
+          email: googleEmail,
+        ),
+      ),
+    );
+    _setCurrent(account.profile);
+    return Result<UserProfile?>.success(account.profile);
+  }
+
+  @override
   Future<Result<void>> sendPasswordReset({required String email}) async {
     await Future<void>.delayed(delay);
     return const Result<void>.success(null);
@@ -141,6 +170,7 @@ class MockAuthRepository implements AuthRepository {
 class _MockAccount {
   const _MockAccount({required this.password, required this.profile});
 
-  final String password;
+  /// null for a Google account (no password).
+  final String? password;
   final UserProfile profile;
 }

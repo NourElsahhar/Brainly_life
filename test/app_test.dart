@@ -4,8 +4,11 @@
 // It checks OUR parts (splash, bottom bar, login). It does not check what is
 // inside the Home screen, because that screen belongs to M3.
 
+// ignore_for_file: unused_element
+
 import 'package:brainly_life/app.dart';
 import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
+import 'package:brainly_life/features/auth/presentation/screens/login_screen.dart';
 import 'package:brainly_life/features/auth/presentation/screens/splash_screen.dart';
 import 'package:brainly_life/injection.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +57,7 @@ void main() {
     getIt<AuthCubit>().signOut();
     await tester.pumpAndSettle();
 
-    expect(appBarTitle('Login'), findsOneWidget);
+    expect(find.byType(LoginScreen), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
   });
 }

@@ -85,6 +85,12 @@ flutter:
     - assets/branding/baseet_logo_dark.png
     - assets/branding/baseet_app_bar_logo_light.png
     - assets/branding/baseet_app_bar_logo_dark.png
+    - assets/onboarding/onboarding_1_light.png
+    - assets/onboarding/onboarding_1_dark.png
+    - assets/onboarding/onboarding_2_light.png
+    - assets/onboarding/onboarding_2_dark.png
+    - assets/onboarding/onboarding_3_light.png
+    - assets/onboarding/onboarding_3_dark.png
 
   fonts:
     - family: PlusJakartaSans

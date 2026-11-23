@@ -15,6 +15,72 @@ class AppStrings {
   // ===== Common (M1) =====
 
   // ===== Auth (M1) =====
+    static const String onboardingSkip = 'Skip';
+  static const String onboardingNext = 'Next';
+  static const String onboardingGetStarted = 'Get started';
+  static const String onboardingHaveAccount = 'I already have an account';
+  static const String onboardingTitle1 = 'Plan your studies with AI';
+  static const String onboardingSubtitle1 =
+      'Tell us your subjects and exam dates. Baseet builds your study plan for you.';
+  static const String onboardingTitle2 = 'Build habits, stay focused';
+  static const String onboardingSubtitle2 =
+      'Track daily habits and use the focus timer to get more done.';
+  static const String onboardingTitle3 = 'See your week clearly';
+  static const String onboardingSubtitle3 =
+      'Weekly reports show your progress and give you tips to improve.';
+
+  // Shared form fields.
+  static const String authNameLabel = 'Full name';
+  static const String authNameHint = 'Your name';
+  static const String authEmailLabel = 'Email';
+  static const String authEmailHint = 'name@example.com';
+  static const String authPasswordLabel = 'Password';
+  static const String authPasswordHint = 'Your password';
+  static const String authNewPasswordHint = 'At least 8 characters';
+  static const String authConfirmPasswordLabel = 'Confirm password';
+  static const String authConfirmPasswordHint = 'Type your password again';
+  static const String authOr = 'or';
+  static const String authContinueWithGoogle = 'Continue with Google';
+
+  // Password strength (under the password on Register).
+  static const String passwordRule = 'At least 8 characters';
+  static const String passwordWeak = 'Weak';
+  static const String passwordMedium = 'Medium';
+  static const String passwordStrong = 'Strong';
+  static const String passwordTooWeak =
+      'Too weak. Mix letters with numbers or symbols.';
+
+  // Login.
+  static const String loginTitle = 'Welcome back';
+  static const String loginSubtitle = 'Log in to continue your plan';
+  static const String loginAction = 'Log in';
+  static const String loginForgotPassword = 'Forgot password?';
+  static const String loginNoAccount = "Don't have an account?";
+  static const String loginSignUpLink = 'Sign up';
+
+  // Register.
+  static const String registerTitle = 'Create your account';
+  static const String registerSubtitle = 'Start planning smarter today';
+  static const String registerAction = 'Create account';
+  static const String registerHaveAccount = 'Already have an account?';
+  static const String registerLoginLink = 'Log in';
+  static const String registerAgreePrefix = 'I agree to the ';
+  static const String registerTerms = 'Terms';
+  static const String registerAgreeMiddle = ' and ';
+  static const String registerPrivacy = 'Privacy Policy';
+  static const String registerTermsRequired =
+      'Please accept the Terms and Privacy Policy';
+
+  // Forgot password.
+  static const String forgotTitle = 'Forgot your password?';
+  static const String forgotSubtitle =
+      "Enter your email and we'll send you a link to reset it.";
+  static const String forgotAction = 'Send reset link';
+  static const String forgotBackToLogin = 'Back to log in';
+
+  /// "Check your inbox. We sent a link to x@y.com"
+  static String forgotSent(String email) =>
+      'Check your inbox. We sent a link to $email';
 
   // ===== Home (M3) =====
 
@@ -79,6 +145,35 @@ class AppStrings {
   static const String habitsAiEmpty = 'No new suggestions for now.';
   static const String habitsAiDisclaimer = 'AI can make mistakes.';
 
+  static const String habitSaveHabit = 'Save habit';
+  static const String habitFormClose = 'Close';
+  static const String habitFormIconLabel = 'Icon';
+  static const String habitFormColorLabel = 'Color';
+  static const String habitFormFrequencyLabel = 'Frequency';
+  static const String habitFormStartDate = 'Start date';
+  static const String habitFormSaved = 'Habit saved';
+  static const String habitFormDecrease = 'Decrease';
+  static const String habitFormIncrease = 'Increase';
+  static const String habitFrequencyDaily = 'Daily';
+  static const String habitFrequencyWeekdays = 'Weekdays';
+  static const String habitFrequencyTimesPerWeek = 'Times per week';
+
+  static String habitFormTimesPerWeekValue(int times) =>
+      times == 1 ? '1 time per week' : '$times times per week';
+
+  static String habitWeekdayLetter(int weekday) =>
+      const ['M', 'T', 'W', 'T', 'F', 'S', 'S'][weekday - 1];
+
+  static String habitWeekdayName(int weekday) => const [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ][weekday - 1];
+  
   // ===== Focus (M4) =====
   static const String focusTitle = 'Focus';
   static const String focusModeFocus = 'Focus';
