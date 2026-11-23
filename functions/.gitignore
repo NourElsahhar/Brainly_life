@@ -1,0 +1,11 @@
+# Compiled JavaScript (npm run build)
+lib/
+node_modules/
+
+# Secrets for the emulator. NEVER commit these (Master Document C.6).
+.secret.local
+.env.local
+*.local
+
+# Logs
+*.log

@@ -1,0 +1,12 @@
+{
+  "name": "brainly-life-seed",
+  "private": true,
+  "type": "module",
+  "description": "Fills the Firebase EMULATOR with demo data. Never the real project.",
+  "scripts": {
+    "seed": "node seed.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.1"
+  }
+}

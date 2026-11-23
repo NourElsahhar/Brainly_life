@@ -18,6 +18,10 @@ class AppRoutes {
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
 
+  // Open to everyone, signed in or not (full screen).
+  static const String terms = '/terms';
+  static const String privacy = '/privacy';
+
   // The tabs of the bottom bar
   static const String home = '/home';
   static const String plan = '/plan'; // study planner

@@ -257,6 +257,23 @@ class _TermsCheckbox extends StatelessWidget {
   final ValueChanged<bool>? onChanged;
   final String? errorText;
 
+  /// A tappable word that opens the Terms or the Privacy page on top.
+  InlineSpan _link(
+    BuildContext context,
+    String text,
+    TextStyle style,
+    String route,
+  ) {
+    return WidgetSpan(
+      alignment: PlaceholderAlignment.baseline,
+      baseline: TextBaseline.alphabetic,
+      child: GestureDetector(
+        onTap: () => context.push(route),
+        child: Text(text, style: context.text.bodyMedium?.merge(style)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
@@ -295,11 +312,18 @@ class _TermsCheckbox extends StatelessWidget {
                     ),
                     children: [
                       const TextSpan(text: AppStrings.registerAgreePrefix),
-                      TextSpan(text: AppStrings.registerTerms, style: linkStyle),
+                      _link(
+                        context,
+                        AppStrings.registerTerms,
+                        linkStyle,
+                        AppRoutes.terms,
+                      ),
                       const TextSpan(text: AppStrings.registerAgreeMiddle),
-                      TextSpan(
-                        text: AppStrings.registerPrivacy,
-                        style: linkStyle,
+                      _link(
+                        context,
+                        AppStrings.registerPrivacy,
+                        linkStyle,
+                        AppRoutes.privacy,
                       ),
                     ],
                   ),
