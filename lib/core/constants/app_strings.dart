@@ -69,6 +69,16 @@ class AppStrings {
 
   static String habitStreakLabel(int days) => '$days-day streak';
 
+  static const String habitsAiTitle = 'AI suggestions';
+  static const String habitsAiGet = 'Get suggestions';
+  static const String habitsAiAdd = 'Add';
+  static const String habitsAiDismiss = 'Dismiss';
+  static const String habitsAiRetry = 'Try again';
+  static const String habitsAiUnavailable =
+      'Suggestions are unavailable right now.';
+  static const String habitsAiEmpty = 'No new suggestions for now.';
+  static const String habitsAiDisclaimer = 'AI can make mistakes.';
+
   // ===== Focus (M4) =====
   static const String focusTitle = 'Focus';
   static const String focusModeFocus = 'Focus';
