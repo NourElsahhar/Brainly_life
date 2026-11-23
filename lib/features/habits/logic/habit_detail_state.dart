@@ -1,11 +1,14 @@
 // States of the habit detail screen: initial, loading, error, loaded (calendar
-// month, streaks and completion rates), and removed (archived or deleted, so
+// month, streaks, completion numbers) and removed (archived or deleted, so
 // the screen closes). There is no empty state: a missing habit is an error.
 
 import 'package:brainly_life/core/errors/failure.dart';
 import 'package:brainly_life/core/utils/utils.dart';
 import 'package:brainly_life/features/habits/data/models/habit_model.dart';
 import 'package:equatable/equatable.dart';
+
+/// How many days back the user may mark or unmark a day.
+const int maxBackfillDays = 7;
 
 /// First day of the month of [dateKey], as a dateKey.
 String firstDayOfMonthKey(String dateKey) => '${dateKey.substring(0, 8)}01';
@@ -49,6 +52,8 @@ class HabitDetailLoaded extends HabitDetailState {
     required this.bestStreak,
     required this.rate7,
     required this.rate30,
+    required this.doneLast7,
+    required this.dueLast7,
     this.actionFailure,
   });
 
@@ -69,13 +74,28 @@ class HabitDetailLoaded extends HabitDetailState {
   final double rate7;
   final double rate30;
 
-  /// Set when archive or delete failed. The screen shows it in a snackbar.
+  /// Done and due days in the last 7 days, for the "6/7" text.
+  final int doneLast7;
+  final int dueLast7;
+
+  /// Set when archive, delete or a day change failed. The screen shows it in
+  /// a snackbar.
   final Failure? actionFailure;
 
   bool get canGoPrevious =>
       monthStart.compareTo(firstDayOfMonthKey(habit.startDate)) > 0;
 
   bool get canGoNext => monthStart.compareTo(firstDayOfMonthKey(today)) < 0;
+
+  /// A day can be changed if it is not in the future, not before the start
+  /// date, not older than [maxBackfillDays], and the habit is not archived.
+  bool canToggleDay(String dateKey) {
+    if (habit.archived) return false;
+    if (dateKey.compareTo(today) > 0) return false;
+    if (dateKey.compareTo(habit.startDate) < 0) return false;
+    return dateKey.compareTo(DateKeyUtils.addDays(today, -maxBackfillDays)) >=
+        0;
+  }
 
   /// Every day of the shown month, as dateKeys.
   List<String> get monthDateKeys {
@@ -100,6 +120,8 @@ class HabitDetailLoaded extends HabitDetailState {
       bestStreak: bestStreak,
       rate7: rate7,
       rate30: rate30,
+      doneLast7: doneLast7,
+      dueLast7: dueLast7,
       actionFailure: clearActionFailure
           ? null
           : (actionFailure ?? this.actionFailure),
@@ -116,6 +138,8 @@ class HabitDetailLoaded extends HabitDetailState {
     bestStreak,
     rate7,
     rate30,
+    doneLast7,
+    dueLast7,
     actionFailure,
   ];
 }

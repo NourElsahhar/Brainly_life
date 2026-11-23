@@ -145,4 +145,73 @@ void main() {
       ),
     ],
   );
+  blocTest<HabitDetailCubit, HabitDetailState>(
+    'load counts the done and due days of the last 7 days',
+    build: () => buildCubit(threeDays()),
+    act: (cubit) => at(() => cubit.load()),
+    skip: 1,
+    expect: () => [
+      isA<HabitDetailLoaded>()
+          .having((s) => s.doneLast7, 'doneLast7', 3)
+          .having((s) => s.dueLast7, 'dueLast7', 6),
+    ],
+  );
+
+  blocTest<HabitDetailCubit, HabitDetailState>(
+    'toggleDay marks an older day as done and updates the streak',
+    build: () => buildCubit(threeDays()),
+    act: (cubit) => at(() async {
+      await cubit.load();
+      await cubit.toggleDay('2026-11-12');
+    }),
+    skip: 2,
+    expect: () => [
+      isA<HabitDetailLoaded>()
+          .having((s) => s.doneDates.contains('2026-11-12'), 'done 12th', true)
+          .having((s) => s.currentStreak, 'currentStreak', 4)
+          .having((s) => s.doneLast7, 'doneLast7', 4),
+    ],
+  );
+
+  blocTest<HabitDetailCubit, HabitDetailState>(
+    'toggleDay twice removes the mark again',
+    build: () => buildCubit(threeDays()),
+    act: (cubit) => at(() async {
+      await cubit.load();
+      await cubit.toggleDay('2026-11-12');
+      await cubit.toggleDay('2026-11-12');
+    }),
+    skip: 3,
+    expect: () => [
+      isA<HabitDetailLoaded>().having(
+        (s) => s.doneDates.contains('2026-11-12'),
+        'done 12th',
+        false,
+      ),
+    ],
+  );
+
+  blocTest<HabitDetailCubit, HabitDetailState>(
+    'toggleDay ignores future days and days older than 7 days',
+    build: () => buildCubit(threeDays()),
+    act: (cubit) => at(() async {
+      await cubit.load();
+      await cubit.toggleDay('2026-11-20');
+      await cubit.toggleDay('2026-11-05');
+    }),
+    skip: 2,
+    expect: () => <Matcher>[],
+  );
+
+  blocTest<HabitDetailCubit, HabitDetailState>(
+    'toggleDay keeps the month that is shown',
+    build: () => buildCubit(threeDays(startDate: '2026-10-01')),
+    act: (cubit) => at(() async {
+      await cubit.load();
+      cubit.previousMonth();
+      await cubit.toggleDay('2026-11-12');
+    }),
+    skip: 3,
+    expect: () => [monthIs('2026-10-01')],
+  );
 }
