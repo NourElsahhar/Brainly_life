@@ -149,6 +149,31 @@ class FirebaseAuthRepository implements AuthRepository {
     }
   }
 
+  @override
+  Future<Result<void>> updateDisplayName(String displayName) =>
+      _run('Updating the name', () => _dataSource.updateDisplayName(displayName.trim()));
+
+  @override
+  Future<Result<void>> updateSettings(UserSettings settings) =>
+      _run('Saving the settings', () => _dataSource.updateSettings(settings));
+
+  @override
+  Future<Result<void>> deleteAccount() =>
+      _run('Deleting the account', _dataSource.deleteAccount);
+
+  /// Runs [action] and turns any exception into a Failure.
+  Future<Result<void>> _run(
+    String name,
+    Future<void> Function() action,
+  ) async {
+    try {
+      await action();
+      return const Result<void>.success(null);
+    } catch (error) {
+      return Result.failure(_fail(error, name));
+    }
+  }
+
   Future<Result<UserProfile>> _loadProfile(User user) async {
     try {
       final profile = await _dataSource.loadOrCreateProfile(

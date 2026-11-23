@@ -12,7 +12,20 @@
           "package_name": "com.example.brainly_life"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "639606599049-hentj53vcavqk316kbub0kjdfqre48f3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.brainly_life",
+            "certificate_hash": "aabfbe00cc8697d5ee05164b64979f28adc60c06"
+          }
+        },
+        {
+          "client_id": "639606599049-pjjh6hquoopdn3erleskgbshcd4jalum.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCdvxDIeJClkQKpk-NMbLqVUlQhaYRy0qo"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "639606599049-pjjh6hquoopdn3erleskgbshcd4jalum.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "639606599049-81rbhu3ju03qraf1dkse3qcuol77tkg4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.brainlyLife"
+              }
+            }
+          ]
         }
       }
     }

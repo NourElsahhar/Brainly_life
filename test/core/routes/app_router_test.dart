@@ -245,13 +245,30 @@ void main() {
       expect(appBarTitle('Plan'), findsOneWidget);
     });
 
-    testWidgets('settings opens inside the Profile tab', (tester) async {
+    testWidgets('settings is full screen (no bottom bar)', (tester) async {
       final router = await pumpApp(tester, RouterAuthState(AuthStatus.signedIn));
 
       router.go(AppRoutes.settings);
       await tester.pumpAndSettle();
 
       expect(appBarTitle('Settings'), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
+    });
+
+    testWidgets('settings pushed from a tab goes back to that tab', (
+      tester,
+    ) async {
+      final router = await pumpApp(tester, RouterAuthState(AuthStatus.signedIn));
+      router.go(AppRoutes.plan);
+      await tester.pumpAndSettle();
+
+      router.push(AppRoutes.settings);
+      await tester.pumpAndSettle();
+      expect(appBarTitle('Settings'), findsOneWidget);
+
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(appBarTitle('Plan'), findsOneWidget);
       expect(find.byType(NavigationBar), findsOneWidget);
     });
 

@@ -145,6 +145,45 @@ class MockAuthRepository implements AuthRepository {
     return const Result<void>.success(null);
   }
 
+  @override
+  Future<Result<void>> updateDisplayName(String displayName) =>
+      _updateCurrent((p) => p.copyWith(displayName: displayName.trim()));
+
+  @override
+  Future<Result<void>> updateSettings(UserSettings settings) =>
+      _updateCurrent((p) => p.copyWith(settings: settings));
+
+  @override
+  Future<Result<void>> deleteAccount() async {
+    await Future<void>.delayed(delay);
+    final current = _current;
+    if (current == null) return const Result.failure(_noUser);
+
+    _accounts.remove(_key(current.email));
+    _setCurrent(null);
+    return const Result<void>.success(null);
+  }
+
+  static const _noUser = AuthFailure(
+    userMessage: 'Please sign in again.',
+    code: 'no-current-user',
+  );
+
+  /// Changes the signed-in profile (like a Firestore update: the session
+  /// stream does not emit; the cubit already shows the new value).
+  Future<Result<void>> _updateCurrent(
+    UserProfile Function(UserProfile profile) change,
+  ) async {
+    await Future<void>.delayed(delay);
+    final current = _current;
+    if (current == null) return const Result.failure(_noUser);
+
+    final updated = change(current);
+    _current = updated;
+    _accounts[_key(current.email)]?.profile = updated;
+    return const Result<void>.success(null);
+  }
+
   void _setCurrent(UserProfile? profile) {
     _current = profile;
     _changes.add(Result<UserProfile?>.success(profile));
@@ -168,9 +207,11 @@ class MockAuthRepository implements AuthRepository {
 }
 
 class _MockAccount {
-  const _MockAccount({required this.password, required this.profile});
+  _MockAccount({required this.password, required this.profile});
 
   /// null for a Google account (no password).
   final String? password;
-  final UserProfile profile;
+
+  /// Changes when the name or the settings are saved.
+  UserProfile profile;
 }

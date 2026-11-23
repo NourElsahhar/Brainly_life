@@ -80,7 +80,7 @@ class BaseetAppBar extends StatelessWidget implements PreferredSizeWidget {
           AppBarIconButton(
             icon: Icons.settings_outlined,
             tooltip: 'Settings',
-            onPressed: onSettings ?? () => context.go(AppRoutes.settings),
+            onPressed: onSettings ?? () => context.push(AppRoutes.settings),
           )
         else
           ...actions,

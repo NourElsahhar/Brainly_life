@@ -10,6 +10,7 @@
 
 import 'package:brainly_life/core/routes/router_auth_state.dart';
 import 'package:brainly_life/core/theme/app_theme.dart';
+import 'package:brainly_life/features/auth/data/models/user_settings_model.dart';
 import 'package:brainly_life/features/auth/data/repositories/onboarding_store.dart';
 import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
 import 'package:brainly_life/features/auth/logic/auth_state.dart';
@@ -33,15 +34,30 @@ class BrainlyLifeApp extends StatelessWidget {
           if (state is Authenticated) getIt<OnboardingStore>().markSeen();
           routerAuthState.update(authStatusFor(state, routerAuthState.status));
         },
-        child: MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          title: 'Baseet',
-          theme: AppTheme.light,
-          darkTheme: AppTheme.dark,
-          themeMode: ThemeMode.system,
-          routerConfig: getIt<GoRouter>(),
+        // The theme follows the user's setting (Settings > Appearance).
+        // Signed out -> the phone's theme.
+        child: Builder(
+          builder: (context) {
+            final mode = context.select(
+              (AuthCubit cubit) => cubit.currentUser?.settings.themeMode,
+            );
+            return MaterialApp.router(
+              debugShowCheckedModeBanner: false,
+              title: 'Baseet',
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              themeMode: _toThemeMode(mode),
+              routerConfig: getIt<GoRouter>(),
+            );
+          },
         ),
       ),
     );
   }
 }
+
+ThemeMode _toThemeMode(AppThemeMode? mode) => switch (mode) {
+  AppThemeMode.light => ThemeMode.light,
+  AppThemeMode.dark => ThemeMode.dark,
+  AppThemeMode.system || null => ThemeMode.system,
+};

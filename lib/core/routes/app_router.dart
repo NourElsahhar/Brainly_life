@@ -162,7 +162,9 @@ GoRouter createAppRouter(
         ],
       ),
       // Full screen (open on top of the bottom bar).
-            ...(fullScreenRoutes ??
+      // Settings is always here (also in tests that replace the others).
+      ...settingsRoutes,
+      ...(fullScreenRoutes ??
           [...tasksRoutes, ...focusRoutes, ...habitsFullScreenRoutes]),
     ],
   );

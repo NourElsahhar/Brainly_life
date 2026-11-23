@@ -14,6 +14,7 @@ import 'package:brainly_life/features/auth/data/datasources/auth_remote_data_sou
 import 'package:brainly_life/features/auth/data/repositories/auth_repository.dart';
 import 'package:brainly_life/features/auth/data/repositories/firebase_auth_repository.dart';
 import 'package:brainly_life/features/auth/data/repositories/mock_auth_repository.dart';
+import 'package:brainly_life/features/auth/data/repositories/profile_stats_provider.dart';
 import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,6 +30,14 @@ void registerAuthFeature(GetIt getIt, {required bool useMocks}) {
               firestore: getIt<FirebaseFirestore>(),
             ),
           ),
+  );
+
+  // The 3 numbers on Profile. Real mode shows zeros until the habits,
+  // focus and tasks owners register their adapter here.
+  getIt.registerLazySingleton<ProfileStatsProvider>(
+    () => useMocks
+        ? const MockProfileStatsProvider()
+        : const EmptyProfileStatsProvider(),
   );
 
   getIt.registerLazySingleton<AuthCubit>(

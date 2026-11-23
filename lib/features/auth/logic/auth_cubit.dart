@@ -138,6 +138,21 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
+  /// The signed-in user, or null. Stays the same while the state is
+  /// AuthLoading or AuthError (it is the last known session).
+  UserProfile? get currentUser {
+    final session = _session;
+    return session is Authenticated ? session.user : null;
+  }
+
+  /// Profile and Settings call this after they save a change (new name,
+  /// new settings), so the whole app sees it at once (for example the
+  /// theme). Ignored when nobody is signed in.
+  void profileUpdated(UserProfile profile) {
+    if (isClosed || currentUser == null) return;
+    _setSession(Authenticated(profile));
+  }
+
   void _setSession(AuthState session) {
     _session = session;
     emit(session);
