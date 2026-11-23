@@ -82,6 +82,56 @@ class AppStrings {
   static String forgotSent(String email) =>
       'Check your inbox. We sent a link to $email';
 
+  // ===== Profile and Settings (M1) =====
+  static const String profileTitle = 'Profile';
+  static const String profileEdit = 'Edit profile';
+  static const String profileEditTitle = 'Edit profile';
+  static const String profileSave = 'Save';
+  static const String profileNameSaved = 'Your name was updated.';
+  static const String profileStreak = 'day streak';
+  static const String profileStudied = 'studied';
+  static const String profileTasksDone = 'tasks done';
+  static const String profileWeeklyAnalytics = 'Weekly analytics';
+  static const String profileWeeklyReport = 'Weekly AI report';
+  static const String profileStudyPreferences = 'Study preferences';
+  static const String profileSettings = 'Settings';
+  static const String profileComingSoon = 'Coming soon.';
+  static const String profileChangePhoto = 'Change photo';
+  static const String profilePhotoSoon = 'Photo upload is coming soon.';
+
+  static const String settingsTitle = 'Settings';
+  static const String settingsStudySection = 'Study preferences';
+  static const String settingsDailyHours = 'Daily study hours';
+  static const String settingsStudyTime = 'Preferred study time';
+  static const String settingsWeekStart = 'Week starts on';
+  static const String settingsTimezone = 'Time zone';
+  static const String settingsAppearanceSection = 'Appearance';
+  static const String settingsTheme = 'Theme';
+  static const String settingsThemeLight = 'Light';
+  static const String settingsThemeDark = 'Dark';
+  static const String settingsThemeSystem = 'System';
+  static const String settingsAiSection = 'AI';
+  static const String settingsAiSwitch = 'Use AI features';
+  static const String settingsAiNote =
+      'AI can make mistakes. You can turn it off any time.';
+  static const String settingsAccountSection = 'Account';
+  static const String settingsSignOut = 'Sign out';
+  static const String settingsDeleteAccount = 'Delete account';
+
+  static const String studyTimeMorning = 'Morning';
+  static const String studyTimeAfternoon = 'Afternoon';
+  static const String studyTimeEvening = 'Evening';
+  static const String studyTimeNight = 'Night';
+
+  static const String deleteTitle = 'Delete your account?';
+  static const String deleteMessage =
+      "This deletes your tasks, study plans, habits and focus history. "
+      "This can't be undone.";
+  static const String deleteConfirmWord = 'DELETE';
+  static const String deleteHint = 'Type DELETE to confirm';
+  static const String deleteCancel = 'Cancel';
+  static const String deleteAction = 'Delete account';
+
   // ===== Home (M3) =====
 
   // ===== Tasks (M3) =====

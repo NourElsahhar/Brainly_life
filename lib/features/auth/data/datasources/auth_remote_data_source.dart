@@ -131,6 +131,52 @@ class AuthRemoteDataSource {
     await _auth.signOut();
   }
 
+  /// Changes the name in users/{uid} and on the Firebase account.
+  Future<void> updateDisplayName(String displayName) async {
+    final user = _requireCurrentUser();
+    await _users.doc(user.uid).update({
+      'displayName': displayName,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    await user.updateDisplayName(displayName);
+  }
+
+  /// Saves the whole settings map in users/{uid}.settings.
+  Future<void> updateSettings(UserSettings settings) async {
+    final user = _requireCurrentUser();
+    await _users.doc(user.uid).update({
+      'settings': settings.toMap(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// Deletes users/{uid}, then the Firebase account.
+  ///
+  /// Firebase refuses to delete an account when the last sign in was long
+  /// ago ('requires-recent-login'). We check that FIRST, so we never delete
+  /// the profile and then fail to delete the account.
+  Future<void> deleteAccount() async {
+    final user = _requireCurrentUser();
+    final lastSignIn = user.metadata.lastSignInTime;
+    if (lastSignIn == null ||
+        clock.now().difference(lastSignIn) > recentLoginWindow) {
+      throw FirebaseAuthException(code: 'requires-recent-login');
+    }
+
+    await _users.doc(user.uid).delete();
+    await user.delete();
+    if (_googleReady != null) {
+      try {
+        await _google.signOut();
+      } catch (_) {
+        // Not important: the account is already deleted.
+      }
+    }
+  }
+
+  /// How long after a sign in Firebase still allows sensitive actions.
+  static const Duration recentLoginWindow = Duration(minutes: 5);
+
   /// Reads users/{uid}. If it does not exist yet (for example the first
   /// sign in), it is created with the default settings.
   Future<UserProfile> loadOrCreateProfile(
@@ -171,6 +217,12 @@ class AuthRemoteDataSource {
     await batch.commit();
 
     return profile;
+  }
+
+  User _requireCurrentUser() {
+    final user = _auth.currentUser;
+    if (user == null) throw FirebaseAuthException(code: 'no-current-user');
+    return user;
   }
 
   User _requireUser(UserCredential credential) {

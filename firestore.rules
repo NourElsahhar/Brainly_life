@@ -1,0 +1,158 @@
+rules_version = '2';
+
+// Firestore Security Rules for Baseet (Brainly Life).
+// Owner: M1. Each member adds the validation of their own collections here
+// (send it in your PR; M1 reviews).
+//
+// The idea:
+//   - Everything lives under users/{uid}. Only that user can touch it.
+//   - The main collections are VALIDATED: the shape of every write is
+//     checked, so a broken or hacked app cannot save bad data.
+//   - aiUsage is written only by Cloud Functions (the Admin SDK skips the
+//     rules), never by the app.
+//
+// IMPORTANT: if several `match` blocks fit the same document, access is
+// allowed when ANY of them allows it. So the catch-all at the bottom must
+// list the validated collections, or it would skip their checks.
+//
+// Deploy:  firebase deploy --only firestore
+// Test:    firebase emulators:start   (then run the app with USE_EMULATOR)
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function isText(value, min, max) {
+      return value is string && value.size() >= min && value.size() <= max;
+    }
+
+    function isTextOrNull(value, max) {
+      return value == null || isText(value, 0, max);
+    }
+
+    function isTimestampOrNull(value) {
+      return value == null || value is timestamp;
+    }
+
+    // createdAt can never change after the document is created.
+    function keepsCreatedAt() {
+      return incoming().createdAt == resource.data.createdAt;
+    }
+
+    // ---------- users/{uid} (M1) ----------
+    // Written by AuthRemoteDataSource. createdAt and updatedAt are
+    // FieldValue.serverTimestamp(), so they must equal request.time.
+
+    function isValidSettings(s) {
+      return s is map
+        && s.keys().hasOnly([
+          'dailyStudyHours', 'preferredStudyTime', 'weekStartDay',
+          'timezone', 'themeMode', 'aiEnabled'
+        ])
+        && s.dailyStudyHours is number
+        && s.dailyStudyHours >= 0 && s.dailyStudyHours <= 24
+        && s.preferredStudyTime in ['morning', 'afternoon', 'evening', 'night']
+        && s.weekStartDay is int
+        && s.weekStartDay >= 1 && s.weekStartDay <= 7
+        && isText(s.timezone, 1, 64)
+        && s.themeMode in ['system', 'light', 'dark']
+        && s.aiEnabled is bool;
+    }
+
+    function isValidUser() {
+      let d = incoming();
+      return d.keys().hasOnly([
+          'displayName', 'email', 'photoUrl', 'settings',
+          'createdAt', 'updatedAt'
+        ])
+        && d.keys().hasAll(['displayName', 'email', 'settings', 'createdAt'])
+        && isText(d.displayName, 0, 60)
+        && isText(d.email, 0, 254)
+        && isTextOrNull(d.get('photoUrl', null), 2048)
+        && isValidSettings(d.settings)
+        && d.updatedAt == request.time;
+    }
+
+    match /users/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && isValidUser()
+        && incoming().createdAt == request.time;
+      allow update: if isOwner(uid) && isValidUser() && keepsCreatedAt();
+    }
+
+    // ---------- users/{uid}/tasks/{taskId} (M3) ----------
+    // Written by Task.toFirestore(). Dates are client Timestamps.
+
+    function isValidTask() {
+      let d = incoming();
+      return d.keys().hasOnly([
+          'title', 'description', 'priority', 'categoryId', 'dueAt',
+          'status', 'completedAt', 'subtasks', 'createdAt', 'updatedAt'
+        ])
+        && d.keys().hasAll([
+          'title', 'priority', 'status', 'subtasks', 'createdAt', 'updatedAt'
+        ])
+        && isText(d.title, 1, 100)
+        && isTextOrNull(d.get('description', null), 1000)
+        && d.priority in ['low', 'medium', 'high']
+        && d.status in ['todo', 'done']
+        && d.subtasks is list && d.subtasks.size() <= 20
+        && isTextOrNull(d.get('categoryId', null), 128)
+        && isTimestampOrNull(d.get('dueAt', null))
+        && isTimestampOrNull(d.get('completedAt', null))
+        && d.createdAt is timestamp
+        && d.updatedAt is timestamp
+        // A done task has completedAt, an open one does not. The
+        // "completed in the last 30 days" query depends on this.
+        && ((d.status == 'done') == (d.get('completedAt', null) != null));
+    }
+
+    match /users/{uid}/tasks/{taskId} {
+      allow read, delete: if isOwner(uid);
+      allow create: if isOwner(uid) && isValidTask();
+      allow update: if isOwner(uid) && isValidTask() && keepsCreatedAt();
+    }
+
+    // ---------- users/{uid}/taskCategories/{categoryId} (M3) ----------
+
+    function isValidCategory() {
+      let d = incoming();
+      return d.keys().hasOnly(['name', 'colorValue'])
+        && d.keys().hasAll(['name', 'colorValue'])
+        && isText(d.name, 1, 30)
+        && d.colorValue is int;
+    }
+
+    match /users/{uid}/taskCategories/{categoryId} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid) && isValidCategory();
+    }
+
+    // ---------- users/{uid}/aiUsage/{day} (M1, Cloud Functions) ----------
+    // The app may read it (to show "x requests left"), never write it.
+
+    match /users/{uid}/aiUsage/{day} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+    }
+
+    // ---------- every other collection of the user ----------
+    // Owner only, no shape checks yet. When you validate your collection,
+    // add a block above AND add its name to this list.
+
+    match /users/{uid}/{collection}/{document=**} {
+      allow read, write: if isOwner(uid)
+        && !(collection in ['tasks', 'taskCategories', 'aiUsage']);
+    }
+  }
+}
