@@ -12,9 +12,13 @@ import 'package:brainly_life/core/routes/main_shell.dart';
 import 'package:brainly_life/core/routes/placeholder_screen.dart';
 import 'package:brainly_life/core/routes/router_auth_state.dart';
 import 'package:brainly_life/core/theme/app_theme.dart';
+import 'package:brainly_life/features/auth/data/repositories/mock_auth_repository.dart';
+import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
 import 'package:brainly_life/features/auth/presentation/auth_routes.dart';
+import 'package:brainly_life/features/auth/presentation/screens/login_screen.dart';
 import 'package:brainly_life/features/auth/presentation/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -193,7 +197,14 @@ void main() {
       );
       addTearDown(router.dispose);
       await tester.pumpWidget(
-        MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+        // The auth screens need the AuthCubit (app.dart gives it in the app).
+        BlocProvider<AuthCubit>(
+          create: (_) => AuthCubit(MockAuthRepository()),
+          child: MaterialApp.router(
+            theme: AppTheme.light,
+            routerConfig: router,
+          ),
+        ),
       );
       if (settle) {
         await tester.pumpAndSettle();
@@ -271,7 +282,7 @@ void main() {
     testWidgets('signed out goes to login', (tester) async {
       await pumpApp(tester, RouterAuthState(AuthStatus.signedOut));
 
-      expect(appBarTitle('Login'), findsOneWidget);
+      expect(find.byType(LoginScreen), findsOneWidget);
       expect(find.byType(NavigationBar), findsNothing);
     });
 
@@ -303,7 +314,7 @@ void main() {
         (tester) async {
       final authState = RouterAuthState(AuthStatus.signedOut);
       await pumpApp(tester, authState);
-      expect(appBarTitle('Login'), findsOneWidget);
+      expect(find.byType(LoginScreen), findsOneWidget);
 
       authState.update(AuthStatus.signedIn);
       await tester.pumpAndSettle();

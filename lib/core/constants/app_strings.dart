@@ -29,6 +29,59 @@ class AppStrings {
   static const String onboardingSubtitle3 =
       'Weekly reports show your progress and give you tips to improve.';
 
+  // Shared form fields.
+  static const String authNameLabel = 'Full name';
+  static const String authNameHint = 'Your name';
+  static const String authEmailLabel = 'Email';
+  static const String authEmailHint = 'name@example.com';
+  static const String authPasswordLabel = 'Password';
+  static const String authPasswordHint = 'Your password';
+  static const String authNewPasswordHint = 'At least 8 characters';
+  static const String authConfirmPasswordLabel = 'Confirm password';
+  static const String authConfirmPasswordHint = 'Type your password again';
+  static const String authOr = 'or';
+  static const String authContinueWithGoogle = 'Continue with Google';
+
+  // Password strength (under the password on Register).
+  static const String passwordRule = 'At least 8 characters';
+  static const String passwordWeak = 'Weak';
+  static const String passwordMedium = 'Medium';
+  static const String passwordStrong = 'Strong';
+  static const String passwordTooWeak =
+      'Too weak. Mix letters with numbers or symbols.';
+
+  // Login.
+  static const String loginTitle = 'Welcome back';
+  static const String loginSubtitle = 'Log in to continue your plan';
+  static const String loginAction = 'Log in';
+  static const String loginForgotPassword = 'Forgot password?';
+  static const String loginNoAccount = "Don't have an account?";
+  static const String loginSignUpLink = 'Sign up';
+
+  // Register.
+  static const String registerTitle = 'Create your account';
+  static const String registerSubtitle = 'Start planning smarter today';
+  static const String registerAction = 'Create account';
+  static const String registerHaveAccount = 'Already have an account?';
+  static const String registerLoginLink = 'Log in';
+  static const String registerAgreePrefix = 'I agree to the ';
+  static const String registerTerms = 'Terms';
+  static const String registerAgreeMiddle = ' and ';
+  static const String registerPrivacy = 'Privacy Policy';
+  static const String registerTermsRequired =
+      'Please accept the Terms and Privacy Policy';
+
+  // Forgot password.
+  static const String forgotTitle = 'Forgot your password?';
+  static const String forgotSubtitle =
+      "Enter your email and we'll send you a link to reset it.";
+  static const String forgotAction = 'Send reset link';
+  static const String forgotBackToLogin = 'Back to log in';
+
+  /// "Check your inbox. We sent a link to x@y.com"
+  static String forgotSent(String email) =>
+      'Check your inbox. We sent a link to $email';
+
   // ===== Home (M3) =====
 
   // ===== Tasks (M3) =====

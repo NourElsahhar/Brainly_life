@@ -200,6 +200,49 @@ void main() {
     );
   });
 
+  group('signInWithGoogle', () {
+    void stubGoogle(Result<UserProfile?> result) {
+      when(() => repository.signInWithGoogle()).thenAnswer((_) async => result);
+    }
+
+    blocTest<AuthCubit, AuthState>(
+      'success: Loading then Authenticated',
+      build: () {
+        stubGoogle(Result<UserProfile?>.success(profile));
+        return AuthCubit(repository);
+      },
+      act: (cubit) => cubit.signInWithGoogle(),
+      expect: () => [const AuthLoading(), Authenticated(profile)],
+    );
+
+    blocTest<AuthCubit, AuthState>(
+      'picker closed: Loading then back to Unauthenticated (no error)',
+      build: () {
+        stubGoogle(const Result<UserProfile?>.success(null));
+        return AuthCubit(repository);
+      },
+      act: (cubit) => cubit.signInWithGoogle(),
+      expect: () => [const AuthLoading(), const Unauthenticated()],
+    );
+
+    blocTest<AuthCubit, AuthState>(
+      'failure: Loading then AuthError',
+      build: () {
+        stubGoogle(
+          const Result<UserProfile?>.failure(
+            AuthFailure(code: 'google-unknownError'),
+          ),
+        );
+        return AuthCubit(repository);
+      },
+      act: (cubit) => cubit.signInWithGoogle(),
+      expect: () => [
+        const AuthLoading(),
+        const AuthError(AuthFailure(code: 'google-unknownError')),
+      ],
+    );
+  });
+
   group('sendPasswordReset', () {
     blocTest<AuthCubit, AuthState>(
       'success: Loading then AuthPasswordResetSent',
