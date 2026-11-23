@@ -144,7 +144,35 @@ class AppStrings {
       'Suggestions are unavailable right now.';
   static const String habitsAiEmpty = 'No new suggestions for now.';
   static const String habitsAiDisclaimer = 'AI can make mistakes.';
+  static const String habitSaveHabit = 'Save habit';
+  static const String habitFormClose = 'Close';
+  static const String habitFormIconLabel = 'Icon';
+  static const String habitFormColorLabel = 'Color';
+  static const String habitFormFrequencyLabel = 'Frequency';
+  static const String habitFormStartDate = 'Start date';
+  static const String habitFormSaved = 'Habit saved';
+  static const String habitFormDecrease = 'Decrease';
+  static const String habitFormIncrease = 'Increase';
+  static const String habitFrequencyDaily = 'Daily';
+  static const String habitFrequencyWeekdays = 'Weekdays';
+  static const String habitFrequencyTimesPerWeek = 'Times per week';
 
+  static String habitFormTimesPerWeekValue(int times) =>
+      times == 1 ? '1 time per week' : '$times times per week';
+
+  static String habitWeekdayLetter(int weekday) =>
+      const ['M', 'T', 'W', 'T', 'F', 'S', 'S'][weekday - 1];
+
+  static String habitWeekdayName(int weekday) => const [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ][weekday - 1];
+  
   // ===== Focus (M4) =====
   static const String focusTitle = 'Focus';
   static const String focusModeFocus = 'Focus';
