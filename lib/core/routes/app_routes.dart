@@ -35,6 +35,9 @@ class AppRoutes {
   static const String focus = '/focus'; // ?taskId=&studySessionId=
   static const String focusSettings = '/focus/settings';
   static const String focusStats = '/focus/stats';
+  static const String newHabit = '/habits/new';
+  static const String habitDetail = '/habits/:id';
+  static const String editHabit = '/habits/:id/edit';
   static String taskPath(String id) => '/tasks/$id';
   static String editTaskPath(String id) => '/tasks/$id/edit';
   static String focusPath({String? taskId, String? studySessionId}) {
@@ -48,4 +51,6 @@ class AppRoutes {
       queryParameters: query.isEmpty ? null : query,
     ).toString();
   }
+  static String habitPath(String id) => '/habits/$id';
+  static String editHabitPath(String id) => '/habits/$id/edit';
 }
