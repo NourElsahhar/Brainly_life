@@ -34,6 +34,7 @@ import 'package:brainly_life/features/tasks/tasks_injection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:brainly_life/features/auth/data/repositories/onboarding_store.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
@@ -59,8 +60,17 @@ Future<void> configureDependencies({bool? useMocks}) async {
 
   // Router. It starts as "unknown" (the splash screen).
   // app.dart updates it from AuthCubit (signed in or signed out).
+  // Onboarding: shown only the first time the app opens on a phone.
+  // load() reads the saved flag BEFORE the router starts.
+  final onboardingStore =
+      mocks ? MockOnboardingStore() : SharedPrefsOnboardingStore();
+  await onboardingStore.load();
+  getIt.registerSingleton<OnboardingStore>(onboardingStore);
+
   getIt.registerLazySingleton<RouterAuthState>(
-    () => RouterAuthState.withSplash(),
+    () => RouterAuthState.app(
+      hasSeenOnboarding: () => onboardingStore.hasSeen,
+    ),
   );
   getIt.registerLazySingleton<GoRouter>(
     () => createAppRouter(getIt<RouterAuthState>()),
@@ -76,3 +86,4 @@ Future<void> configureDependencies({bool? useMocks}) async {
   registerAnalyticsFeature(getIt, useMocks: mocks);
   registerAiAssistantFeature(getIt, useMocks: mocks);
 }
+

@@ -84,13 +84,18 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   /// Fades [child] in, and slides it up a little when [slide] is not 0.
-  Widget _reveal(Animation<double> animation, Widget child,
-      {double slide = 0}) {
+  Widget _reveal(
+    Animation<double> animation,
+    Widget child, {
+    double slide = 0,
+  }) {
     final faded = FadeTransition(opacity: animation, child: child);
     if (slide == 0) return faded;
     return SlideTransition(
-      position: Tween<Offset>(begin: Offset(0, slide), end: Offset.zero)
-          .animate(animation),
+      position: Tween<Offset>(
+        begin: Offset(0, slide),
+        end: Offset.zero,
+      ).animate(animation),
       child: faded,
     );
   }

@@ -6,9 +6,11 @@
 //
 // The BlocListener tells the router when the user signs in or out, and the
 // router then redirects (see core/routes/app_router.dart).
+// Someone who signs in never needs the onboarding, so we mark it as seen.
 
 import 'package:brainly_life/core/routes/router_auth_state.dart';
 import 'package:brainly_life/core/theme/app_theme.dart';
+import 'package:brainly_life/features/auth/data/repositories/onboarding_store.dart';
 import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
 import 'package:brainly_life/features/auth/logic/auth_state.dart';
 import 'package:brainly_life/features/auth/logic/auth_status_mapper.dart';
@@ -27,9 +29,10 @@ class BrainlyLifeApp extends StatelessWidget {
     return BlocProvider<AuthCubit>.value(
       value: getIt<AuthCubit>(),
       child: BlocListener<AuthCubit, AuthState>(
-        listener: (context, state) => routerAuthState.update(
-          authStatusFor(state, routerAuthState.status),
-        ),
+        listener: (context, state) {
+          if (state is Authenticated) getIt<OnboardingStore>().markSeen();
+          routerAuthState.update(authStatusFor(state, routerAuthState.status));
+        },
         child: MaterialApp.router(
           debugShowCheckedModeBanner: false,
           title: 'Baseet',
