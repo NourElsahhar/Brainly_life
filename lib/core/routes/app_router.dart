@@ -134,7 +134,8 @@ GoRouter createAppRouter(
         ],
       ),
       // Full screen (open on top of the bottom bar).
-      ...(fullScreenRoutes ?? [...tasksRoutes, ...focusRoutes]),
+            ...(fullScreenRoutes ??
+          [...tasksRoutes, ...focusRoutes, ...habitsFullScreenRoutes]),
     ],
   );
 }

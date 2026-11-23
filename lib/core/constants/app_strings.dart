@@ -24,9 +24,9 @@ class AppStrings {
 
   // ===== Habits (M4) =====
   static const String habitsTitle = 'Habits';
-  static const String habitsEmptyTitle = 'Add your first habit';
+  static const String habitsEmptyTitle = 'Start your first habit';
   static const String habitsEmptyMessage =
-      'Small daily habits add up. Start with one.';
+      'Small daily habits add up. Pick one to begin.';
   static const String habitsAddAction = 'Add habit';
   static const String habitsNothingDueTitle = 'Nothing due today';
   static const String habitsNothingDueMessage = 'Enjoy your day off.';
@@ -52,6 +52,22 @@ class AppStrings {
   static String habitsProgress(int done, int total) => '$done of $total done';
 
   static String habitStreakDays(int days) => days == 1 ? '1 day' : '$days days';
+
+    static const String habitsEmptyCta = 'New habit';
+  static const String habitsDoneToday = 'done today';
+  static const String habitsAllDone = 'All done for today!';
+  static const String habitsFocusTooltip = 'Focus timer';
+  static const String habitsAddTooltip = 'Add habit';
+  static const String habitMarkDone = 'Mark as done';
+  static const String habitMarkUndone = 'Mark as not done';
+  static const String habitTemplateRead = 'Read 10 pages';
+  static const String habitTemplateWater = 'Drink water';
+  static const String habitTemplateWalk = 'Walk 15 min';
+
+  static String habitsKeepGoing(String? name) =>
+      name == null ? 'Keep going!' : 'Keep going, $name!';
+
+  static String habitStreakLabel(int days) => '$days-day streak';
 
   // ===== Focus (M4) =====
   static const String focusTitle = 'Focus';
