@@ -25,12 +25,14 @@ class HabitDetailCubit extends Cubit<HabitDetailState> {
   }) : _repository = repository,
        _habitId = habitId,
        _timezone = timezone,
+       _weekStartDay = weekStartDay,
        _calculator = StreakCalculator(weekStartDay: weekStartDay),
        super(const HabitDetailInitial());
 
   final HabitRepository _repository;
   final String _habitId;
   final String _timezone;
+  final int _weekStartDay;
   final StreakCalculator _calculator;
 
   Future<void> load() => _fetch(showLoading: true);
@@ -138,6 +140,7 @@ class HabitDetailCubit extends Cubit<HabitDetailState> {
         rate30: rate(30),
         doneLast7: last7.done,
         dueLast7: last7.due,
+        weekStartDay: _weekStartDay,
       ),
     );
   }
