@@ -144,6 +144,7 @@ class AppStrings {
       'Suggestions are unavailable right now.';
   static const String habitsAiEmpty = 'No new suggestions for now.';
   static const String habitsAiDisclaimer = 'AI can make mistakes.';
+
   static const String habitSaveHabit = 'Save habit';
   static const String habitFormClose = 'Close';
   static const String habitFormIconLabel = 'Icon';
