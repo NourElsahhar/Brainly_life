@@ -54,6 +54,7 @@ class HabitDetailLoaded extends HabitDetailState {
     required this.rate30,
     required this.doneLast7,
     required this.dueLast7,
+    required this.weekStartDay,
     this.actionFailure,
   });
 
@@ -77,6 +78,9 @@ class HabitDetailLoaded extends HabitDetailState {
   /// Done and due days in the last 7 days, for the "6/7" text.
   final int doneLast7;
   final int dueLast7;
+
+  /// First day of the week (1 = Monday ... 7 = Sunday), for the calendar.
+  final int weekStartDay;
 
   /// Set when archive, delete or a day change failed. The screen shows it in
   /// a snackbar.
@@ -122,6 +126,7 @@ class HabitDetailLoaded extends HabitDetailState {
       rate30: rate30,
       doneLast7: doneLast7,
       dueLast7: dueLast7,
+      weekStartDay: weekStartDay,
       actionFailure: clearActionFailure
           ? null
           : (actionFailure ?? this.actionFailure),
@@ -140,6 +145,7 @@ class HabitDetailLoaded extends HabitDetailState {
     rate30,
     doneLast7,
     dueLast7,
+    weekStartDay,
     actionFailure,
   ];
 }

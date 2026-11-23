@@ -173,7 +173,31 @@ class AppStrings {
     'Saturday',
     'Sunday',
   ][weekday - 1];
-  
+  static const String habitDetailCurrentStreak = 'Current streak';
+  static const String habitDetailBestStreak = 'Best streak';
+  static const String habitDetailLast30Days = 'Last 30 days';
+  static const String habitDetailLast7Days = 'Last 7 days';
+  static const String habitDetailCompletion = 'Completion';
+  static const String habitDetailEditTooltip = 'Edit habit';
+  static const String habitDetailPrevMonth = 'Previous month';
+  static const String habitDetailNextMonth = 'Next month';
+  static const String habitDetailArchivedBadge = 'Archived';
+  static const String habitEveryDay = 'Every day';
+
+  static String habitEveryWeekdays(String days) => 'Every $days';
+
+  static String habitTimesPerWeekSubtitle(int times) =>
+      times == 1 ? 'Once a week' : '$times times a week';
+
+  static String habitWeekdayShort(int weekday) =>
+      const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][weekday - 1];
+
+  static String habitDeleteConfirmWithStreak(int days) =>
+      'Your $days-day streak and history will be lost. You can archive it instead.';
+
+  static String habitDetailCompletionDays(int done, int due) => '$done/$due';
+
+  static String habitDetailPercent(double rate) => '${(rate * 100).round()}%';
   // ===== Focus (M4) =====
   static const String focusTitle = 'Focus';
   static const String focusModeFocus = 'Focus';
