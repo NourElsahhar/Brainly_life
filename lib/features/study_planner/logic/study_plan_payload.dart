@@ -52,7 +52,8 @@ class StudyPlanPayloadBuilder {
   final Clock clock;
   final String timezone;
 
-  String get todayKey => DateKeyUtils.toDateKey(clock.now(), timezone: timezone);
+  String get todayKey =>
+      DateKeyUtils.toDateKey(clock.now(), timezone: timezone);
 
   /// The exam day of [subject] in the user's timezone.
   String examDateKey(Subject subject) =>

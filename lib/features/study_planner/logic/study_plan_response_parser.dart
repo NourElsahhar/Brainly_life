@@ -64,7 +64,9 @@ class StudyPlanResponseParser {
     }
     final minutes = raw['plannedMinutes'];
     if (minutes is! int) {
-      throw FormatException('Session $index: "plannedMinutes" is not a number.');
+      throw FormatException(
+        'Session $index: "plannedMinutes" is not a number.',
+      );
     }
 
     return StudySession(
