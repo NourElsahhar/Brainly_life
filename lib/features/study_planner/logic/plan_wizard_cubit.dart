@@ -19,12 +19,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// fails, nothing is saved and the user can try again. Saving happens later,
 /// in the preview, after the user accepts the plan.
 class PlanWizardCubit extends Cubit<PlanWizardState> {
-  PlanWizardCubit(
+   PlanWizardCubit(
     this._repository,
     this._generator, {
-    required StudyPlanPayloadBuilder payloadBuilder,
-  }) : _payloadBuilder = payloadBuilder,
-       super(const PlanWizardState(status: PlanWizardStatus.loading));
+    required this._payloadBuilder,
+  }) : super(const PlanWizardState(status: PlanWizardStatus.loading));
 
   /// The session lengths the user can pick (design: 25, 45, 60 min).
   static const List<int> sessionLengths = [25, 45, 60];
