@@ -96,34 +96,35 @@ void main() {
   });
 
   group('load', () {
-    test('lists plannable subjects, soonest exam first, all selected', () async {
-      final cubit = newCubit();
-      await cubit.load();
+    test(
+      'lists plannable subjects, soonest exam first, all selected',
+      () async {
+        final cubit = newCubit();
+        await cubit.load();
 
-      final state = cubit.state;
-      expect(state.status, PlanWizardStatus.editing);
-      expect(state.step, 1);
-      expect(state.subjects.map((s) => s.subject.name), ['Physics', 'Math']);
-      // Done topics are not offered.
-      expect(state.subjects.first.topics.map((t) => t.title), [
-        'Optics',
-        'Waves',
-      ]);
-      expect(state.selectedTopicIds, hasLength(3));
-      expect(state.minutesPerWeekday, {
-        for (var day = 1; day <= 7; day++)
-          day: PlanWizardCubit.defaultDayMinutes,
-      });
-      expect(state.maxSessionMinutes, 45);
-    });
+        final state = cubit.state;
+        expect(state.status, PlanWizardStatus.editing);
+        expect(state.step, 1);
+        expect(state.subjects.map((s) => s.subject.name), ['Physics', 'Math']);
+        // Done topics are not offered.
+        expect(state.subjects.first.topics.map((t) => t.title), [
+          'Optics',
+          'Waves',
+        ]);
+        expect(state.selectedTopicIds, hasLength(3));
+        expect(state.minutesPerWeekday, {
+          for (var day = 1; day <= 7; day++)
+            day: PlanWizardCubit.defaultDayMinutes,
+        });
+        expect(state.maxSessionMinutes, 45);
+      },
+    );
 
     test('from a subject page only its topics start selected', () async {
       final cubit = newCubit();
       await cubit.load(subjectId: math.id);
 
-      expect(cubit.state.selectedSubjects.map((s) => s.subject.name), [
-        'Math',
-      ]);
+      expect(cubit.state.selectedSubjects.map((s) => s.subject.name), ['Math']);
     });
 
     test('leaves out exams today and subjects with nothing left', () async {
@@ -151,12 +152,10 @@ void main() {
 
     test('a failed load shows loadFailed', () async {
       final failing = _FailingRepository();
-      when(() => failing.getSubjects()).thenAnswer(
-        (_) async => const Result.failure(NetworkFailure()),
-      );
-      when(
-        () => failing.getTopics(),
-      ).thenAnswer((_) async => const Result.success([]));
+      when(() => failing.getSubjects())
+          .thenAnswer((_) async => const Result.failure(NetworkFailure()));
+      when(() => failing.getTopics())
+          .thenAnswer((_) async => const Result.success([]));
 
       final cubit = newCubit(failing);
       await cubit.load();
@@ -179,9 +178,7 @@ void main() {
       expect(cubit.state.isSelected(waves), isTrue);
 
       cubit.toggleSubject(physics.id); // all selected -> none
-      expect(cubit.state.selectedSubjects.map((s) => s.subject.name), [
-        'Math',
-      ]);
+      expect(cubit.state.selectedSubjects.map((s) => s.subject.name), ['Math']);
     });
 
     test('next needs at least one topic', () async {
@@ -213,17 +210,20 @@ void main() {
       return cubit;
     }
 
-    test('0 minutes makes a day off; session length is one of 25/45/60', () async {
-      final cubit = await atStep2();
+    test(
+      '0 minutes makes a day off; session length is one of 25/45/60',
+      () async {
+        final cubit = await atStep2();
 
-      cubit
-        ..setDayMinutes(DateTime.friday, 0)
-        ..sessionLengthChanged(60)
-        ..sessionLengthChanged(50); // not offered: ignored
+        cubit
+          ..setDayMinutes(DateTime.friday, 0)
+          ..sessionLengthChanged(60)
+          ..sessionLengthChanged(50); // not offered: ignored
 
-      expect(cubit.state.daysOff, {DateTime.friday});
-      expect(cubit.state.maxSessionMinutes, 60);
-    });
+        expect(cubit.state.daysOff, {DateTime.friday});
+        expect(cubit.state.maxSessionMinutes, 60);
+      },
+    );
 
     test('without study time nothing is generated', () async {
       final cubit = await atStep2();
@@ -239,9 +239,8 @@ void main() {
     });
 
     test('sends only the selected topics and the chosen time', () async {
-      when(
-        () => generator.generate(any()),
-      ).thenAnswer((_) async => Result.success(_generated));
+      when(() => generator.generate(any()))
+          .thenAnswer((_) async => Result.success(_generated));
       final cubit = await atStep2();
       final waves = cubit.state.subjects.first.topics.last;
       cubit
@@ -267,9 +266,8 @@ void main() {
     });
 
     test('an AI failure keeps the choices and allows Try again', () async {
-      when(
-        () => generator.generate(any()),
-      ).thenAnswer((_) async => const Result.failure(AiFailure()));
+      when(() => generator.generate(any()))
+          .thenAnswer((_) async => const Result.failure(AiFailure()));
       final cubit = await atStep2();
 
       await cubit.generate();
@@ -280,9 +278,8 @@ void main() {
       expect(cubit.state.selectedTopicIds, hasLength(3));
       expect(cubit.state.result, isNull);
 
-      when(
-        () => generator.generate(any()),
-      ).thenAnswer((_) async => Result.success(_generated));
+      when(() => generator.generate(any()))
+          .thenAnswer((_) async => Result.success(_generated));
       await cubit.generate(); // Try again
 
       expect(cubit.state.status, PlanWizardStatus.generated);
@@ -290,9 +287,8 @@ void main() {
     });
 
     test('generating does not save anything', () async {
-      when(
-        () => generator.generate(any()),
-      ).thenAnswer((_) async => Result.success(_generated));
+      when(() => generator.generate(any()))
+          .thenAnswer((_) async => Result.success(_generated));
       final cubit = await atStep2();
 
       await cubit.generate();
@@ -301,9 +297,8 @@ void main() {
     });
 
     test('after the preview closes the wizard can be edited again', () async {
-      when(
-        () => generator.generate(any()),
-      ).thenAnswer((_) async => Result.success(_generated));
+      when(() => generator.generate(any()))
+          .thenAnswer((_) async => Result.success(_generated));
       final cubit = await atStep2();
       await cubit.generate();
 
