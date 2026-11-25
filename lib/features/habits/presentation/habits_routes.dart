@@ -3,15 +3,15 @@
 //   habitsRoutes           -> the Habits tab (inside the bottom bar)
 //   habitsFullScreenRoutes -> new / detail / edit (full screen, no bottom bar)
 // The new habit form can receive a HabitTemplate in `extra`. The edit form
-// receives the Habit to edit in `extra` (the detail screen passes it). The
-// detail screen comes in the next step and shows a placeholder until then.
+// receives the Habit to edit in `extra` (the detail screen passes it).
+// The detail screen loads the habit by the id in the path.
 
 import 'package:brainly_life/core/errors/failure.dart';
 import 'package:brainly_life/core/routes/app_routes.dart';
-import 'package:brainly_life/core/routes/placeholder_screen.dart';
 import 'package:brainly_life/core/widgets/widgets.dart';
 import 'package:brainly_life/features/habits/data/models/habit_model.dart';
 import 'package:brainly_life/features/habits/logic/habit_templates.dart';
+import 'package:brainly_life/features/habits/presentation/screens/habit_detail_screen.dart';
 import 'package:brainly_life/features/habits/presentation/screens/habit_form_screen.dart';
 import 'package:brainly_life/features/habits/presentation/screens/habits_screen.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +35,8 @@ final List<RouteBase> habitsFullScreenRoutes = [
   ),
   GoRoute(
     path: AppRoutes.habitDetail,
-    builder: (context, state) => const PlaceholderScreen(title: 'Habit'),
+    builder: (context, state) =>
+        HabitDetailScreen(habitId: state.pathParameters['id'] ?? ''),
   ),
   GoRoute(
     path: AppRoutes.editHabit,

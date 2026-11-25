@@ -35,12 +35,22 @@ void registerAuthFeature(GetIt getIt, {required bool useMocks}) {
           ),
   );
 
-  // The 3 numbers on Profile. Real mode shows zeros until the habits,
-  // focus and tasks owners register their adapter here.
+  // The 3 numbers on Profile. Habits, focus and tasks each register a
+  // source (ProfileStreakSource ...); a missing one shows 0.
   getIt.registerLazySingleton<ProfileStatsProvider>(
     () => useMocks
         ? const MockProfileStatsProvider()
-        : const EmptyProfileStatsProvider(),
+        : CombinedProfileStatsProvider(
+            streak: () => getIt.isRegistered<ProfileStreakSource>()
+                ? getIt<ProfileStreakSource>()
+                : null,
+            study: () => getIt.isRegistered<ProfileStudySource>()
+                ? getIt<ProfileStudySource>()
+                : null,
+            tasks: () => getIt.isRegistered<ProfileTasksSource>()
+                ? getIt<ProfileTasksSource>()
+                : null,
+          ),
   );
 
   getIt.registerLazySingleton<AuthCubit>(

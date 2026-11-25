@@ -30,7 +30,8 @@ class DeleteAccountDialog extends StatefulWidget {
 class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
   final _controller = TextEditingController();
 
-  bool get _confirmed => _controller.text.trim() == AppStrings.deleteConfirmWord;
+  bool get _confirmed =>
+      _controller.text.trim() == AppStrings.deleteConfirmWord;
 
   @override
   void dispose() {
@@ -74,9 +75,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
             Text(
               AppStrings.deleteMessage,
               textAlign: TextAlign.center,
-              style: context.text.bodyMedium?.copyWith(
-                color: p.textSecondary,
-              ),
+              style: context.text.bodyMedium?.copyWith(color: p.textSecondary),
             ),
             const SizedBox(height: AppSpacing.s5),
             TextField(

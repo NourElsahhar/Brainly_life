@@ -126,20 +126,16 @@ class UserSettings extends Equatable {
 
   @override
   List<Object?> get props => [
-        dailyStudyHours,
-        preferredStudyTime,
-        weekStartDay,
-        timezone,
-        themeMode,
-        aiEnabled,
-      ];
+    dailyStudyHours,
+    preferredStudyTime,
+    weekStartDay,
+    timezone,
+    themeMode,
+    aiEnabled,
+  ];
 
   /// Finds the enum value with the same name as [raw], or returns [fallback].
-  static T _parseEnum<T extends Enum>(
-    List<T> values,
-    Object? raw,
-    T fallback,
-  ) {
+  static T _parseEnum<T extends Enum>(List<T> values, Object? raw, T fallback) {
     for (final value in values) {
       if (value.name == raw) return value;
     }

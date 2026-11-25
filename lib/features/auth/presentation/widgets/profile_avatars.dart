@@ -34,18 +34,63 @@ class ProfileAvatarOption {
 }
 
 const List<ProfileAvatarOption> profileAvatars = [
-  ProfileAvatarOption('rocket', 'Rocket', Icons.rocket_launch_rounded, Color(0xFF6C5CE7)),
-  ProfileAvatarOption('book', 'Book', Icons.auto_stories_rounded, Color(0xFF14B8A6)),
-  ProfileAvatarOption('brain', 'Brain', Icons.psychology_rounded, Color(0xFFEC4899)),
-  ProfileAvatarOption('idea', 'Idea', Icons.lightbulb_rounded, Color(0xFFF59E0B)),
+  ProfileAvatarOption(
+    'rocket',
+    'Rocket',
+    Icons.rocket_launch_rounded,
+    Color(0xFF6C5CE7),
+  ),
+  ProfileAvatarOption(
+    'book',
+    'Book',
+    Icons.auto_stories_rounded,
+    Color(0xFF14B8A6),
+  ),
+  ProfileAvatarOption(
+    'brain',
+    'Brain',
+    Icons.psychology_rounded,
+    Color(0xFFEC4899),
+  ),
+  ProfileAvatarOption(
+    'idea',
+    'Idea',
+    Icons.lightbulb_rounded,
+    Color(0xFFF59E0B),
+  ),
   ProfileAvatarOption('star', 'Star', Icons.star_rounded, Color(0xFF3B82F6)),
   ProfileAvatarOption('bolt', 'Bolt', Icons.bolt_rounded, Color(0xFF9333EA)),
-  ProfileAvatarOption('coffee', 'Coffee', Icons.local_cafe_rounded, Color(0xFFB45309)),
-  ProfileAvatarOption('music', 'Music', Icons.music_note_rounded, Color(0xFFEF4444)),
-  ProfileAvatarOption('palette', 'Palette', Icons.palette_rounded, Color(0xFF0891B2)),
-  ProfileAvatarOption('plant', 'Plant', Icons.local_florist_rounded, Color(0xFF16A34A)),
+  ProfileAvatarOption(
+    'coffee',
+    'Coffee',
+    Icons.local_cafe_rounded,
+    Color(0xFFB45309),
+  ),
+  ProfileAvatarOption(
+    'music',
+    'Music',
+    Icons.music_note_rounded,
+    Color(0xFFEF4444),
+  ),
+  ProfileAvatarOption(
+    'palette',
+    'Palette',
+    Icons.palette_rounded,
+    Color(0xFF0891B2),
+  ),
+  ProfileAvatarOption(
+    'plant',
+    'Plant',
+    Icons.local_florist_rounded,
+    Color(0xFF16A34A),
+  ),
   ProfileAvatarOption('pet', 'Pet', Icons.pets_rounded, Color(0xFF4F46E5)),
-  ProfileAvatarOption('game', 'Game', Icons.sports_esports_rounded, Color(0xFF475569)),
+  ProfileAvatarOption(
+    'game',
+    'Game',
+    Icons.sports_esports_rounded,
+    Color(0xFF475569),
+  ),
 ];
 
 /// The avatar with this id, or null (no id, or an id that no longer exists).
@@ -148,7 +193,10 @@ class _AvatarPicker extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(AppStrings.profileChooseAvatar, style: context.text.titleLarge),
+            Text(
+              AppStrings.profileChooseAvatar,
+              style: context.text.titleLarge,
+            ),
             const SizedBox(height: AppSpacing.s4),
             GridView.count(
               crossAxisCount: 4,

@@ -121,12 +121,12 @@ class UserProfile extends Equatable {
 
   @override
   List<Object?> get props => [
-        uid,
-        displayName,
-        email,
-        photoUrl,
-        avatarId,
-        createdAt,
-        settings,
-      ];
+    uid,
+    displayName,
+    email,
+    photoUrl,
+    avatarId,
+    createdAt,
+    settings,
+  ];
 }

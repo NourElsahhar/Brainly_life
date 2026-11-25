@@ -83,4 +83,3 @@ class HomeSectionCard<T> extends StatelessWidget {
     );
   }
 }
-

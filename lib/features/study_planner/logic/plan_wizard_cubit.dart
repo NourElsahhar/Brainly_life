@@ -19,7 +19,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// fails, nothing is saved and the user can try again. Saving happens later,
 /// in the preview, after the user accepts the plan.
 class PlanWizardCubit extends Cubit<PlanWizardState> {
-   PlanWizardCubit(
+  PlanWizardCubit(
     this._repository,
     this._generator, {
     required this._payloadBuilder,

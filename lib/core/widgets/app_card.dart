@@ -45,7 +45,8 @@ class AppCard extends StatelessWidget {
     final radius = BorderRadius.circular(AppRadius.card);
 
     final content = Padding(
-      padding: padding ??
+      padding:
+          padding ??
           EdgeInsets.all(
             compact ? AppSpacing.compactCardPadding : AppSpacing.cardPadding,
           ),

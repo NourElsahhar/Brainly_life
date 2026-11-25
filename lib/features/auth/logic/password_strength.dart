@@ -22,6 +22,8 @@
 // Real life: like a padlock. A 3-digit lock is weak, a long code with
 // letters and numbers takes a thief much longer to guess.
 
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 enum PasswordLevel { none, weak, medium, strong }
 
 class PasswordStrength {
@@ -42,7 +44,8 @@ class PasswordStrength {
   static final RegExp _symbol = RegExp(r'[^A-Za-z0-9]');
 
   static PasswordStrength of(String password) {
-    if (password.isEmpty) return const PasswordStrength._(PasswordLevel.none, 0);
+    if (password.isEmpty)
+      return const PasswordStrength._(PasswordLevel.none, 0);
 
     var score = 0;
     if (password.length >= minLength) score++;

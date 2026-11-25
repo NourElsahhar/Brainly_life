@@ -7,12 +7,13 @@
 //   3. npm test
 
 import {KNOWN_FEATURES} from "./config";
+import * as habitSuggest from "./features/habitSuggest";
 import * as studyPlan from "./features/studyPlan";
 import {FeatureModule} from "./types";
 
 const modules: FeatureModule[] = [
   studyPlan, // M2
-  // habitSuggest,  // M4: ./features/habitSuggest
+  habitSuggest, // M4
   // chat,          // M5: ./features/chat
   // dailyTip,      // M5: ./features/dailyTip
   // weeklyInsight, // M5: ./features/weeklyInsight

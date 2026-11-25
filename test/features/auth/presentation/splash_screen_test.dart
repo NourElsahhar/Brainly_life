@@ -29,8 +29,9 @@ void main() {
   }
 
   group('SplashScreen', () {
-    testWidgets('has the name, the tagline, the logo and the spinner',
-        (tester) async {
+    testWidgets('has the name, the tagline, the logo and the spinner', (
+      tester,
+    ) async {
       await pumpSplash(tester);
 
       expect(find.text('Baseet'), findsOneWidget);
@@ -39,7 +40,7 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-        testWidgets('everything fades in, in order', (tester) async {
+    testWidgets('everything fades in, in order', (tester) async {
       await pumpSplash(tester);
       final name = find.text('Baseet');
       final tagline = find.text('Your day, made simpler.');
@@ -56,8 +57,9 @@ void main() {
       expect(opacityOf(tester, name), 1);
       expect(opacityOf(tester, tagline), 1);
     });
-    testWidgets('calls onFinished once, after the full duration',
-        (tester) async {
+    testWidgets('calls onFinished once, after the full duration', (
+      tester,
+    ) async {
       var finished = 0;
       await pumpSplash(tester, onFinished: () => finished++);
 

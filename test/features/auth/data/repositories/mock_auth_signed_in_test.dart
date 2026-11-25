@@ -13,8 +13,9 @@ void main() {
   });
 
   test('startSignedIn: the first event is the demo user', () async {
-    final first =
-        await MockAuthRepository(startSignedIn: true).authStateChanges().first;
+    final first = await MockAuthRepository(startSignedIn: true)
+        .authStateChanges()
+        .first;
 
     expect(first.dataOrNull?.email, MockAuthRepository.demoEmail);
   });
@@ -22,9 +23,9 @@ void main() {
   test('startSignedIn: signing out works', () async {
     final repository = MockAuthRepository(startSignedIn: true);
     final events = <String?>[];
-    final subscription = repository
-        .authStateChanges()
-        .listen((result) => events.add(result.dataOrNull?.email));
+    final subscription = repository.authStateChanges().listen(
+      (result) => events.add(result.dataOrNull?.email),
+    );
     addTearDown(subscription.cancel);
     await Future<void>.delayed(Duration.zero);
 

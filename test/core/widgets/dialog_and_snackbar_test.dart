@@ -48,8 +48,9 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('shows the title, the message and both buttons',
-        (tester) async {
+    testWidgets('shows the title, the message and both buttons', (
+      tester,
+    ) async {
       await openDialog(tester, (_) {});
 
       expect(find.text('Delete task?'), findsOneWidget);
@@ -119,10 +120,7 @@ void main() {
     });
 
     testWidgets('info shows the message and an info icon', (tester) async {
-      await pumpHost(
-        tester,
-        (context) => AppSnackBar.info(context, 'Synced'),
-      );
+      await pumpHost(tester, (context) => AppSnackBar.info(context, 'Synced'));
       await showAndWait(tester);
 
       expect(find.text('Synced'), findsOneWidget);

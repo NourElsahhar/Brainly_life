@@ -12,7 +12,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   Future<void> pumpView(WidgetTester tester, Widget view) {
     return tester.pumpWidget(
-      MaterialApp(theme: AppTheme.light, home: Scaffold(body: view)),
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(body: view),
+      ),
     );
   }
 

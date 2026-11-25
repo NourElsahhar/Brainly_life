@@ -94,7 +94,7 @@ class TaskDetailView extends StatelessWidget {
       builder: (context, state) {
         final loaded = state is TaskDetailLoaded ? state : null;
         return Scaffold(
-                    appBar: BaseetAppBar.inner(
+          appBar: BaseetAppBar.inner(
             title: 'Task',
             actions: [
               if (loaded != null) ...[

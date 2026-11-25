@@ -4,9 +4,8 @@
 // tip as the name) and a dismiss button. It needs a HabitSuggestionCubit above
 // it in the tree.
 //
-// HabitSuggestionsSection = the card with its own cubit from getIt. Use it in
-// the Habits screen once HabitSuggestionPort is registered (see the notes for
-// M5 in the PR).
+// HabitSuggestionsSection = the card with its own cubit from getIt. The
+// Habits screen shows it at the bottom of the list.
 
 import 'package:brainly_life/core/constants/app_strings.dart';
 import 'package:brainly_life/core/routes/app_routes.dart';

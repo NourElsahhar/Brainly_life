@@ -57,7 +57,7 @@ class ActiveTasksView extends StatelessWidget {
         );
       },
       builder: (context, state) => switch (state) {
-                TaskListInitial() || TaskListLoading() => const TasksLoadingList(),
+        TaskListInitial() || TaskListLoading() => const TasksLoadingList(),
         TaskListError(:final failure) => ErrorView(
           failure: failure,
           onRetry: cubit.load,

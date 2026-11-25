@@ -18,16 +18,29 @@
 // own owner. Ask for them with getIt<TaskSummaryProvider>().
 
 import 'package:brainly_life/features/auth/data/models/user_settings_model.dart';
+import 'package:brainly_life/features/auth/data/repositories/profile_stats_provider.dart';
 import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
 import 'package:brainly_life/features/auth/logic/auth_state.dart';
+import 'package:brainly_life/features/habits/data/datasources/habit_remote_data_source.dart';
 import 'package:brainly_life/features/habits/data/models/habit_model.dart';
+import 'package:brainly_life/features/habits/data/repositories/firestore_habit_repository.dart';
+import 'package:brainly_life/features/habits/data/repositories/gateway_habit_suggestion_port.dart';
+import 'package:brainly_life/features/habits/data/repositories/habit_creation_port.dart';
+import 'package:brainly_life/features/habits/data/repositories/habit_profile_streak_source.dart';
 import 'package:brainly_life/features/habits/data/repositories/habit_repository.dart';
+import 'package:brainly_life/features/habits/data/repositories/habit_suggestion_port.dart';
 import 'package:brainly_life/features/habits/data/repositories/habit_summary_provider.dart';
 import 'package:brainly_life/features/habits/data/repositories/mock_habit_repository.dart';
+import 'package:brainly_life/features/habits/data/repositories/mock_habit_suggestion_port.dart';
+import 'package:brainly_life/features/habits/data/repositories/repository_habit_creation_port.dart';
 import 'package:brainly_life/features/habits/logic/habit_detail_cubit.dart';
 import 'package:brainly_life/features/habits/logic/habit_form_cubit.dart';
+import 'package:brainly_life/features/habits/logic/habit_suggestion_cubit.dart';
 import 'package:brainly_life/features/habits/logic/habits_cubit.dart';
 import 'package:brainly_life/features/home/data/repositories/home_summary_port.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:brainly_life/features/habits/logic/habit_templates.dart';
 
@@ -47,10 +60,45 @@ String? _firstName(GetIt getIt) {
 }
 
 void registerHabitsFeature(GetIt getIt, {required bool useMocks}) {
-  // The Firestore repository comes in Phase 3. Until then the mock (with
-  // sample habits) is used in both modes.
+  // Mock mode: sample habits in memory. Real mode: users/{uid}/habits and
+  // users/{uid}/habitLogs in Firestore.
   getIt.registerLazySingleton<HabitRepository>(
-    () => MockHabitRepository.withSampleData(),
+    () => useMocks
+        ? MockHabitRepository.withSampleData()
+        : FirestoreHabitRepository(
+            dataSource: HabitRemoteDataSource(
+              auth: getIt<FirebaseAuth>(),
+              firestore: getIt<FirebaseFirestore>(),
+            ),
+            timezone: () => _settings(getIt).timezone,
+            weekStartDay: () => _settings(getIt).weekStartDay,
+          ),
+  );
+
+  // For M5's assistant: "create a habit" after the user confirms.
+  getIt.registerLazySingleton<HabitCreationPort>(
+    () => RepositoryHabitCreationPort(
+      getIt<HabitRepository>(),
+      timezone: () => _settings(getIt).timezone,
+    ),
+  );
+
+  // The day streak on Profile.
+  getIt.registerLazySingleton<ProfileStreakSource>(
+    () => HabitProfileStreakSource(getIt<HabitRepository>()),
+  );
+
+  // AI suggestions on the Habits screen (the server builds the statistics).
+  getIt.registerLazySingleton<HabitSuggestionPort>(
+    () => useMocks
+        ? MockHabitSuggestionPort(delay: const Duration(milliseconds: 600))
+        : GatewayHabitSuggestionPort.firebase(
+            functions: getIt<FirebaseFunctions>(),
+            aiEnabled: () => _settings(getIt).aiEnabled,
+          ),
+  );
+  getIt.registerFactory(
+    () => HabitSuggestionCubit(port: getIt<HabitSuggestionPort>()),
   );
 
   // The "Habits" card on Home.

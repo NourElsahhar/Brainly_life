@@ -53,9 +53,7 @@ class PasswordStrengthMeter extends StatelessWidget {
             Expanded(
               child: Text(
                 AppStrings.passwordRule,
-                style: context.text.bodySmall?.copyWith(
-                  color: p.textSecondary,
-                ),
+                style: context.text.bodySmall?.copyWith(color: p.textSecondary),
               ),
             ),
             if (label != null)

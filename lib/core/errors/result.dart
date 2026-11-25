@@ -41,25 +41,24 @@ sealed class Result<T> {
 
   /// The data if this is a Success, otherwise null.
   T? get dataOrNull => switch (this) {
-        Success<T>(:final data) => data,
-        Failed<T>() => null,
-      };
+    Success<T>(:final data) => data,
+    Failed<T>() => null,
+  };
 
   /// The failure if this is a Failed, otherwise null.
   Failure? get failureOrNull => switch (this) {
-        Success<T>() => null,
-        Failed<T>(:final failure) => failure,
-      };
+    Success<T>() => null,
+    Failed<T>(:final failure) => failure,
+  };
 
   /// Runs one of the two callbacks depending on the result.
   R fold<R>({
     required R Function(T data) onSuccess,
     required R Function(Failure failure) onFailure,
-  }) =>
-      switch (this) {
-        Success<T>(:final data) => onSuccess(data),
-        Failed<T>(:final failure) => onFailure(failure),
-      };
+  }) => switch (this) {
+    Success<T>(:final data) => onSuccess(data),
+    Failed<T>(:final failure) => onFailure(failure),
+  };
 }
 
 // ignore: deprecated_member_use

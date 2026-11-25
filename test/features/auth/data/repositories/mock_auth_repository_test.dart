@@ -21,25 +21,27 @@ void main() {
       expect(result.dataOrNull?.email, MockAuthRepository.demoEmail);
     });
 
-    test('a wrong password or an unknown email gives the same failure',
-        () async {
-      final wrongPassword = await repository.signInWithEmail(
-        email: MockAuthRepository.demoEmail,
-        password: 'wrong',
-      );
-      final unknownEmail = await repository.signInWithEmail(
-        email: 'nobody@example.com',
-        password: 'password123',
-      );
-
-      for (final result in [wrongPassword, unknownEmail]) {
-        expect(result.failureOrNull, isA<AuthFailure>());
-        expect(
-          result.failureOrNull?.userMessage,
-          'Incorrect email or password.',
+    test(
+      'a wrong password or an unknown email gives the same failure',
+      () async {
+        final wrongPassword = await repository.signInWithEmail(
+          email: MockAuthRepository.demoEmail,
+          password: 'wrong',
         );
-      }
-    });
+        final unknownEmail = await repository.signInWithEmail(
+          email: 'nobody@example.com',
+          password: 'password123',
+        );
+
+        for (final result in [wrongPassword, unknownEmail]) {
+          expect(result.failureOrNull, isA<AuthFailure>());
+          expect(
+            result.failureOrNull?.userMessage,
+            'Incorrect email or password.',
+          );
+        }
+      },
+    );
   });
 
   group('registerWithEmail', () {
@@ -92,12 +94,11 @@ void main() {
     expect(result.isSuccess, isTrue);
   });
 
-  test('authStateChanges starts signed out and follows every change',
-      () async {
+  test('authStateChanges starts signed out and follows every change', () async {
     final emitted = <UserProfile?>[];
-    final subscription = repository
-        .authStateChanges()
-        .listen((result) => emitted.add(result.dataOrNull));
+    final subscription = repository.authStateChanges().listen(
+      (result) => emitted.add(result.dataOrNull),
+    );
     addTearDown(subscription.cancel);
     await Future<void>.delayed(Duration.zero);
 

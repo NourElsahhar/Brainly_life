@@ -43,7 +43,8 @@ void main() {
   );
 
   void stubSave(Result<void> result) =>
-      when(() => repository.updateSettings(any())).thenAnswer((_) async => result);
+      when(() => repository.updateSettings(any()))
+          .thenAnswer((_) async => result);
 
   test('starts with the settings of the signed-in user', () {
     final cubit = build();
@@ -105,9 +106,9 @@ void main() {
   group('deleteAccount', () {
     blocTest<SettingsCubit, SettingsState>(
       'success: deleting, then done',
-      setUp: () => when(
-        () => repository.deleteAccount(),
-      ).thenAnswer((_) async => const Result<void>.success(null)),
+      setUp: () =>
+          when(() => repository.deleteAccount())
+              .thenAnswer((_) async => const Result<void>.success(null)),
       build: build,
       act: (cubit) async => expect(await cubit.deleteAccount(), isTrue),
       expect: () => [

@@ -68,7 +68,7 @@ void main() {
     expect(find.byTooltip('Settings'), findsNothing);
   });
 
-    testWidgets('inner: titleWidget is shown instead of the title', (
+  testWidgets('inner: titleWidget is shown instead of the title', (
     tester,
   ) async {
     await pumpBar(

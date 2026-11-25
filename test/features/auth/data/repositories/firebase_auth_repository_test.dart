@@ -70,10 +70,8 @@ void main() {
 
       expect(result.dataOrNull, profile);
       verify(
-        () => dataSource.signInWithEmail(
-          email: 'a@b.com',
-          password: 'secret123',
-        ),
+        () =>
+            dataSource.signInWithEmail(email: 'a@b.com', password: 'secret123'),
       ).called(1);
       verify(
         () => dataSource.loadOrCreateProfile(user, timezone: 'Africa/Cairo'),
@@ -116,54 +114,58 @@ void main() {
   });
 
   group('registerWithEmail', () {
-    test('creates the account with the trimmed values and the timezone',
-        () async {
-      when(
-        () => dataSource.registerWithEmail(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-          displayName: any(named: 'displayName'),
-          timezone: any(named: 'timezone'),
-        ),
-      ).thenAnswer((_) async => profile);
+    test(
+      'creates the account with the trimmed values and the timezone',
+      () async {
+        when(
+          () => dataSource.registerWithEmail(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+            displayName: any(named: 'displayName'),
+            timezone: any(named: 'timezone'),
+          ),
+        ).thenAnswer((_) async => profile);
 
-      final result = await repository.registerWithEmail(
-        displayName: '  Nour ',
-        email: ' a@b.com ',
-        password: 'secret123',
-      );
+        final result = await repository.registerWithEmail(
+          displayName: '  Nour ',
+          email: ' a@b.com ',
+          password: 'secret123',
+        );
 
-      expect(result.dataOrNull, profile);
-      verify(
-        () => dataSource.registerWithEmail(
+        expect(result.dataOrNull, profile);
+        verify(
+          () => dataSource.registerWithEmail(
+            email: 'a@b.com',
+            password: 'secret123',
+            displayName: 'Nour',
+            timezone: 'Africa/Cairo',
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'an email already in use gives an AuthFailure with its code',
+      () async {
+        when(
+          () => dataSource.registerWithEmail(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+            displayName: any(named: 'displayName'),
+            timezone: any(named: 'timezone'),
+          ),
+        ).thenThrow(FirebaseAuthException(code: 'email-already-in-use'));
+
+        final result = await repository.registerWithEmail(
+          displayName: 'Nour',
           email: 'a@b.com',
           password: 'secret123',
-          displayName: 'Nour',
-          timezone: 'Africa/Cairo',
-        ),
-      ).called(1);
-    });
+        );
 
-    test('an email already in use gives an AuthFailure with its code',
-        () async {
-      when(
-        () => dataSource.registerWithEmail(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-          displayName: any(named: 'displayName'),
-          timezone: any(named: 'timezone'),
-        ),
-      ).thenThrow(FirebaseAuthException(code: 'email-already-in-use'));
-
-      final result = await repository.registerWithEmail(
-        displayName: 'Nour',
-        email: 'a@b.com',
-        password: 'secret123',
-      );
-
-      expect(result.failureOrNull, isA<AuthFailure>());
-      expect(result.failureOrNull?.code, 'email-already-in-use');
-    });
+        expect(result.failureOrNull, isA<AuthFailure>());
+        expect(result.failureOrNull?.code, 'email-already-in-use');
+      },
+    );
 
     test('a timezone problem falls back to UTC', () async {
       final repo = FirebaseAuthRepository(
@@ -259,7 +261,9 @@ void main() {
           any(),
           timezone: any(named: 'timezone'),
         ),
-      ).thenThrow(FirebaseException(plugin: 'cloud_firestore', code: 'unavailable'));
+      ).thenThrow(
+        FirebaseException(plugin: 'cloud_firestore', code: 'unavailable'),
+      );
 
       final results = await repository.authStateChanges().toList();
 
@@ -284,9 +288,9 @@ void main() {
       stubLoadProfile();
 
       final emitted = <UserProfile?>[];
-      final subscription = repository
-          .authStateChanges()
-          .listen((result) => emitted.add(result.dataOrNull));
+      final subscription = repository.authStateChanges().listen(
+        (result) => emitted.add(result.dataOrNull),
+      );
       addTearDown(subscription.cancel);
 
       final registering = repository.registerWithEmail(

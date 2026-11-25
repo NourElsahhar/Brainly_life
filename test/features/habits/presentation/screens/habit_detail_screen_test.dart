@@ -1,4 +1,3 @@
-
 // Widget tests for the habit detail screen: the header and the numbers, marking
 // today in the calendar, archive and delete with confirmation, an archived
 // habit, and a habit that does not exist.
@@ -68,10 +67,8 @@ void main() {
       routes: [
         GoRoute(
           path: AppRoutes.habitDetail,
-          builder: (_, _) => BlocProvider.value(
-            value: cubit,
-            child: const HabitDetailView(),
-          ),
+          builder: (_, _) =>
+              BlocProvider.value(value: cubit, child: const HabitDetailView()),
         ),
         GoRoute(
           path: AppRoutes.habits,

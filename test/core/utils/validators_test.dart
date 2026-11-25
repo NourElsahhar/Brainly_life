@@ -84,15 +84,21 @@ void main() {
 
   group('confirmPassword', () {
     test('rejects empty', () {
-      expect(Validators.confirmPassword('', 'secret123'),
-          'Please confirm your password');
-      expect(Validators.confirmPassword(null, 'secret123'),
-          'Please confirm your password');
+      expect(
+        Validators.confirmPassword('', 'secret123'),
+        'Please confirm your password',
+      );
+      expect(
+        Validators.confirmPassword(null, 'secret123'),
+        'Please confirm your password',
+      );
     });
 
     test('rejects a different password', () {
-      expect(Validators.confirmPassword('secret124', 'secret123'),
-          'Passwords do not match');
+      expect(
+        Validators.confirmPassword('secret124', 'secret123'),
+        'Passwords do not match',
+      );
     });
 
     test('accepts the same password', () {
@@ -102,8 +108,10 @@ void main() {
 
   group('maxLength', () {
     test('rejects longer text and accepts the limit', () {
-      expect(Validators.maxLength('abcd', 3, fieldName: 'Name'),
-          'Name must be at most 3 characters');
+      expect(
+        Validators.maxLength('abcd', 3, fieldName: 'Name'),
+        'Name must be at most 3 characters',
+      );
       expect(Validators.maxLength('abc', 3), isNull);
       expect(Validators.maxLength(null, 3), isNull);
     });

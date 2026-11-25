@@ -43,23 +43,23 @@ class PriorityChip extends StatelessWidget {
     final p = context.palette;
     final (label, icon, color, softColor) = switch (level) {
       PriorityLevel.low => (
-          'Low',
-          Icons.keyboard_arrow_down_rounded,
-          p.info,
-          p.infoSoft,
-        ),
+        'Low',
+        Icons.keyboard_arrow_down_rounded,
+        p.info,
+        p.infoSoft,
+      ),
       PriorityLevel.medium => (
-          'Medium',
-          Icons.drag_handle_rounded,
-          p.warning,
-          p.warningSoft,
-        ),
+        'Medium',
+        Icons.drag_handle_rounded,
+        p.warning,
+        p.warningSoft,
+      ),
       PriorityLevel.high => (
-          'High',
-          Icons.priority_high_rounded,
-          p.error,
-          p.errorSoft,
-        ),
+        'High',
+        Icons.priority_high_rounded,
+        p.error,
+        p.errorSoft,
+      ),
     };
 
     final foreground = selected ? color : p.textSecondary;

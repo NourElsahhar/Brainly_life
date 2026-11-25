@@ -1,7 +1,7 @@
 // HabitSuggestionPort = the contract that gives the Habits screen its AI
 // suggestions. The Habits feature only knows this contract, never the AI
-// client. M5 writes the real one (it calls AiClient with AiFeature.habitSuggest
-// and turns the answer into HabitSuggestion objects).
+// client. The real one is GatewayHabitSuggestionPort (it calls the aiGateway
+// function with the feature habitSuggest).
 //
 // Rules for the real one:
 //   - Send nothing about the user. The server builds the habit statistics

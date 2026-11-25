@@ -102,7 +102,7 @@ class _TasksViewState extends State<TasksView>
         counts == null ? name : '$name ${counts[bucket] ?? 0}';
 
     return Scaffold(
-          appBar: BaseetAppBar.inner(
+      appBar: BaseetAppBar.inner(
         title: 'Tasks',
         titleWidget: _searching
             ? TextField(

@@ -30,15 +30,21 @@ void main() {
     });
 
     test('invalid email and weak password are validation failures', () {
-      expect(FirebaseErrorMapper.map(auth('invalid-email')),
-          isA<ValidationFailure>());
-      expect(FirebaseErrorMapper.map(auth('weak-password')),
-          isA<ValidationFailure>());
+      expect(
+        FirebaseErrorMapper.map(auth('invalid-email')),
+        isA<ValidationFailure>(),
+      );
+      expect(
+        FirebaseErrorMapper.map(auth('weak-password')),
+        isA<ValidationFailure>(),
+      );
     });
 
     test('email already in use is an AuthFailure', () {
-      expect(FirebaseErrorMapper.map(auth('email-already-in-use')),
-          isA<AuthFailure>());
+      expect(
+        FirebaseErrorMapper.map(auth('email-already-in-use')),
+        isA<AuthFailure>(),
+      );
     });
 
     test('requires-recent-login keeps its code for the Cubit', () {
@@ -49,8 +55,10 @@ void main() {
     });
 
     test('network-request-failed is a NetworkFailure', () {
-      expect(FirebaseErrorMapper.map(auth('network-request-failed')),
-          isA<NetworkFailure>());
+      expect(
+        FirebaseErrorMapper.map(auth('network-request-failed')),
+        isA<NetworkFailure>(),
+      );
     });
 
     test('unknown auth code falls back to AuthFailure', () {
@@ -66,25 +74,35 @@ void main() {
         FirebaseException(plugin: 'cloud_firestore', code: code);
 
     test('permission-denied -> PermissionFailure', () {
-      expect(FirebaseErrorMapper.map(firebase('permission-denied')),
-          isA<PermissionFailure>());
+      expect(
+        FirebaseErrorMapper.map(firebase('permission-denied')),
+        isA<PermissionFailure>(),
+      );
     });
 
     test('not-found -> NotFoundFailure', () {
-      expect(FirebaseErrorMapper.map(firebase('not-found')),
-          isA<NotFoundFailure>());
+      expect(
+        FirebaseErrorMapper.map(firebase('not-found')),
+        isA<NotFoundFailure>(),
+      );
     });
 
     test('unavailable and deadline-exceeded -> NetworkFailure', () {
-      expect(FirebaseErrorMapper.map(firebase('unavailable')),
-          isA<NetworkFailure>());
-      expect(FirebaseErrorMapper.map(firebase('deadline-exceeded')),
-          isA<NetworkFailure>());
+      expect(
+        FirebaseErrorMapper.map(firebase('unavailable')),
+        isA<NetworkFailure>(),
+      );
+      expect(
+        FirebaseErrorMapper.map(firebase('deadline-exceeded')),
+        isA<NetworkFailure>(),
+      );
     });
 
     test('unauthenticated -> AuthFailure', () {
-      expect(FirebaseErrorMapper.map(firebase('unauthenticated')),
-          isA<AuthFailure>());
+      expect(
+        FirebaseErrorMapper.map(firebase('unauthenticated')),
+        isA<AuthFailure>(),
+      );
     });
 
     test('unknown code -> UnknownFailure and keeps the code', () {
@@ -97,10 +115,14 @@ void main() {
 
   group('other errors', () {
     test('SocketException and TimeoutException -> NetworkFailure', () {
-      expect(FirebaseErrorMapper.map(const SocketException('no internet')),
-          isA<NetworkFailure>());
-      expect(FirebaseErrorMapper.map(TimeoutException('too slow')),
-          isA<NetworkFailure>());
+      expect(
+        FirebaseErrorMapper.map(const SocketException('no internet')),
+        isA<NetworkFailure>(),
+      );
+      expect(
+        FirebaseErrorMapper.map(TimeoutException('too slow')),
+        isA<NetworkFailure>(),
+      );
     });
 
     test('TimeoutException has its own code and message', () {
@@ -117,8 +139,7 @@ void main() {
     });
 
     test('anything else -> UnknownFailure', () {
-      expect(FirebaseErrorMapper.map(Exception('boom')),
-          isA<UnknownFailure>());
+      expect(FirebaseErrorMapper.map(Exception('boom')), isA<UnknownFailure>());
     });
   });
 }

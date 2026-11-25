@@ -42,8 +42,9 @@ void main() {
       expect(taps, 1);
     });
 
-    testWidgets('normal padding is 20 and compact padding is 16',
-        (tester) async {
+    testWidgets('normal padding is 20 and compact padding is 16', (
+      tester,
+    ) async {
       const content = SizedBox(width: 100, height: 50);
 
       await pumpCard(tester, const AppCard(child: content));

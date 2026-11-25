@@ -21,9 +21,7 @@ import 'injection.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _catchUnexpectedErrors();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   if (AppConfig.useEmulator && !AppConfig.useMocks) {
     await _connectToEmulators(AppConfig.emulatorHost);
   }

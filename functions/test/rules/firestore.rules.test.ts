@@ -227,10 +227,10 @@ describe("server-only collections (aiUsage, weeklyReports)", () => {
   }
 });
 
-describe("other collections (habits, focus, plans...)", () => {
+describe("other collections (plans, subjects...)", () => {
   it("owner only", async () => {
-    const path = `users/${ME}/habits/h1`;
-    await assertSucceeds(setDoc(doc(db(ME), path), {name: "Read"}));
+    const path = `users/${ME}/studyPlans/p1`;
+    await assertSucceeds(setDoc(doc(db(ME), path), {name: "Exam plan"}));
     await assertFails(getDoc(doc(db(OTHER), path)));
     await assertFails(getDoc(doc(db(), path)));
   });

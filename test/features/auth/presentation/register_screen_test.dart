@@ -102,9 +102,7 @@ void main() {
     expect(cubit.state, isNot(isA<Authenticated>()));
   });
 
-  testWidgets('an email that is already used shows the banner', (
-    tester,
-  ) async {
+  testWidgets('an email that is already used shows the banner', (tester) async {
     final cubit = await pumpAuthScreen(tester, AppRoutes.register);
 
     await fillForm(tester, email: MockAuthRepository.demoEmail);

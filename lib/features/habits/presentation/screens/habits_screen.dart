@@ -8,10 +8,12 @@ import 'package:brainly_life/core/constants/app_strings.dart';
 import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:brainly_life/core/theme/theme.dart';
 import 'package:brainly_life/core/widgets/widgets.dart';
+import 'package:brainly_life/features/habits/logic/habit_suggestion_cubit.dart';
 import 'package:brainly_life/features/habits/logic/habit_templates.dart';
 import 'package:brainly_life/features/habits/logic/habits_cubit.dart';
 import 'package:brainly_life/features/habits/logic/habits_state.dart';
 import 'package:brainly_life/features/habits/presentation/widgets/habit_icons.dart';
+import 'package:brainly_life/features/habits/presentation/widgets/habit_suggestions_card.dart';
 import 'package:brainly_life/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -136,6 +138,11 @@ class _HabitsList extends StatelessWidget {
               onToggle: () => onToggle(item.habit.id),
             ),
           ),
+        // AI tips (only after the user taps "Get suggestions").
+        if (getIt.isRegistered<HabitSuggestionCubit>()) ...[
+          const SizedBox(height: AppSpacing.s4),
+          const HabitSuggestionsSection(),
+        ],
       ],
     );
   }

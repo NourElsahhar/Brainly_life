@@ -40,54 +40,90 @@ class AppTextStyles {
   }
 
   static final TextStyle displayHero = _style(
-    family: headingFont, size: 32, weight: FontWeight.w700,
-    lineHeight: 40, letterSpacingEm: -0.02,
+    family: headingFont,
+    size: 32,
+    weight: FontWeight.w700,
+    lineHeight: 40,
+    letterSpacingEm: -0.02,
   );
   static final TextStyle displayHeroMobile = _style(
-    family: headingFont, size: 28, weight: FontWeight.w700,
-    lineHeight: 36, letterSpacingEm: -0.02,
+    family: headingFont,
+    size: 28,
+    weight: FontWeight.w700,
+    lineHeight: 36,
+    letterSpacingEm: -0.02,
   );
   static final TextStyle headlineLarge = _style(
-    family: headingFont, size: 24, weight: FontWeight.w700,
-    lineHeight: 32, letterSpacingEm: -0.015,
+    family: headingFont,
+    size: 24,
+    weight: FontWeight.w700,
+    lineHeight: 32,
+    letterSpacingEm: -0.015,
   );
   static final TextStyle headlineMedium = _style(
-    family: headingFont, size: 20, weight: FontWeight.w600,
-    lineHeight: 28, letterSpacingEm: -0.01,
+    family: headingFont,
+    size: 20,
+    weight: FontWeight.w600,
+    lineHeight: 28,
+    letterSpacingEm: -0.01,
   );
   static final TextStyle headlineSmall = _style(
-    family: headingFont, size: 18, weight: FontWeight.w600,
-    lineHeight: 24, letterSpacingEm: -0.005,
+    family: headingFont,
+    size: 18,
+    weight: FontWeight.w600,
+    lineHeight: 24,
+    letterSpacingEm: -0.005,
   );
   static final TextStyle bodyLarge = _style(
-    family: bodyFont, size: 16, weight: FontWeight.w500,
-    lineHeight: 24, letterSpacingEm: -0.005,
+    family: bodyFont,
+    size: 16,
+    weight: FontWeight.w500,
+    lineHeight: 24,
+    letterSpacingEm: -0.005,
   );
   static final TextStyle bodyMedium = _style(
-    family: bodyFont, size: 14, weight: FontWeight.w400, lineHeight: 20,
+    family: bodyFont,
+    size: 14,
+    weight: FontWeight.w400,
+    lineHeight: 20,
   );
   static final TextStyle bodySmall = _style(
-    family: bodyFont, size: 13, weight: FontWeight.w400, lineHeight: 18,
+    family: bodyFont,
+    size: 13,
+    weight: FontWeight.w400,
+    lineHeight: 18,
   );
   static final TextStyle labelPill = _style(
-    family: headingFont, size: 12, weight: FontWeight.w600,
-    lineHeight: 16, letterSpacingEm: 0.01,
+    family: headingFont,
+    size: 12,
+    weight: FontWeight.w600,
+    lineHeight: 16,
+    letterSpacingEm: 0.01,
   );
   static final TextStyle labelCaption = _style(
-    family: bodyFont, size: 11, weight: FontWeight.w500,
-    lineHeight: 14, letterSpacingEm: 0.02,
+    family: bodyFont,
+    size: 11,
+    weight: FontWeight.w500,
+    lineHeight: 14,
+    letterSpacingEm: 0.02,
   );
 
   /// Big numbers: streaks, hours, progress. Not part of Material's roles,
   /// so use it directly: AppTextStyles.metricCounter
   static final TextStyle metricCounter = _style(
-    family: headingFont, size: 22, weight: FontWeight.w800,
-    lineHeight: 26, letterSpacingEm: -0.02,
+    family: headingFont,
+    size: 22,
+    weight: FontWeight.w800,
+    lineHeight: 26,
+    letterSpacingEm: -0.02,
   );
 
   /// Text inside buttons (design spec 6.1: Plus Jakarta Sans, 14-16, 600-700).
   static final TextStyle button = _style(
-    family: headingFont, size: 15, weight: FontWeight.w700, lineHeight: 20,
+    family: headingFont,
+    size: 15,
+    weight: FontWeight.w700,
+    lineHeight: 20,
   );
 
   /// Connects our styles to Flutter's built-in roles, so standard widgets

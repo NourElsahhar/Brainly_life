@@ -113,10 +113,8 @@ void main() {
       act: (cubit) => cubit.signIn(email: 'a@b.com', password: 'secret123'),
       expect: () => [const AuthLoading(), Authenticated(profile)],
       verify: (_) => verify(
-        () => repository.signInWithEmail(
-          email: 'a@b.com',
-          password: 'secret123',
-        ),
+        () =>
+            repository.signInWithEmail(email: 'a@b.com', password: 'secret123'),
       ).called(1),
     );
 
@@ -182,9 +180,7 @@ void main() {
       'failure: Loading then AuthError',
       build: () {
         stubRegister(
-          const Result.failure(
-            AuthFailure(code: 'email-already-in-use'),
-          ),
+          const Result.failure(AuthFailure(code: 'email-already-in-use')),
         );
         return AuthCubit(repository);
       },
@@ -260,8 +256,8 @@ void main() {
       build: () {
         when(() => repository.sendPasswordReset(email: any(named: 'email')))
             .thenAnswer(
-          (_) async => const Result<void>.failure(ValidationFailure()),
-        );
+              (_) async => const Result<void>.failure(ValidationFailure()),
+            );
         return AuthCubit(repository);
       },
       act: (cubit) => cubit.sendPasswordReset(email: 'nope'),
@@ -284,9 +280,9 @@ void main() {
     blocTest<AuthCubit, AuthState>(
       'failure: the user stays signed in',
       build: () {
-        when(() => repository.signOut()).thenAnswer(
-          (_) async => const Result<void>.failure(NetworkFailure()),
-        );
+        when(
+          () => repository.signOut(),
+        ).thenAnswer((_) async => const Result<void>.failure(NetworkFailure()));
         return AuthCubit(repository);
       },
       act: (cubit) async {

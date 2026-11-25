@@ -70,10 +70,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     fieldName: 'Name',
   );
 
-  String? _checkPassword(String value) => PasswordStrength.validateNew(
-    value,
-    tooWeak: AppStrings.passwordTooWeak,
-  );
+  String? _checkPassword(String value) =>
+      PasswordStrength.validateNew(value, tooWeak: AppStrings.passwordTooWeak);
 
   String? _checkConfirm(String value) =>
       Validators.confirmPassword(value, _passwordController.text);
@@ -277,10 +275,7 @@ class _TermsCheckbox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
-    final linkStyle = TextStyle(
-      color: p.primary,
-      fontWeight: FontWeight.w700,
-    );
+    final linkStyle = TextStyle(color: p.primary, fontWeight: FontWeight.w700);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
