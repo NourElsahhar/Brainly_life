@@ -7,16 +7,19 @@
 //   3. npm test
 
 import {KNOWN_FEATURES} from "./config";
+import * as chat from "./features/chat";
+import * as dailyTip from "./features/dailyTip";
 import * as habitSuggest from "./features/habitSuggest";
 import * as studyPlan from "./features/studyPlan";
+import * as weeklyInsight from "./features/weeklyInsight";
 import {FeatureModule} from "./types";
 
 const modules: FeatureModule[] = [
   studyPlan, // M2
   habitSuggest, // M4
-  // chat,          // M5: ./features/chat
-  // dailyTip,      // M5: ./features/dailyTip
-  // weeklyInsight, // M5: ./features/weeklyInsight
+  chat, // M5
+  dailyTip, // M5
+  weeklyInsight, // M5
 ];
 
 /** Builds the lookup table and refuses unknown or repeated names. */
