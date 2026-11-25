@@ -20,8 +20,12 @@ function findTests(dir) {
 }
 
 const filter = process.argv[2];
+// The rules tests need the Firestore emulator: `npm run test:rules` starts
+// it and runs them. A plain `npm test` skips them.
+const withEmulator = Boolean(process.env.FIRESTORE_EMULATOR_HOST);
 const files = findTests("test")
   .map((file) => relative(".", file))
+  .filter((file) => withEmulator || !file.includes("rules"))
   .filter((file) => !filter || file.includes(filter))
   .sort();
 

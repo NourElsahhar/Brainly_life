@@ -41,9 +41,14 @@ class FirebaseErrorMapper {
     // so it must be checked FIRST.
     if (error is FirebaseAuthException) return _fromAuth(error);
     if (error is FirebaseException) return _fromFirebase(error);
-    if (error is SocketException || error is TimeoutException) {
-      return const NetworkFailure();
+    if (error is TimeoutException) {
+      // The server did not answer in time (it is not always "no internet").
+      return const NetworkFailure(
+        userMessage: 'The server is taking too long. Please try again.',
+        code: 'timeout',
+      );
     }
+    if (error is SocketException) return const NetworkFailure();
     return const UnknownFailure();
   }
 

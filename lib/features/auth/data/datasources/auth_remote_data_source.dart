@@ -137,7 +137,7 @@ class AuthRemoteDataSource {
     await _users.doc(user.uid).update({
       'displayName': displayName,
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }).timeout(firestoreTimeout);
     await user.updateDisplayName(displayName);
   }
 
@@ -147,7 +147,7 @@ class AuthRemoteDataSource {
     await _users.doc(user.uid).update({
       'settings': settings.toMap(),
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }).timeout(firestoreTimeout);
   }
 
   /// Deletes users/{uid}, then the Firebase account.
@@ -163,7 +163,12 @@ class AuthRemoteDataSource {
       throw FirebaseAuthException(code: 'requires-recent-login');
     }
 
-    await _users.doc(user.uid).delete();
+    // 1. Every subcollection (tasks, habits, plans...), then users/{uid}.
+    //    The app does it itself: deleteUserData (Cloud Function) needs the
+    //    Blaze plan, so it is not deployed.
+    await _deleteUserData(user.uid);
+    await _users.doc(user.uid).delete().timeout(firestoreTimeout);
+    // 2. The Firebase account.
     await user.delete();
     if (_googleReady != null) {
       try {
@@ -171,6 +176,65 @@ class AuthRemoteDataSource {
       } catch (_) {
         // Not important: the account is already deleted.
       }
+    }
+  }
+
+  /// The longest we wait for Firestore. A Firestore write only finishes
+  /// when the SERVER confirms it, so without a limit the app would wait
+  /// forever when Firestore cannot be reached (no database, blocked
+  /// network...). After this, TimeoutException -> a clear error message
+  /// instead of an endless spinner.
+  static const Duration firestoreTimeout = Duration(seconds: 15);
+
+  /// Every subcollection of users/{uid} (FirestorePaths). A new collection
+  /// MUST be added here, or "Delete account" would leave it behind.
+  static const List<String> userCollections = [
+    FirestorePaths.tasks,
+    FirestorePaths.taskCategories,
+    FirestorePaths.subjects,
+    FirestorePaths.topics,
+    FirestorePaths.studyPlans,
+    FirestorePaths.studySessions,
+    FirestorePaths.habits,
+    FirestorePaths.habitLogs,
+    FirestorePaths.focusSessions,
+    FirestorePaths.preferences,
+    FirestorePaths.aiConversations,
+    FirestorePaths.weeklyReports,
+    FirestorePaths.aiUsage,
+  ];
+
+  /// Deletes all the user's documents, collection by collection, in
+  /// batches of 400 (a batch allows 500 operations at most).
+  Future<void> _deleteUserData(String uid) async {
+    for (final name in userCollections) {
+      final collection = _firestore.collection(
+        FirestorePaths.userCollection(uid, name),
+      );
+      if (name == FirestorePaths.aiConversations) {
+        // Each conversation has its own messages subcollection.
+        final conversations = await collection.get().timeout(firestoreTimeout);
+        for (final conversation in conversations.docs) {
+          await _deleteCollection(
+            conversation.reference.collection(FirestorePaths.messages),
+          );
+        }
+      }
+      await _deleteCollection(collection);
+    }
+  }
+
+  Future<void> _deleteCollection(
+    CollectionReference<Map<String, dynamic>> collection,
+  ) async {
+    while (true) {
+      final page = await collection.limit(400).get().timeout(firestoreTimeout);
+      if (page.docs.isEmpty) return;
+      final batch = _firestore.batch();
+      for (final doc in page.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit().timeout(firestoreTimeout);
     }
   }
 
@@ -183,7 +247,7 @@ class AuthRemoteDataSource {
     User user, {
     required String timezone,
   }) async {
-    final doc = await _users.doc(user.uid).get();
+    final doc = await _users.doc(user.uid).get().timeout(firestoreTimeout);
     if (doc.exists) return UserProfile.fromFirestore(doc);
 
     return _createProfile(
@@ -214,7 +278,7 @@ class AuthRemoteDataSource {
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
-    await batch.commit();
+    await batch.commit().timeout(firestoreTimeout);
 
     return profile;
   }

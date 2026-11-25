@@ -10,6 +10,7 @@
 //
 // Ask for them anywhere with: getIt<AuthRepository>() and getIt<AuthCubit>()
 
+import 'package:brainly_life/core/utils/device_timezone.dart';
 import 'package:brainly_life/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:brainly_life/features/auth/data/repositories/auth_repository.dart';
 import 'package:brainly_life/features/auth/data/repositories/firebase_auth_repository.dart';
@@ -29,6 +30,8 @@ void registerAuthFeature(GetIt getIt, {required bool useMocks}) {
               auth: getIt<FirebaseAuth>(),
               firestore: getIt<FirebaseFirestore>(),
             ),
+            // New users get the phone's time zone (not UTC).
+            getTimezone: DeviceTimezone.current,
           ),
   );
 
