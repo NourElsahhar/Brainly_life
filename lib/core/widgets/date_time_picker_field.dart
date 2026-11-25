@@ -56,23 +56,23 @@ class DateTimePickerField extends StatelessWidget {
   final bool enabled;
 
   String get _defaultHint => switch (mode) {
-        DateTimePickerMode.date => 'Select date',
-        DateTimePickerMode.time => 'Select time',
-        DateTimePickerMode.dateTime => 'Select date and time',
-      };
+    DateTimePickerMode.date => 'Select date',
+    DateTimePickerMode.time => 'Select time',
+    DateTimePickerMode.dateTime => 'Select date and time',
+  };
 
   IconData get _icon => switch (mode) {
-        DateTimePickerMode.date => Icons.calendar_today_outlined,
-        DateTimePickerMode.time => Icons.access_time_rounded,
-        DateTimePickerMode.dateTime => Icons.event_outlined,
-      };
+    DateTimePickerMode.date => Icons.calendar_today_outlined,
+    DateTimePickerMode.time => Icons.access_time_rounded,
+    DateTimePickerMode.dateTime => Icons.event_outlined,
+  };
 
   String _format(DateTime v) => switch (mode) {
-        DateTimePickerMode.date => DateFormat.yMMMd().format(v),
-        DateTimePickerMode.time => DateFormat.jm().format(v),
-        DateTimePickerMode.dateTime =>
-          '${DateFormat.yMMMd().format(v)}, ${DateFormat.jm().format(v)}',
-      };
+    DateTimePickerMode.date => DateFormat.yMMMd().format(v),
+    DateTimePickerMode.time => DateFormat.jm().format(v),
+    DateTimePickerMode.dateTime =>
+      '${DateFormat.yMMMd().format(v)}, ${DateFormat.jm().format(v)}',
+  };
 
   DateTime _clamp(DateTime d, DateTime first, DateTime last) {
     if (d.isBefore(first)) return first;
@@ -139,7 +139,9 @@ class DateTimePickerField extends StatelessWidget {
             onTap: enabled ? () => _pick(context) : null,
             borderRadius: radius,
             child: Container(
-              constraints: const BoxConstraints(minHeight: AppSizes.inputHeight),
+              constraints: const BoxConstraints(
+                minHeight: AppSizes.inputHeight,
+              ),
               padding: const EdgeInsets.only(left: AppSpacing.s4),
               decoration: BoxDecoration(
                 borderRadius: radius,
@@ -153,7 +155,9 @@ class DateTimePickerField extends StatelessWidget {
                   const SizedBox(width: AppSpacing.s3),
                   Expanded(
                     child: Text(
-                      current == null ? (hint ?? _defaultHint) : _format(current),
+                      current == null
+                          ? (hint ?? _defaultHint)
+                          : _format(current),
                       style: context.text.bodyLarge?.copyWith(
                         color: current == null ? p.textTertiary : null,
                       ),

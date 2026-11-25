@@ -31,4 +31,14 @@ void main() {
     expect(accepted.failureOrNull, isNull);
     expect(accepted.dataOrNull, AiActionType.createTask);
   });
+  test('Assistant creates a habit through the habits port', () async {
+    await configureDependencies(useMocks: true);
+    const action = AiAction(AiActionType.createHabit, title: 'Drink water');
+    final result = await getIt<AiActionHandler>().execute(
+      action,
+      confirmed: true,
+    );
+    expect(result.failureOrNull, isNull);
+    expect(result.dataOrNull, AiActionType.createHabit);
+  });
 }

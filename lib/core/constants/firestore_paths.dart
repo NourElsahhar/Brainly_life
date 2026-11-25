@@ -10,7 +10,9 @@
 //     FirestorePaths.userCollection(uid, FirestorePaths.tasks),      // users/{uid}/tasks
 //   )
 //
-// Need a new collection? Add its name here (after the schema PR is approved).
+// Need a new collection? Add its name here (after the schema PR is approved),
+// AND add it to AuthRemoteDataSource.userCollections, so "Delete account"
+// deletes it too.
 
 class FirestorePaths {
   const FirestorePaths._();
@@ -39,6 +41,5 @@ class FirestorePaths {
   static String userDoc(String uid) => '$users/$uid';
 
   /// 'users/{uid}/{name}', for example users/abc/tasks
-  static String userCollection(String uid, String name) =>
-      '$users/$uid/$name';
+  static String userCollection(String uid, String name) => '$users/$uid/$name';
 }

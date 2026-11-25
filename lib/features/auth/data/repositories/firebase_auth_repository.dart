@@ -3,12 +3,14 @@
 // (see FirebaseErrorMapper).
 //
 // getTimezone: the timezone saved in the settings of a NEW user.
-// For now it is UTC. Later it will come from the device (flutter_timezone).
+// The app passes DeviceTimezone.current (the phone's zone); default UTC.
 //
 // Why the _registration lock: when an account is created, Firebase says
 // "a user signed in" BEFORE the profile document is written. Without the lock,
 // authStateChanges() would try to create the profile at the same time.
 // So while a registration is running, authStateChanges() waits for it.
+// Google sign in uses the same lock (a first Google sign in creates the
+// profile too).
 
 // ignore_for_file: prefer_initializing_formals
 
@@ -23,13 +25,15 @@ import 'package:brainly_life/features/auth/data/models/user_profile_model.dart';
 import 'package:brainly_life/features/auth/data/models/user_settings_model.dart';
 import 'package:brainly_life/features/auth/data/repositories/auth_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:google_sign_in/google_sign_in.dart' show GoogleSignInException;
 
 class FirebaseAuthRepository implements AuthRepository {
   FirebaseAuthRepository({
     required AuthRemoteDataSource dataSource,
     Future<String> Function()? getTimezone,
-  })  : _dataSource = dataSource,
-        _getTimezone = getTimezone ?? _utcTimezone;
+  }) : _dataSource = dataSource,
+       _getTimezone = getTimezone ?? _utcTimezone;
 
   final AuthRemoteDataSource _dataSource;
   final Future<String> Function() _getTimezone;
@@ -40,9 +44,9 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Stream<Result<UserProfile?>> authStateChanges() {
-    return _dataSource
-        .authStateChanges()
-        .asyncMap<Result<UserProfile?>>((user) async {
+    return _dataSource.authStateChanges().asyncMap<Result<UserProfile?>>((
+      user,
+    ) async {
       // Wait while a registration is writing the new profile.
       await _registration?.future;
 
@@ -97,6 +101,39 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<Result<UserProfile?>> signInWithGoogle() async {
+    final registration = Completer<void>();
+    _registration = registration;
+
+    try {
+      final user = await _dataSource.signInWithGoogle();
+      if (user == null) return const Result<UserProfile?>.success(null);
+
+      final profile = await _dataSource.loadOrCreateProfile(
+        user,
+        timezone: await _timezone(),
+      );
+      return Result<UserProfile?>.success(profile);
+    } on GoogleSignInException catch (error) {
+      AppLogger.warning(
+        'Google sign in failed (${error.code.name})',
+        tag: 'Auth',
+      );
+      return Result.failure(
+        AuthFailure(
+          userMessage: 'Google sign in failed. Please try again.',
+          code: 'google-${error.code.name}',
+        ),
+      );
+    } catch (error) {
+      return Result.failure(_fail(error, 'Google sign in'));
+    } finally {
+      registration.complete();
+      if (identical(_registration, registration)) _registration = null;
+    }
+  }
+
+  @override
   Future<Result<void>> sendPasswordReset({required String email}) async {
     try {
       await _dataSource.sendPasswordReset(email: email.trim());
@@ -113,6 +150,34 @@ class FirebaseAuthRepository implements AuthRepository {
       return const Result<void>.success(null);
     } catch (error) {
       return Result.failure(_fail(error, 'Sign out'));
+    }
+  }
+
+  @override
+  Future<Result<void>> updateDisplayName(String displayName) => _run(
+    'Updating the name',
+    () => _dataSource.updateDisplayName(displayName.trim()),
+  );
+
+  @override
+  Future<Result<void>> updateAvatar(String? avatarId) =>
+      _run('Saving the avatar', () => _dataSource.updateAvatar(avatarId));
+
+  @override
+  Future<Result<void>> updateSettings(UserSettings settings) =>
+      _run('Saving the settings', () => _dataSource.updateSettings(settings));
+
+  @override
+  Future<Result<void>> deleteAccount() =>
+      _run('Deleting the account', _dataSource.deleteAccount);
+
+  /// Runs [action] and turns any exception into a Failure.
+  Future<Result<void>> _run(String name, Future<void> Function() action) async {
+    try {
+      await action();
+      return const Result<void>.success(null);
+    } catch (error) {
+      return Result.failure(_fail(error, name));
     }
   }
 
@@ -145,6 +210,10 @@ class FirebaseAuthRepository implements AuthRepository {
       '$action failed (${failure.code ?? failure.runtimeType})',
       tag: 'Auth',
     );
+    // Debug builds only: the ORIGINAL error (for example
+    // "[cloud_firestore/unavailable] ... client is offline"), so we can see
+    // the real reason. Release builds never log it.
+    if (kDebugMode) AppLogger.warning('$action raw error: $error', tag: 'Auth');
     return failure;
   }
 }

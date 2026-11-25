@@ -56,8 +56,7 @@ class ColorPickerRow extends StatelessWidget {
       spacing: AppSpacing.s1,
       runSpacing: AppSpacing.s1,
       children: [
-        for (var i = 0; i < options.length; i++)
-          _buildSwatch(p, options[i], i),
+        for (var i = 0; i < options.length; i++) _buildSwatch(p, options[i], i),
       ],
     );
 
@@ -79,8 +78,8 @@ class ColorPickerRow extends StatelessWidget {
   Widget _buildSwatch(AppPalette p, Color color, int index) {
     final value = color.toARGB32();
     final isSelected = value == selectedColorValue;
-    final checkColor = ThemeData.estimateBrightnessForColor(color) ==
-            Brightness.dark
+    final checkColor =
+        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
         ? AppPalette.light.onPrimary
         : AppPalette.light.textPrimary;
 

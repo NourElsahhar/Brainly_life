@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -120,7 +121,7 @@ class _ChatScreenState extends State<ChatScreen> {
             IconButton(
               tooltip: 'Weekly analytics',
               icon: const Icon(Icons.insights_outlined),
-              onPressed: () => context.push('/assistant/analytics'),
+              onPressed: () => context.push(AppRoutes.analytics),
             ),
             IconButton(
               tooltip: AppStrings.clearConversation,

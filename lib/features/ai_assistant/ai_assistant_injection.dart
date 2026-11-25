@@ -7,11 +7,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'data/repositories/daily_ai_tip_provider.dart';
 
 import '../../core/ai/ai.dart';
-import '../../core/errors/failure.dart';
 import '../../core/errors/result.dart';
 import '../../core/utils/date_key_utils.dart';
 import '../auth/data/models/user_settings_model.dart';
+import '../auth/logic/auth_cubit.dart';
+import '../auth/logic/auth_state.dart';
 import '../home/data/repositories/home_summary_port.dart' as home;
+import '../habits/data/repositories/habit_creation_port.dart';
 import '../tasks/data/repositories/task_creation_port.dart';
 import 'data/datasources/chat_remote_data_source.dart';
 import 'data/repositories/chat_repository.dart';
@@ -26,16 +28,13 @@ class AiAccount {
   final bool useMocks;
   String get uid =>
       useMocks ? 'demo' : services<FirebaseAuth>().currentUser?.uid ?? '';
+  /// The signed-in user's settings, from AuthCubit (no extra Firestore read,
+  /// and always the latest values after the user changes Settings).
   Future<UserSettings> settings() async {
     if (useMocks) return UserSettings.defaults();
-    if (uid.isEmpty) throw StateError('Sign in required');
-    final doc = await services<FirebaseFirestore>()
-        .collection('users')
-        .doc(uid)
-        .get();
-    return UserSettings.fromMap(
-      doc.data()?['settings'] as Map<String, dynamic>?,
-    );
+    final state = services<AuthCubit>().state;
+    if (state is! Authenticated) throw StateError('Sign in required');
+    return state.user.settings;
   }
 }
 
@@ -95,11 +94,8 @@ void registerAiAssistantFeature(GetIt getIt, {required bool useMocks}) {
     () => AiActionHandler(
       createTask: (title) =>
           getIt<TaskCreationPort>().createTask(TaskDraft(title: title)),
-      createHabit: (title) async => const Result.failure(
-        ValidationFailure(
-          userMessage: 'Open Habits and add this suggestion. Habit creation integration is not available yet.',
-        ),
-      ),
+      createHabit: (title) =>
+          getIt<HabitCreationPort>().createHabit(HabitDraft(name: title)),
     ),
   );
   getIt.registerLazySingleton<home.AiTipProvider>(

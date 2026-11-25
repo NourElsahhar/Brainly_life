@@ -25,24 +25,21 @@ class AppSnackBar {
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
-  }) =>
-      _show(context, message, _SnackType.success, actionLabel, onAction);
+  }) => _show(context, message, _SnackType.success, actionLabel, onAction);
 
   static void error(
     BuildContext context,
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
-  }) =>
-      _show(context, message, _SnackType.error, actionLabel, onAction);
+  }) => _show(context, message, _SnackType.error, actionLabel, onAction);
 
   static void info(
     BuildContext context,
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
-  }) =>
-      _show(context, message, _SnackType.info, actionLabel, onAction);
+  }) => _show(context, message, _SnackType.info, actionLabel, onAction);
 
   static void _show(
     BuildContext context,
@@ -51,11 +48,17 @@ class AppSnackBar {
     String? actionLabel,
     VoidCallback? onAction,
   ) {
+    // The design: a dark bar for success and info (in light and dark mode),
+    // a red bar for errors. Text and icons are light on both.
+    const dark = AppPalette.dark;
     final p = context.palette;
-    final (icon, color) = switch (type) {
-      _SnackType.success => (Icons.check_circle_rounded, p.success),
-      _SnackType.error => (Icons.error_rounded, p.error),
-      _SnackType.info => (Icons.info_rounded, p.info),
+    final isError = type == _SnackType.error;
+    final background = isError ? p.error : dark.surfaceRaised;
+    const foreground = Color(0xFFFFFFFF);
+    final (icon, iconColor) = switch (type) {
+      _SnackType.success => (Icons.check_circle_rounded, dark.success),
+      _SnackType.error => (Icons.error_rounded, foreground),
+      _SnackType.info => (Icons.info_rounded, dark.info),
     };
     final hasAction = actionLabel != null && onAction != null;
 
@@ -64,7 +67,7 @@ class AppSnackBar {
       ..showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
-          backgroundColor: p.surfaceRaised,
+          backgroundColor: background,
           margin: const EdgeInsets.fromLTRB(
             AppSpacing.screenMargin,
             0,
@@ -73,20 +76,24 @@ class AppSnackBar {
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            side: BorderSide(color: p.border),
           ),
           duration: Duration(seconds: hasAction ? 5 : 3),
           content: Row(
             children: [
-              Icon(icon, color: color, size: AppSizes.iconStandard),
+              Icon(icon, color: iconColor, size: AppSizes.iconStandard),
               const SizedBox(width: AppSpacing.s3),
-              Expanded(child: Text(message, style: context.text.bodyMedium)),
+              Expanded(
+                child: Text(
+                  message,
+                  style: context.text.bodyMedium?.copyWith(color: foreground),
+                ),
+              ),
             ],
           ),
           action: hasAction
               ? SnackBarAction(
                   label: actionLabel,
-                  textColor: p.primary,
+                  textColor: isError ? foreground : dark.primary,
                   onPressed: onAction,
                 )
               : null,

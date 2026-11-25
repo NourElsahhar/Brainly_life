@@ -20,6 +20,7 @@
 
 import 'package:brainly_life/core/errors/result.dart';
 import 'package:brainly_life/features/auth/data/models/user_profile_model.dart';
+import 'package:brainly_life/features/auth/data/models/user_settings_model.dart';
 
 abstract class AuthRepository {
   /// Emits the profile of the signed-in user, or null when signed out.
@@ -36,7 +37,30 @@ abstract class AuthRepository {
     required String password,
   });
 
+  /// Signs in (or signs up) with a Google account.
+  /// success(null) means the user closed the Google picker: not an error.
+  Future<Result<UserProfile?>> signInWithGoogle();
+
   Future<Result<void>> sendPasswordReset({required String email});
 
   Future<Result<void>> signOut();
+
+  // ===== Profile and Settings (signed-in user only) =====
+
+  /// Changes the name in users/{uid} (and on the Firebase account).
+  Future<Result<void>> updateDisplayName(String displayName);
+
+  /// Saves the avatar the user picked (users/{uid}.avatarId).
+  /// null removes it (the first letter or the Google photo shows again).
+  Future<Result<void>> updateAvatar(String? avatarId);
+
+  /// Saves all the settings (users/{uid}.settings).
+  Future<Result<void>> updateSettings(UserSettings settings);
+
+  /// Deletes users/{uid} and the Firebase account, then the user is signed
+  /// out. Firebase only allows it soon after a sign in; if it was long ago
+  /// the Failure code is 'requires-recent-login' and nothing is deleted.
+  /// (The rest of the data, users/{uid}/..., is removed by the
+  /// deleteUserData Cloud Function.)
+  Future<Result<void>> deleteAccount();
 }

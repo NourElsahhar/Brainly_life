@@ -131,4 +131,17 @@ void main() {
           ),
     ],
   );
+  blocTest<HabitsCubit, HabitsState>(
+    'loadHabits passes the user name for the greeting',
+    build: () => HabitsCubit(
+      repository: MockHabitRepository(habits: [habit('daily')]),
+      timezone: 'UTC',
+      userName: () => 'Shahd',
+    ),
+    act: (cubit) => at(() => cubit.loadHabits()),
+    skip: 1,
+    expect: () => [
+      isA<HabitsLoaded>().having((s) => s.userName, 'userName', 'Shahd'),
+    ],
+  );
 }

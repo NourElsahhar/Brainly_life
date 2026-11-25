@@ -37,10 +37,7 @@ void main() {
     });
 
     testWidgets('is disabled when onPressed is null', (tester) async {
-      await pumpButton(
-        tester,
-        const AppButton(label: 'Save', onPressed: null),
-      );
+      await pumpButton(tester, const AppButton(label: 'Save', onPressed: null));
 
       expect(tester.widget<InkWell>(find.byType(InkWell)).onTap, isNull);
     });
@@ -70,8 +67,9 @@ void main() {
       expect(find.byIcon(Icons.add), findsOneWidget);
     });
 
-    testWidgets('expanded false is only as wide as its content',
-        (tester) async {
+    testWidgets('expanded false is only as wide as its content', (
+      tester,
+    ) async {
       await pumpButton(
         tester,
         AppButton(label: 'Go', expanded: false, onPressed: () {}),
@@ -88,6 +86,61 @@ void main() {
         );
 
         expect(find.text('Go'), findsOneWidget);
+      }
+    });
+
+    // What the button paints: background, gradient and outline.
+    BoxDecoration decorationOf(WidgetTester tester) =>
+        tester.widget<Ink>(find.byType(Ink)).decoration! as BoxDecoration;
+
+    testWidgets('secondary has a violet outline and no background', (
+      tester,
+    ) async {
+      await pumpButton(
+        tester,
+        AppButton(label: 'Go', type: AppButtonType.secondary, onPressed: () {}),
+      );
+
+      final decoration = decorationOf(tester);
+      expect(decoration.color, isNull);
+      expect(
+        (decoration.border! as Border).top.color,
+        AppPalette.light.primary,
+      );
+    });
+
+    testWidgets('teal has a teal outline', (tester) async {
+      await pumpButton(
+        tester,
+        AppButton(label: 'Go', type: AppButtonType.teal, onPressed: () {}),
+      );
+
+      expect(
+        (decorationOf(tester).border! as Border).top.color,
+        AppPalette.light.teal,
+      );
+    });
+
+    testWidgets('disabled is grey, whatever the type', (tester) async {
+      for (final type in [
+        AppButtonType.primary,
+        AppButtonType.secondary,
+        AppButtonType.teal,
+        AppButtonType.destructive,
+      ]) {
+        await pumpButton(
+          tester,
+          AppButton(label: 'Go', type: type, onPressed: null),
+        );
+
+        final decoration = decorationOf(tester);
+        expect(
+          decoration.color,
+          AppPalette.light.surfaceMuted,
+          reason: '$type',
+        );
+        expect(decoration.gradient, isNull, reason: '$type');
+        expect(decoration.border, isNull, reason: '$type');
       }
     });
   });

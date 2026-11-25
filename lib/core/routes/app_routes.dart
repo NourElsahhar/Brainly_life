@@ -18,22 +18,33 @@ class AppRoutes {
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
 
+  // Open to everyone, signed in or not (full screen).
+  static const String terms = '/terms';
+  static const String privacy = '/privacy';
+
   // The tabs of the bottom bar
   static const String home = '/home';
   static const String plan = '/plan'; // study planner
   static const String assistant = '/assistant'; // Brainly AI
+  static const String analytics = '/assistant/analytics'; // Weekly analytics
   static const String habits = '/habits';
   static const String profile = '/profile';
-  static const String settings = '/profile/settings';
 
   // Full screen (open on top of the bottom bar)
-    static const String tasks = '/tasks';
+  // Settings is opened with context.push from any tab, so the back arrow
+  // returns to the tab the user came from.
+  static const String settings = '/settings';
+  static const String tasks = '/tasks';
   static const String newTask = '/tasks/new';
   static const String taskCategories = '/tasks/categories';
   static const String taskDetail = '/tasks/:id';
   static const String editTask = '/tasks/:id/edit';
   static const String focus = '/focus'; // ?taskId=&studySessionId=
-
+  static const String focusSettings = '/focus/settings';
+  static const String focusStats = '/focus/stats';
+  static const String newHabit = '/habits/new';
+  static const String habitDetail = '/habits/:id';
+  static const String editHabit = '/habits/:id/edit';
   static String taskPath(String id) => '/tasks/$id';
   static String editTaskPath(String id) => '/tasks/$id/edit';
   static String focusPath({String? taskId, String? studySessionId}) {
@@ -47,4 +58,7 @@ class AppRoutes {
       queryParameters: query.isEmpty ? null : query,
     ).toString();
   }
+
+  static String habitPath(String id) => '/habits/$id';
+  static String editHabitPath(String id) => '/habits/$id/edit';
 }

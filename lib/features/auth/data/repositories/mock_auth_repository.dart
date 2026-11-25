@@ -1,10 +1,13 @@
 // MockAuthRepository = a fake AuthRepository that lives in memory.
 // Used when the app runs with --dart-define=USE_MOCKS=true, and in tests.
 //
-// It starts signed out. A demo account already exists:
+// It starts signed out (or signed in as the demo user with startSignedIn).
+// A demo account already exists:
 //   email:    MockAuthRepository.demoEmail      (demo@example.com)
 //   password: MockAuthRepository.demoPassword   (password123)
 // Register works too (new accounts live until the app restarts).
+// "Continue with Google" signs in as MockAuthRepository.googleEmail
+// (set googleCancels: true to act as if the user closed the picker).
 //
 // delay: makes every call slower, to see your loading states:
 //   MockAuthRepository(delay: const Duration(seconds: 1))
@@ -19,8 +22,12 @@ import 'package:brainly_life/features/auth/data/repositories/auth_repository.dar
 import 'package:clock/clock.dart';
 
 class MockAuthRepository implements AuthRepository {
-  MockAuthRepository({this.delay = Duration.zero}) {
-    _accounts[demoEmail] = _MockAccount(
+  MockAuthRepository({
+    this.delay = Duration.zero,
+    bool startSignedIn = false,
+    this.googleCancels = false,
+  }) {
+    final demo = _MockAccount(
       password: demoPassword,
       profile: _newProfile(
         uid: 'mock-user-1',
@@ -28,12 +35,16 @@ class MockAuthRepository implements AuthRepository {
         email: demoEmail,
       ),
     );
+    _accounts[demoEmail] = demo;
+    if (startSignedIn) _current = demo.profile;
   }
 
   static const String demoEmail = 'demo@example.com';
   static const String demoPassword = 'password123';
+  static const String googleEmail = 'google.student@gmail.com';
 
   final Duration delay;
+  final bool googleCancels;
 
   final Map<String, _MockAccount> _accounts = {};
   final StreamController<Result<UserProfile?>> _changes =
@@ -55,7 +66,10 @@ class MockAuthRepository implements AuthRepository {
     await Future<void>.delayed(delay);
 
     final account = _accounts[_key(email)];
-    if (account == null || account.password != password) {
+    // A Google account has no password, so email sign in never works for it.
+    if (account == null ||
+        account.password == null ||
+        account.password != password) {
       return const Result.failure(
         AuthFailure(
           userMessage: 'Incorrect email or password.',
@@ -98,6 +112,27 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<Result<UserProfile?>> signInWithGoogle() async {
+    await Future<void>.delayed(delay);
+    if (googleCancels) return const Result<UserProfile?>.success(null);
+
+    // The same Google account every time (created on the first use).
+    final account = _accounts.putIfAbsent(
+      googleEmail,
+      () => _MockAccount(
+        password: null,
+        profile: _newProfile(
+          uid: 'mock-google-user',
+          displayName: 'Google Student',
+          email: googleEmail,
+        ),
+      ),
+    );
+    _setCurrent(account.profile);
+    return Result<UserProfile?>.success(account.profile);
+  }
+
+  @override
   Future<Result<void>> sendPasswordReset({required String email}) async {
     await Future<void>.delayed(delay);
     return const Result<void>.success(null);
@@ -107,6 +142,52 @@ class MockAuthRepository implements AuthRepository {
   Future<Result<void>> signOut() async {
     await Future<void>.delayed(delay);
     _setCurrent(null);
+    return const Result<void>.success(null);
+  }
+
+  @override
+  Future<Result<void>> updateDisplayName(String displayName) =>
+      _updateCurrent((p) => p.copyWith(displayName: displayName.trim()));
+
+  @override
+  Future<Result<void>> updateAvatar(String? avatarId) => _updateCurrent(
+    (p) => avatarId == null
+        ? p.copyWith(clearAvatarId: true)
+        : p.copyWith(avatarId: avatarId),
+  );
+
+  @override
+  Future<Result<void>> updateSettings(UserSettings settings) =>
+      _updateCurrent((p) => p.copyWith(settings: settings));
+
+  @override
+  Future<Result<void>> deleteAccount() async {
+    await Future<void>.delayed(delay);
+    final current = _current;
+    if (current == null) return const Result.failure(_noUser);
+
+    _accounts.remove(_key(current.email));
+    _setCurrent(null);
+    return const Result<void>.success(null);
+  }
+
+  static const _noUser = AuthFailure(
+    userMessage: 'Please sign in again.',
+    code: 'no-current-user',
+  );
+
+  /// Changes the signed-in profile (like a Firestore update: the session
+  /// stream does not emit; the cubit already shows the new value).
+  Future<Result<void>> _updateCurrent(
+    UserProfile Function(UserProfile profile) change,
+  ) async {
+    await Future<void>.delayed(delay);
+    final current = _current;
+    if (current == null) return const Result.failure(_noUser);
+
+    final updated = change(current);
+    _current = updated;
+    _accounts[_key(current.email)]?.profile = updated;
     return const Result<void>.success(null);
   }
 
@@ -133,8 +214,11 @@ class MockAuthRepository implements AuthRepository {
 }
 
 class _MockAccount {
-  const _MockAccount({required this.password, required this.profile});
+  _MockAccount({required this.password, required this.profile});
 
-  final String password;
-  final UserProfile profile;
+  /// null for a Google account (no password).
+  final String? password;
+
+  /// Changes when the name or the settings are saved.
+  UserProfile profile;
 }

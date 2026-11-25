@@ -1,0 +1,31 @@
+{
+  "name": "brainly-life-functions",
+  "description": "Cloud Functions of Baseet: aiGateway and deleteUserData (owner: M1).",
+  "private": true,
+  "main": "lib/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node scripts/run-tests.mjs",
+    "serve": "npm run build && firebase emulators:start --only functions,auth,firestore",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "test:rules": "firebase emulators:exec --only firestore --project brainly-life \"node scripts/run-tests.mjs rules\""
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.1",
+    "firebase-functions": "^7.4.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "@types/node": "^22.20.5",
+    "firebase": "^13.4.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}
