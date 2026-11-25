@@ -17,10 +17,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   tearDown(() => getIt.reset());
 
-  Finder appBarTitle(String title) => find.descendant(
-        of: find.byType(AppBar),
-        matching: find.text(title),
-      );
+  Finder appBarTitle(String title) =>
+      find.descendant(of: find.byType(AppBar), matching: find.text(title));
 
   Future<void> openApp(WidgetTester tester) async {
     await configureDependencies(useMocks: true);
@@ -33,16 +31,18 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('the splash is shown first, even if the user is known',
-      (tester) async {
+  testWidgets('the splash is shown first, even if the user is known', (
+    tester,
+  ) async {
     await openApp(tester);
 
     expect(find.byType(SplashScreen), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
   });
 
-  testWidgets('with mocks the demo user sees the app after the splash',
-      (tester) async {
+  testWidgets('with mocks the demo user sees the app after the splash', (
+    tester,
+  ) async {
     await openApp(tester);
     await waitForSplash(tester);
 

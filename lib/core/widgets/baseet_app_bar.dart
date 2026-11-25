@@ -49,7 +49,7 @@ class BaseetAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// null means this is the main bar (logo instead of a title).
   final String? title;
-  
+
   /// Shown instead of [title] when set, like a search box.
   final Widget? titleWidget;
 

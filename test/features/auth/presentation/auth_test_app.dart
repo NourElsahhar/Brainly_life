@@ -32,10 +32,7 @@ Future<AuthCubit> pumpAuthScreen(
     initialLocation: location,
     routes: [
       ...authRoutes,
-      GoRoute(
-        path: AppRoutes.home,
-        builder: (_, _) => const Text('home page'),
-      ),
+      GoRoute(path: AppRoutes.home, builder: (_, _) => const Text('home page')),
     ],
   );
   addTearDown(router.dispose);

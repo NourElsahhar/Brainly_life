@@ -37,10 +37,7 @@ void main() {
     });
 
     testWidgets('is disabled when onPressed is null', (tester) async {
-      await pumpButton(
-        tester,
-        const AppButton(label: 'Save', onPressed: null),
-      );
+      await pumpButton(tester, const AppButton(label: 'Save', onPressed: null));
 
       expect(tester.widget<InkWell>(find.byType(InkWell)).onTap, isNull);
     });
@@ -70,8 +67,9 @@ void main() {
       expect(find.byIcon(Icons.add), findsOneWidget);
     });
 
-    testWidgets('expanded false is only as wide as its content',
-        (tester) async {
+    testWidgets('expanded false is only as wide as its content', (
+      tester,
+    ) async {
       await pumpButton(
         tester,
         AppButton(label: 'Go', expanded: false, onPressed: () {}),
@@ -89,9 +87,8 @@ void main() {
 
         expect(find.text('Go'), findsOneWidget);
       }
-      
     });
-    
+
     // What the button paints: background, gradient and outline.
     BoxDecoration decorationOf(WidgetTester tester) =>
         tester.widget<Ink>(find.byType(Ink)).decoration! as BoxDecoration;
@@ -146,6 +143,5 @@ void main() {
         expect(decoration.border, isNull, reason: '$type');
       }
     });
-    
   });
 }

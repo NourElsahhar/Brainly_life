@@ -62,15 +62,14 @@ Future<void> configureDependencies({bool? useMocks}) async {
   // app.dart updates it from AuthCubit (signed in or signed out).
   // Onboarding: shown only the first time the app opens on a phone.
   // load() reads the saved flag BEFORE the router starts.
-  final onboardingStore =
-      mocks ? MockOnboardingStore() : SharedPrefsOnboardingStore();
+  final onboardingStore = mocks
+      ? MockOnboardingStore()
+      : SharedPrefsOnboardingStore();
   await onboardingStore.load();
   getIt.registerSingleton<OnboardingStore>(onboardingStore);
 
   getIt.registerLazySingleton<RouterAuthState>(
-    () => RouterAuthState.app(
-      hasSeenOnboarding: () => onboardingStore.hasSeen,
-    ),
+    () => RouterAuthState.app(hasSeenOnboarding: () => onboardingStore.hasSeen),
   );
   getIt.registerLazySingleton<GoRouter>(
     () => createAppRouter(getIt<RouterAuthState>()),
@@ -86,4 +85,3 @@ Future<void> configureDependencies({bool? useMocks}) async {
   registerAnalyticsFeature(getIt, useMocks: mocks);
   registerAiAssistantFeature(getIt, useMocks: mocks);
 }
-

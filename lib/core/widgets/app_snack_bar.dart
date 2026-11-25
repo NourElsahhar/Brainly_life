@@ -25,26 +25,23 @@ class AppSnackBar {
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
-  }) =>
-      _show(context, message, _SnackType.success, actionLabel, onAction);
+  }) => _show(context, message, _SnackType.success, actionLabel, onAction);
 
   static void error(
     BuildContext context,
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
-  }) =>
-      _show(context, message, _SnackType.error, actionLabel, onAction);
+  }) => _show(context, message, _SnackType.error, actionLabel, onAction);
 
   static void info(
     BuildContext context,
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
-  }) =>
-      _show(context, message, _SnackType.info, actionLabel, onAction);
+  }) => _show(context, message, _SnackType.info, actionLabel, onAction);
 
-   static void _show(
+  static void _show(
     BuildContext context,
     String message,
     _SnackType type,

@@ -99,13 +99,13 @@ void main() {
     final createdAt = DateTime.utc(2026, 11, 19, 10);
 
     UserProfile sample() => UserProfile(
-          uid: 'u1',
-          displayName: 'Nour',
-          email: 'nour@example.com',
-          photoUrl: 'https://example.com/me.png',
-          createdAt: createdAt,
-          settings: UserSettings.defaults(timezone: 'Africa/Cairo'),
-        );
+      uid: 'u1',
+      displayName: 'Nour',
+      email: 'nour@example.com',
+      photoUrl: 'https://example.com/me.png',
+      createdAt: createdAt,
+      settings: UserSettings.defaults(timezone: 'Africa/Cairo'),
+    );
 
     test('fromMap reads every field', () {
       final profile = UserProfile.fromMap('u1', {
@@ -143,8 +143,10 @@ void main() {
     });
 
     test('avatarId: read when set, an empty one becomes null', () {
-      expect(UserProfile.fromMap('u1', {'avatarId': 'rocket'}).avatarId,
-          'rocket');
+      expect(
+        UserProfile.fromMap('u1', {'avatarId': 'rocket'}).avatarId,
+        'rocket',
+      );
       expect(UserProfile.fromMap('u1', {'avatarId': ''}).avatarId, isNull);
       expect(UserProfile.fromMap('u1', null).avatarId, isNull);
     });

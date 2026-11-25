@@ -116,7 +116,7 @@ class _TaskFormViewState extends State<TaskFormView> {
             if (!didPop) _confirmDiscard(context);
           },
           child: Scaffold(
-              appBar: BaseetAppBar.inner(
+            appBar: BaseetAppBar.inner(
               title: state.isEdit ? 'Edit task' : 'New task',
             ),
             body: SafeArea(child: _body(context, state)),

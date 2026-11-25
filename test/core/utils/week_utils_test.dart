@@ -141,10 +141,7 @@ void main() {
       // 2026-11-22 22:30 UTC is already Monday 2026-11-23 in Cairo.
       final moment = DateTime.utc(2026, 11, 22, 22, 30);
 
-      expect(
-        WeekUtils.weekKeyForMoment(moment, timezone: 'UTC'),
-        '2026-W47',
-      );
+      expect(WeekUtils.weekKeyForMoment(moment, timezone: 'UTC'), '2026-W47');
       expect(
         WeekUtils.weekKeyForMoment(moment, timezone: 'Africa/Cairo'),
         '2026-W48',
@@ -153,10 +150,7 @@ void main() {
 
     test('currentWeekKey uses the injected clock', () {
       withClock(Clock.fixed(DateTime.utc(2026, 11, 22, 22, 30)), () {
-        expect(
-          WeekUtils.currentWeekKey(timezone: 'Africa/Cairo'),
-          '2026-W48',
-        );
+        expect(WeekUtils.currentWeekKey(timezone: 'Africa/Cairo'), '2026-W48');
       });
     });
   });

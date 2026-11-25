@@ -82,7 +82,7 @@ class ConfirmDialog extends StatelessWidget {
               style: context.text.bodyMedium?.copyWith(color: p.textSecondary),
             ),
             const SizedBox(height: AppSpacing.s6),
-                        // The design: two text buttons on the right. The confirm one is
+            // The design: two text buttons on the right. The confirm one is
             // bold, and red when it deletes something.
             Row(
               mainAxisAlignment: MainAxisAlignment.end,

@@ -20,10 +20,7 @@ void main() {
         AppTheme.light.scaffoldBackgroundColor,
         AppPalette.light.background,
       );
-      expect(
-        AppTheme.dark.scaffoldBackgroundColor,
-        AppPalette.dark.background,
-      );
+      expect(AppTheme.dark.scaffoldBackgroundColor, AppPalette.dark.background);
     });
 
     test('the main button color is the brand violet in both modes', () {

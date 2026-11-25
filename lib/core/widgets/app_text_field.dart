@@ -113,8 +113,7 @@ class _AppTextFieldState extends State<AppTextField> {
           style: context.text.bodyLarge,
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle:
-                context.text.bodyLarge?.copyWith(color: p.textTertiary),
+            hintStyle: context.text.bodyLarge?.copyWith(color: p.textTertiary),
             errorText: widget.errorText,
             errorMaxLines: 2,
             errorStyle: context.text.bodySmall?.copyWith(color: p.error),

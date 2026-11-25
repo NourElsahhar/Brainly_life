@@ -160,6 +160,140 @@ service cloud.firestore {
       allow create, update: if false;
     }
 
+    // ---------- users/{uid}/habits/{habitId} (M4) ----------
+    // Written by Habit.toFirestore(). Dates are client Timestamps; day-level
+    // values are dateKeys 'yyyy-MM-dd'.
+
+    function isDateKey(value) {
+      return value is string && value.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    }
+
+    function isCount(value) {
+      return value is int && value >= 0;
+    }
+
+    function isValidHabit() {
+      let d = incoming();
+      return d.keys().hasOnly([
+          'name', 'icon', 'colorValue', 'frequencyType', 'weekdays',
+          'timesPerWeek', 'startDate', 'archived', 'currentStreak',
+          'bestStreak', 'lastCompletedDate', 'createdAt', 'updatedAt'
+        ])
+        && d.keys().hasAll([
+          'name', 'frequencyType', 'startDate', 'archived',
+          'createdAt', 'updatedAt'
+        ])
+        && isText(d.name, 1, 50)
+        && isTextOrNull(d.get('icon', null), 40)
+        && (d.get('colorValue', null) == null || d.colorValue is int)
+        && d.frequencyType in ['daily', 'weekdays', 'timesPerWeek']
+        && (d.get('weekdays', null) == null
+            || (d.weekdays is list && d.weekdays.size() <= 7))
+        && (d.get('timesPerWeek', null) == null
+            || (d.timesPerWeek is int
+                && d.timesPerWeek >= 1 && d.timesPerWeek <= 7))
+        && isDateKey(d.startDate)
+        && d.archived is bool
+        && isCount(d.get('currentStreak', 0))
+        && isCount(d.get('bestStreak', 0))
+        && (d.get('lastCompletedDate', null) == null
+            || isDateKey(d.lastCompletedDate))
+        && d.createdAt is timestamp
+        && d.updatedAt is timestamp;
+    }
+
+    match /users/{uid}/habits/{habitId} {
+      allow read, delete: if isOwner(uid);
+      allow create: if isOwner(uid) && isValidHabit();
+      allow update: if isOwner(uid) && isValidHabit() && keepsCreatedAt();
+    }
+
+    // ---------- users/{uid}/habitLogs/{logId} (M4) ----------
+    // One document per habit per done day. The id is '<habitId>_<date>',
+    // so the same day can never be counted twice.
+
+    function isValidHabitLog(logId) {
+      let d = incoming();
+      return d.keys().hasOnly(['habitId', 'date', 'completedAt'])
+        && d.keys().hasAll(['habitId', 'date', 'completedAt'])
+        && isText(d.habitId, 1, 128)
+        && isDateKey(d.date)
+        && logId == d.habitId + '_' + d.date
+        && d.completedAt is timestamp;
+    }
+
+    match /users/{uid}/habitLogs/{logId} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid) && isValidHabitLog(logId);
+    }
+
+    // ---------- users/{uid}/focusSessions/{sessionId} (M4) ----------
+    // Written by FocusSession.toFirestore() when a timer ends.
+
+    function isValidFocusSession() {
+      let d = incoming();
+      return d.keys().hasOnly([
+          'type', 'startedAt', 'endedAt', 'plannedMinutes', 'actualMinutes',
+          'completed', 'dateKey', 'taskId', 'studySessionId',
+          'createdAt', 'updatedAt'
+        ])
+        && d.keys().hasAll([
+          'type', 'startedAt', 'endedAt', 'plannedMinutes', 'actualMinutes',
+          'completed', 'dateKey', 'createdAt', 'updatedAt'
+        ])
+        && d.type in ['focus', 'shortBreak', 'longBreak']
+        && d.startedAt is timestamp
+        && d.endedAt is timestamp
+        && d.plannedMinutes is int
+        && d.plannedMinutes >= 0 && d.plannedMinutes <= 480
+        && d.actualMinutes is int
+        && d.actualMinutes >= 0 && d.actualMinutes <= 240
+        && d.completed is bool
+        && isDateKey(d.dateKey)
+        && isTextOrNull(d.get('taskId', null), 128)
+        && isTextOrNull(d.get('studySessionId', null), 128)
+        && d.createdAt is timestamp
+        && d.updatedAt is timestamp;
+    }
+
+    match /users/{uid}/focusSessions/{sessionId} {
+      allow read, delete: if isOwner(uid);
+      allow create: if isOwner(uid) && isValidFocusSession();
+      allow update: if isOwner(uid) && isValidFocusSession()
+        && keepsCreatedAt();
+    }
+
+    // ---------- users/{uid}/preferences/{docId} (M4: 'focus') ----------
+    // The timer settings live in preferences/focus. Other preference
+    // documents stay owner-only without shape checks.
+
+    function isMinutes(value, max) {
+      return value is int && value >= 1 && value <= max;
+    }
+
+    function isValidFocusSettings() {
+      let d = incoming();
+      return d.keys().hasOnly([
+          'focusMinutes', 'shortBreakMinutes', 'longBreakMinutes',
+          'sessionsBeforeLong', 'autoStart', 'sound', 'vibration',
+          'keepScreenOn'
+        ])
+        && isMinutes(d.get('focusMinutes', 25), 240)
+        && isMinutes(d.get('shortBreakMinutes', 5), 120)
+        && isMinutes(d.get('longBreakMinutes', 15), 120)
+        && isMinutes(d.get('sessionsBeforeLong', 4), 20)
+        && d.get('autoStart', false) is bool
+        && d.get('sound', true) is bool
+        && d.get('vibration', true) is bool
+        && d.get('keepScreenOn', false) is bool;
+    }
+
+    match /users/{uid}/preferences/{docId} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && (docId != 'focus' || isValidFocusSettings());
+    }
+
     // ---------- every other collection of the user ----------
     // Owner only, no shape checks yet. When you validate your collection,
     // add a block above AND add its name to this list.
@@ -167,7 +301,8 @@ service cloud.firestore {
     match /users/{uid}/{collection}/{document=**} {
       allow read, write: if isOwner(uid)
         && !(collection in [
-          'tasks', 'taskCategories', 'aiUsage', 'weeklyReports'
+          'tasks', 'taskCategories', 'aiUsage', 'weeklyReports',
+          'habits', 'habitLogs', 'focusSessions', 'preferences'
         ]);
     }
   }

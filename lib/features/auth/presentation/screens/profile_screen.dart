@@ -56,8 +56,7 @@ class ProfileScreen extends StatelessWidget {
                 final auth = context.read<AuthCubit>();
                 return ProfileCubit(
                   repository: repository ?? getIt<AuthRepository>(),
-                  statsProvider:
-                      statsProvider ?? getIt<ProfileStatsProvider>(),
+                  statsProvider: statsProvider ?? getIt<ProfileStatsProvider>(),
                   currentUser: () => auth.currentUser,
                   onProfileUpdated: auth.profileUpdated,
                 )..loadStats();

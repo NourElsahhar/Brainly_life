@@ -15,7 +15,7 @@ class AppStrings {
   // ===== Common (M1) =====
 
   // ===== Auth (M1) =====
-    static const String onboardingSkip = 'Skip';
+  static const String onboardingSkip = 'Skip';
   static const String onboardingNext = 'Next';
   static const String onboardingGetStarted = 'Get started';
   static const String onboardingHaveAccount = 'I already have an account';
@@ -171,7 +171,7 @@ class AppStrings {
 
   static String habitStreakDays(int days) => days == 1 ? '1 day' : '$days days';
 
-    static const String habitsEmptyCta = 'New habit';
+  static const String habitsEmptyCta = 'New habit';
   static const String habitsDoneToday = 'done today';
   static const String habitsAllDone = 'All done for today!';
   static const String habitsFocusTooltip = 'Focus timer';
@@ -266,7 +266,8 @@ class AppStrings {
   static const String focusLabelFocus = 'Focus';
   static const String focusLabelShortBreak = 'Short break';
   static const String focusLabelLongBreak = 'Long break';
-  static const String focusLabelSessionsBeforeLong = 'Sessions before long break';
+  static const String focusLabelSessionsBeforeLong =
+      'Sessions before long break';
   static const String focusAutoStart = 'Auto-start next session';
   static const String focusSound = 'Sound';
   static const String focusVibration = 'Vibration';

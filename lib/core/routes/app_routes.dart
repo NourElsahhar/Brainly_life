@@ -57,6 +57,7 @@ class AppRoutes {
       queryParameters: query.isEmpty ? null : query,
     ).toString();
   }
+
   static String habitPath(String id) => '/habits/$id';
   static String editHabitPath(String id) => '/habits/$id/edit';
 }

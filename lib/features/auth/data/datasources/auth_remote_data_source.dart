@@ -10,7 +10,8 @@ import 'package:brainly_life/core/constants/firestore_paths.dart';
 import 'package:brainly_life/features/auth/data/models/user_profile_model.dart';
 import 'package:brainly_life/features/auth/data/models/user_settings_model.dart';
 import 'package:clock/clock.dart';
-import 'package:cloud_firestore/cloud_firestore.dart' show FirebaseFirestore, FieldValue, CollectionReference;
+import 'package:cloud_firestore/cloud_firestore.dart'
+    show FirebaseFirestore, FieldValue, CollectionReference;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -19,9 +20,9 @@ class AuthRemoteDataSource {
     required FirebaseAuth auth,
     required FirebaseFirestore firestore,
     GoogleSignIn? googleSignIn,
-  })  : _auth = auth,
-        _firestore = firestore,
-        _googleSignIn = googleSignIn;
+  }) : _auth = auth,
+       _firestore = firestore,
+       _googleSignIn = googleSignIn;
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
@@ -134,29 +135,38 @@ class AuthRemoteDataSource {
   /// Changes the name in users/{uid} and on the Firebase account.
   Future<void> updateDisplayName(String displayName) async {
     final user = _requireCurrentUser();
-    await _users.doc(user.uid).update({
-      'displayName': displayName,
-      'updatedAt': FieldValue.serverTimestamp(),
-    }).timeout(firestoreTimeout);
+    await _users
+        .doc(user.uid)
+        .update({
+          'displayName': displayName,
+          'updatedAt': FieldValue.serverTimestamp(),
+        })
+        .timeout(firestoreTimeout);
     await user.updateDisplayName(displayName);
   }
 
   /// Saves the picked avatar, or removes the field when [avatarId] is null.
   Future<void> updateAvatar(String? avatarId) async {
     final user = _requireCurrentUser();
-    await _users.doc(user.uid).update({
-      'avatarId': avatarId ?? FieldValue.delete(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    }).timeout(firestoreTimeout);
+    await _users
+        .doc(user.uid)
+        .update({
+          'avatarId': avatarId ?? FieldValue.delete(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        })
+        .timeout(firestoreTimeout);
   }
 
   /// Saves the whole settings map in users/{uid}.settings.
   Future<void> updateSettings(UserSettings settings) async {
     final user = _requireCurrentUser();
-    await _users.doc(user.uid).update({
-      'settings': settings.toMap(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    }).timeout(firestoreTimeout);
+    await _users
+        .doc(user.uid)
+        .update({
+          'settings': settings.toMap(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        })
+        .timeout(firestoreTimeout);
   }
 
   /// Deletes users/{uid}, then the Firebase account.

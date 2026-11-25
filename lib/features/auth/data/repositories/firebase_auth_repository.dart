@@ -32,8 +32,8 @@ class FirebaseAuthRepository implements AuthRepository {
   FirebaseAuthRepository({
     required AuthRemoteDataSource dataSource,
     Future<String> Function()? getTimezone,
-  })  : _dataSource = dataSource,
-        _getTimezone = getTimezone ?? _utcTimezone;
+  }) : _dataSource = dataSource,
+       _getTimezone = getTimezone ?? _utcTimezone;
 
   final AuthRemoteDataSource _dataSource;
   final Future<String> Function() _getTimezone;
@@ -44,9 +44,9 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Stream<Result<UserProfile?>> authStateChanges() {
-    return _dataSource
-        .authStateChanges()
-        .asyncMap<Result<UserProfile?>>((user) async {
+    return _dataSource.authStateChanges().asyncMap<Result<UserProfile?>>((
+      user,
+    ) async {
       // Wait while a registration is writing the new profile.
       await _registration?.future;
 
@@ -115,7 +115,10 @@ class FirebaseAuthRepository implements AuthRepository {
       );
       return Result<UserProfile?>.success(profile);
     } on GoogleSignInException catch (error) {
-      AppLogger.warning('Google sign in failed (${error.code.name})', tag: 'Auth');
+      AppLogger.warning(
+        'Google sign in failed (${error.code.name})',
+        tag: 'Auth',
+      );
       return Result.failure(
         AuthFailure(
           userMessage: 'Google sign in failed. Please try again.',
@@ -151,8 +154,10 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<Result<void>> updateDisplayName(String displayName) =>
-      _run('Updating the name', () => _dataSource.updateDisplayName(displayName.trim()));
+  Future<Result<void>> updateDisplayName(String displayName) => _run(
+    'Updating the name',
+    () => _dataSource.updateDisplayName(displayName.trim()),
+  );
 
   @override
   Future<Result<void>> updateAvatar(String? avatarId) =>
@@ -167,10 +172,7 @@ class FirebaseAuthRepository implements AuthRepository {
       _run('Deleting the account', _dataSource.deleteAccount);
 
   /// Runs [action] and turns any exception into a Failure.
-  Future<Result<void>> _run(
-    String name,
-    Future<void> Function() action,
-  ) async {
+  Future<Result<void>> _run(String name, Future<void> Function() action) async {
     try {
       await action();
       return const Result<void>.success(null);

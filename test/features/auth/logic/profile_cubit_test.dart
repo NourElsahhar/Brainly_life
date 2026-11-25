@@ -71,9 +71,9 @@ void main() {
 
   blocTest<ProfileCubit, ProfileState>(
     'updateName saves the trimmed name and gives it to AuthCubit',
-    setUp: () => when(
-      () => repository.updateDisplayName(any()),
-    ).thenAnswer((_) async => const Result<void>.success(null)),
+    setUp: () =>
+        when(() => repository.updateDisplayName(any()))
+            .thenAnswer((_) async => const Result<void>.success(null)),
     build: build,
     act: (cubit) async => expect(await cubit.updateName('  Nour  '), isTrue),
     expect: () => [
@@ -96,9 +96,8 @@ void main() {
 
   blocTest<ProfileCubit, ProfileState>(
     'updateName failing keeps the old name and shows the error',
-    setUp: () => when(
-      () => repository.updateDisplayName(any()),
-    ).thenAnswer((_) async => const Result<void>.failure(NetworkFailure())),
+    setUp: () => when(() => repository.updateDisplayName(any()))
+        .thenAnswer((_) async => const Result<void>.failure(NetworkFailure())),
     build: build,
     act: (cubit) async => expect(await cubit.updateName('Nour'), isFalse),
     expect: () => [
@@ -114,9 +113,9 @@ void main() {
   group('updateAvatar', () {
     blocTest<ProfileCubit, ProfileState>(
       'saves the avatar and gives the new profile to AuthCubit',
-      setUp: () => when(
-        () => repository.updateAvatar(any()),
-      ).thenAnswer((_) async => const Result<void>.success(null)),
+      setUp: () =>
+          when(() => repository.updateAvatar(any()))
+              .thenAnswer((_) async => const Result<void>.success(null)),
       build: build,
       act: (cubit) async => expect(await cubit.updateAvatar('rocket'), isTrue),
       expect: () => [
@@ -133,9 +132,8 @@ void main() {
       'null removes the avatar',
       setUp: () {
         user = user.copyWith(avatarId: 'book');
-        when(
-          () => repository.updateAvatar(any()),
-        ).thenAnswer((_) async => const Result<void>.success(null));
+        when(() => repository.updateAvatar(any()))
+            .thenAnswer((_) async => const Result<void>.success(null));
       },
       build: build,
       act: (cubit) async => expect(await cubit.updateAvatar(null), isTrue),

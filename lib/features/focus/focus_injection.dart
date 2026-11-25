@@ -18,9 +18,13 @@
 // own owner. Ask for them with getIt<TaskSummaryProvider>().
 
 import 'package:brainly_life/features/auth/data/models/user_settings_model.dart';
+import 'package:brainly_life/features/auth/data/repositories/profile_stats_provider.dart';
 import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
 import 'package:brainly_life/features/auth/logic/auth_state.dart';
+import 'package:brainly_life/features/focus/data/datasources/focus_remote_data_source.dart';
 import 'package:brainly_life/features/focus/data/datasources/focus_timer_local_data_source.dart';
+import 'package:brainly_life/features/focus/data/repositories/firestore_focus_repository.dart';
+import 'package:brainly_life/features/focus/data/repositories/focus_profile_study_source.dart';
 import 'package:brainly_life/features/focus/data/repositories/focus_repository.dart';
 import 'package:brainly_life/features/focus/data/repositories/focus_summary_provider.dart';
 import 'package:brainly_life/features/focus/data/repositories/mock_focus_repository.dart';
@@ -29,6 +33,8 @@ import 'package:brainly_life/features/focus/logic/focus_settings_cubit.dart';
 import 'package:brainly_life/features/focus/logic/focus_stats_cubit.dart';
 import 'package:brainly_life/features/home/data/repositories/home_summary_port.dart';
 import 'package:brainly_life/features/study_planner/data/repositories/study_session_completion_port.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
 /// The settings of the signed-in user (timezone, week start day), or the
@@ -40,10 +46,25 @@ UserSettings _userSettings(GetIt getIt) {
 }
 
 void registerFocusFeature(GetIt getIt, {required bool useMocks}) {
-  // The Firestore repository comes in Phase 3. Until then the mock (with
-  // sample sessions of the last days) is used in both modes.
+  // Mock mode: sample sessions in memory. Real mode: users/{uid}/focusSessions
+  // and users/{uid}/preferences/focus in Firestore.
   getIt.registerLazySingleton<FocusRepository>(
-    () => MockFocusRepository.withSampleData(),
+    () => useMocks
+        ? MockFocusRepository.withSampleData()
+        : FirestoreFocusRepository(
+            dataSource: FocusRemoteDataSource(
+              auth: getIt<FirebaseAuth>(),
+              firestore: getIt<FirebaseFirestore>(),
+            ),
+          ),
+  );
+
+  // The hours studied on Profile.
+  getIt.registerLazySingleton<ProfileStudySource>(
+    () => FocusProfileStudySource(
+      repository: getIt<FocusRepository>(),
+      timezone: () => _userSettings(getIt).timezone,
+    ),
   );
   getIt.registerLazySingleton<FocusTimerLocalDataSource>(
     () => SharedPrefsFocusTimerLocalDataSource(),

@@ -48,11 +48,10 @@ class WeekUtils {
   static String weekEndDateKey(
     String dateKey, {
     int weekStartDay = DateTime.monday,
-  }) =>
-      DateKeyUtils.addDays(
-        weekStartDateKey(dateKey, weekStartDay: weekStartDay),
-        6,
-      );
+  }) => DateKeyUtils.addDays(
+    weekStartDateKey(dateKey, weekStartDay: weekStartDay),
+    6,
+  );
 
   /// The 7 dateKeys of the week that contains [dateKey], first day first.
   static List<String> weekDateKeys(
@@ -64,10 +63,7 @@ class WeekUtils {
   }
 
   /// The weekKey ('yyyy-Www') of the week that contains [dateKey].
-  static String weekKey(
-    String dateKey, {
-    int weekStartDay = DateTime.monday,
-  }) {
+  static String weekKey(String dateKey, {int weekStartDay = DateTime.monday}) {
     final start = _startOfWeek(DateKeyUtils.parse(dateKey), weekStartDay);
     final anchor = start.add(const Duration(days: 3));
     final dayOfYear = anchor.difference(DateTime.utc(anchor.year)).inDays + 1;
@@ -80,21 +76,19 @@ class WeekUtils {
     DateTime moment, {
     required String timezone,
     int weekStartDay = DateTime.monday,
-  }) =>
-      weekKey(
-        DateKeyUtils.toDateKey(moment, timezone: timezone),
-        weekStartDay: weekStartDay,
-      );
+  }) => weekKey(
+    DateKeyUtils.toDateKey(moment, timezone: timezone),
+    weekStartDay: weekStartDay,
+  );
 
   /// The weekKey of this week (uses package:clock, so tests can fake it).
   static String currentWeekKey({
     required String timezone,
     int weekStartDay = DateTime.monday,
-  }) =>
-      weekKey(
-        DateKeyUtils.todayKey(timezone: timezone),
-        weekStartDay: weekStartDay,
-      );
+  }) => weekKey(
+    DateKeyUtils.todayKey(timezone: timezone),
+    weekStartDay: weekStartDay,
+  );
 
   /// Start (included) and end (NOT included) of the week, in UTC.
   static UtcRange weekBounds(

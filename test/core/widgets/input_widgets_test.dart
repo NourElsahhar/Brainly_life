@@ -113,8 +113,9 @@ void main() {
       expect(find.text('Exam date cannot be in the past'), findsOneWidget);
     });
 
-    testWidgets('date mode: confirming the picker calls onChanged',
-        (tester) async {
+    testWidgets('date mode: confirming the picker calls onChanged', (
+      tester,
+    ) async {
       DateTime? picked;
       await pumpWidgetUnderTest(
         tester,

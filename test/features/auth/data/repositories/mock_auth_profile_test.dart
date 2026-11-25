@@ -22,7 +22,10 @@ void main() {
   test('a new name is kept after signing out and in again', () async {
     final repository = MockAuthRepository(startSignedIn: true);
 
-    expect(await repository.updateDisplayName('  Nour  '), isA<Success<void>>());
+    expect(
+      await repository.updateDisplayName('  Nour  '),
+      isA<Success<void>>(),
+    );
     await repository.signOut();
     final result = await repository.signInWithEmail(
       email: MockAuthRepository.demoEmail,
@@ -34,9 +37,7 @@ void main() {
 
   test('new settings are kept after signing in again', () async {
     final repository = MockAuthRepository(startSignedIn: true);
-    final dark = UserSettings.defaults().copyWith(
-      themeMode: AppThemeMode.dark,
-    );
+    final dark = UserSettings.defaults().copyWith(themeMode: AppThemeMode.dark);
 
     await repository.updateSettings(dark);
     await repository.signOut();
@@ -68,22 +69,24 @@ void main() {
     await sub.cancel();
   });
 
-  test('the avatar is kept after signing in again, and can be removed',
-      () async {
-    final repository = MockAuthRepository(startSignedIn: true);
-    Future<String?> avatarAfterSignIn() async {
-      await repository.signOut();
-      final result = await repository.signInWithEmail(
-        email: MockAuthRepository.demoEmail,
-        password: MockAuthRepository.demoPassword,
-      );
-      return result.dataOrNull?.avatarId;
-    }
+  test(
+    'the avatar is kept after signing in again, and can be removed',
+    () async {
+      final repository = MockAuthRepository(startSignedIn: true);
+      Future<String?> avatarAfterSignIn() async {
+        await repository.signOut();
+        final result = await repository.signInWithEmail(
+          email: MockAuthRepository.demoEmail,
+          password: MockAuthRepository.demoPassword,
+        );
+        return result.dataOrNull?.avatarId;
+      }
 
-    await repository.updateAvatar('rocket');
-    expect(await avatarAfterSignIn(), 'rocket');
+      await repository.updateAvatar('rocket');
+      expect(await avatarAfterSignIn(), 'rocket');
 
-    await repository.updateAvatar(null);
-    expect(await avatarAfterSignIn(), isNull);
-  });
+      await repository.updateAvatar(null);
+      expect(await avatarAfterSignIn(), isNull);
+    },
+  );
 }

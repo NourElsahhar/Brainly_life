@@ -39,17 +39,17 @@ AppTab _placeholderTab(String label, String path) {
 /// The same 5 tabs as the app, but every screen is a simple placeholder.
 /// (Profile keeps the real list, because it is a placeholder too.)
 List<AppTab> testTabs() => [
-      _placeholderTab('Home', AppRoutes.home),
-      _placeholderTab('Plan', AppRoutes.plan),
-      _placeholderTab('Brainly AI', AppRoutes.assistant),
-      _placeholderTab('Habits', AppRoutes.habits),
-      AppTab(
-        label: 'Profile',
-        icon: Icons.circle_outlined,
-        selectedIcon: Icons.circle,
-        routes: profileRoutes,
-      ),
-    ];
+  _placeholderTab('Home', AppRoutes.home),
+  _placeholderTab('Plan', AppRoutes.plan),
+  _placeholderTab('Brainly AI', AppRoutes.assistant),
+  _placeholderTab('Habits', AppRoutes.habits),
+  AppTab(
+    label: 'Profile',
+    icon: Icons.circle_outlined,
+    selectedIcon: Icons.circle,
+    routes: profileRoutes,
+  ),
+];
 
 final List<RouteBase> testFullScreenRoutes = [
   GoRoute(
@@ -79,7 +79,10 @@ void main() {
 
     test('unknown: everything goes to splash', () {
       expect(appRedirect(AuthStatus.unknown, AppRoutes.splash), isNull);
-      expect(appRedirect(AuthStatus.unknown, AppRoutes.login), AppRoutes.splash);
+      expect(
+        appRedirect(AuthStatus.unknown, AppRoutes.login),
+        AppRoutes.splash,
+      );
       expect(appRedirect(AuthStatus.unknown, AppRoutes.home), AppRoutes.splash);
     });
 
@@ -92,8 +95,14 @@ void main() {
       ]) {
         expect(appRedirect(AuthStatus.signedOut, page), isNull, reason: page);
       }
-      expect(appRedirect(AuthStatus.signedOut, AppRoutes.splash), AppRoutes.login);
-      expect(appRedirect(AuthStatus.signedOut, AppRoutes.home), AppRoutes.login);
+      expect(
+        appRedirect(AuthStatus.signedOut, AppRoutes.splash),
+        AppRoutes.login,
+      );
+      expect(
+        appRedirect(AuthStatus.signedOut, AppRoutes.home),
+        AppRoutes.login,
+      );
       expect(appRedirect(AuthStatus.signedOut, '/tasks/abc'), AppRoutes.login);
     });
 
@@ -105,7 +114,11 @@ void main() {
         AppRoutes.register,
         AppRoutes.forgotPassword,
       ]) {
-        expect(appRedirect(AuthStatus.signedIn, page), AppRoutes.home, reason: page);
+        expect(
+          appRedirect(AuthStatus.signedIn, page),
+          AppRoutes.home,
+          reason: page,
+        );
       }
       expect(appRedirect(AuthStatus.signedIn, AppRoutes.home), isNull);
       expect(appRedirect(AuthStatus.signedIn, '/tasks/abc'), isNull);
@@ -188,10 +201,8 @@ void main() {
   });
 
   group('router screens', () {
-    Finder appBarTitle(String title) => find.descendant(
-          of: find.byType(AppBar),
-          matching: find.text(title),
-        );
+    Finder appBarTitle(String title) =>
+        find.descendant(of: find.byType(AppBar), matching: find.text(title));
 
     Future<GoRouter> pumpApp(
       WidgetTester tester,
@@ -254,7 +265,10 @@ void main() {
     });
 
     testWidgets('settings is full screen (no bottom bar)', (tester) async {
-      final router = await pumpApp(tester, RouterAuthState(AuthStatus.signedIn));
+      final router = await pumpApp(
+        tester,
+        RouterAuthState(AuthStatus.signedIn),
+      );
 
       router.go(AppRoutes.settings);
       await tester.pumpAndSettle();
@@ -266,7 +280,10 @@ void main() {
     testWidgets('settings pushed from a tab goes back to that tab', (
       tester,
     ) async {
-      final router = await pumpApp(tester, RouterAuthState(AuthStatus.signedIn));
+      final router = await pumpApp(
+        tester,
+        RouterAuthState(AuthStatus.signedIn),
+      );
       router.go(AppRoutes.plan);
       await tester.pumpAndSettle();
 
@@ -280,9 +297,13 @@ void main() {
       expect(find.byType(NavigationBar), findsOneWidget);
     });
 
-    testWidgets('tasks and focus are full screen (no bottom bar)',
-        (tester) async {
-      final router = await pumpApp(tester, RouterAuthState(AuthStatus.signedIn));
+    testWidgets('tasks and focus are full screen (no bottom bar)', (
+      tester,
+    ) async {
+      final router = await pumpApp(
+        tester,
+        RouterAuthState(AuthStatus.signedIn),
+      );
 
       router.go(AppRoutes.taskPath('abc'));
       await tester.pumpAndSettle();
@@ -296,7 +317,10 @@ void main() {
     });
 
     testWidgets('signed in cannot open the login screen', (tester) async {
-      final router = await pumpApp(tester, RouterAuthState(AuthStatus.signedIn));
+      final router = await pumpApp(
+        tester,
+        RouterAuthState(AuthStatus.signedIn),
+      );
 
       router.go(AppRoutes.login);
       await tester.pumpAndSettle();
@@ -318,8 +342,9 @@ void main() {
       expect(find.byType(NavigationBar), findsNothing);
     });
 
-    testWidgets('the splash stays until it finishes, then the app opens',
-        (tester) async {
+    testWidgets('the splash stays until it finishes, then the app opens', (
+      tester,
+    ) async {
       final authState = RouterAuthState.withSplash(AuthStatus.signedIn);
       await pumpApp(tester, authState, settle: false);
 
@@ -335,8 +360,9 @@ void main() {
       expect(appBarTitle('Home'), findsOneWidget);
     });
 
-    testWidgets('the router reacts when the auth state changes',
-        (tester) async {
+    testWidgets('the router reacts when the auth state changes', (
+      tester,
+    ) async {
       final authState = RouterAuthState(AuthStatus.signedOut);
       await pumpApp(tester, authState);
       expect(find.byType(LoginScreen), findsOneWidget);

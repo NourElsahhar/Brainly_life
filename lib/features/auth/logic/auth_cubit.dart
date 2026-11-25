@@ -32,8 +32,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit(AuthRepository repository)
-      : _repository = repository,
-        super(const AuthInitial()) {
+    : _repository = repository,
+      super(const AuthInitial()) {
     _subscription = _repository.authStateChanges().listen(_onSessionChanged);
   }
 
@@ -158,7 +158,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(session);
   }
 
-    @override
+  @override
   Future<void> close() {
     // The cancel is started now but not awaited on purpose: waiting for it
     // can hang in widget tests (fake time). The stream stops right away.

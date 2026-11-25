@@ -68,9 +68,8 @@ class AuthLayout extends StatelessWidget {
                 Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: IconButton(
-                    tooltip: MaterialLocalizations.of(
-                      context,
-                    ).backButtonTooltip,
+                    tooltip: MaterialLocalizations.of(context)
+                        .backButtonTooltip,
                     icon: Icon(Icons.arrow_back_rounded, color: p.textPrimary),
                     onPressed: onBack,
                   ),
@@ -91,9 +90,7 @@ class AuthLayout extends StatelessWidget {
               Text(
                 subtitle,
                 textAlign: textAlign,
-                style: context.text.bodyLarge?.copyWith(
-                  color: p.textSecondary,
-                ),
+                style: context.text.bodyLarge?.copyWith(color: p.textSecondary),
               ),
               const SizedBox(height: AppSpacing.s8),
               ...children,

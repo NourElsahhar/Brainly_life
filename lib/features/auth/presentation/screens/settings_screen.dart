@@ -150,7 +150,8 @@ class _SettingsBody extends StatelessWidget {
                       title: AppStrings.settingsStudyTime,
                       selected: s.preferredStudyTime,
                       options: [
-                        for (final t in StudyTime.values) (t, studyTimeLabel(t)),
+                        for (final t in StudyTime.values)
+                          (t, studyTimeLabel(t)),
                       ],
                     );
                     if (picked != null) cubit.setPreferredStudyTime(picked);
