@@ -142,6 +142,27 @@ void main() {
       });
     });
 
+    test('avatarId: read when set, an empty one becomes null', () {
+      expect(UserProfile.fromMap('u1', {'avatarId': 'rocket'}).avatarId,
+          'rocket');
+      expect(UserProfile.fromMap('u1', {'avatarId': ''}).avatarId, isNull);
+      expect(UserProfile.fromMap('u1', null).avatarId, isNull);
+    });
+
+    test('toFirestore writes avatarId only when picked', () {
+      expect(sample().toFirestore().containsKey('avatarId'), isFalse);
+      expect(
+        sample().copyWith(avatarId: 'book').toFirestore()['avatarId'],
+        'book',
+      );
+    });
+
+    test('copyWith can set and clear the avatar', () {
+      final withAvatar = sample().copyWith(avatarId: 'star');
+      expect(withAvatar.avatarId, 'star');
+      expect(withAvatar.copyWith(clearAvatarId: true).avatarId, isNull);
+    });
+
     test('an empty photoUrl becomes null', () {
       expect(UserProfile.fromMap('u1', {'photoUrl': ''}).photoUrl, isNull);
     });

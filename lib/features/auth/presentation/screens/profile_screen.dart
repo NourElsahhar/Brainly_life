@@ -20,6 +20,7 @@ import 'package:brainly_life/features/auth/data/repositories/auth_repository.dar
 import 'package:brainly_life/features/auth/data/repositories/profile_stats_provider.dart';
 import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
 import 'package:brainly_life/features/auth/logic/profile_cubit.dart';
+import 'package:brainly_life/features/auth/presentation/widgets/profile_avatars.dart';
 import 'package:brainly_life/features/auth/presentation/widgets/settings_widgets.dart';
 import 'package:brainly_life/injection.dart';
 import 'package:flutter/material.dart';
@@ -155,10 +156,7 @@ class _Header extends StatelessWidget {
 
     return Row(
       children: [
-        _Avatar(
-          user: user,
-          onCamera: () => showComingSoon(context, AppStrings.profilePhotoSoon),
-        ),
+        _Avatar(user: user, onEdit: () => _pickAvatar(context)),
         const SizedBox(width: AppSpacing.s5),
         Expanded(
           child: Column(
@@ -193,6 +191,17 @@ class _Header extends StatelessWidget {
     );
   }
 
+  Future<void> _pickAvatar(BuildContext context) async {
+    final cubit = context.read<ProfileCubit>();
+    final picked = await showAvatarPicker(context, selected: user.avatarId);
+    if (picked == null) return; // closed
+
+    final saved = await cubit.updateAvatar(picked.isEmpty ? null : picked);
+    if (saved && context.mounted) {
+      AppSnackBar.success(context, AppStrings.profileAvatarSaved);
+    }
+  }
+
   Future<void> _editName(BuildContext context) async {
     final cubit = context.read<ProfileCubit>();
     final saved = await showModalBottomSheet<bool>(
@@ -211,46 +220,22 @@ class _Header extends StatelessWidget {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.user, required this.onCamera});
+  const _Avatar({required this.user, required this.onEdit});
 
   final UserProfile user;
-  final VoidCallback onCamera;
+  final VoidCallback onEdit;
 
   static const double size = 96;
 
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
-    final source = user.displayName.trim().isNotEmpty
-        ? user.displayName.trim()
-        : user.email;
-    final letter = source.isEmpty ? '?' : source[0].toUpperCase();
-    final photoUrl = user.photoUrl;
-
-    final initial = Center(
-      child: Text(
-        letter,
-        style: context.text.displayLarge?.copyWith(color: p.onPrimary),
-      ),
-    );
 
     return SizedBox.square(
       dimension: size + 8,
       child: Stack(
         children: [
-          Container(
-            width: size,
-            height: size,
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(color: p.primaryCTA, shape: BoxShape.circle),
-            child: photoUrl == null
-                ? initial
-                : Image.network(
-                    photoUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => initial,
-                  ),
-          ),
+          UserAvatar(user: user, size: size),
           Positioned(
             right: 0,
             bottom: 0,
@@ -259,14 +244,14 @@ class _Avatar extends StatelessWidget {
               shape: CircleBorder(side: BorderSide(color: p.surface, width: 3)),
               child: InkWell(
                 customBorder: const CircleBorder(),
-                onTap: onCamera,
+                onTap: onEdit,
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.s2),
                   child: Icon(
-                    Icons.photo_camera_outlined,
+                    Icons.edit_rounded,
                     size: 18,
                     color: p.onPrimary,
-                    semanticLabel: AppStrings.profileChangePhoto,
+                    semanticLabel: AppStrings.profileChangeAvatar,
                   ),
                 ),
               ),

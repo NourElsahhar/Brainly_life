@@ -1,6 +1,7 @@
 // ProfileCubit = the logic of the Profile screen:
 //   - loads the 3 numbers (streak, hours studied, tasks done)
 //   - changes the name ("Edit profile")
+//   - changes the avatar (the camera button)
 //
 // The profile itself (name, email, photo) is NOT kept here: it lives in
 // AuthCubit (one place for the whole app). After a save we give the new
@@ -34,6 +35,8 @@ class ProfileState extends Equatable {
 
   /// null while loading (the cards show "–").
   final ProfileStats? stats;
+
+  /// true while the name OR the avatar is being saved.
   final bool isSavingName;
 
   /// The last error, shown once in a snackbar. failureId changes every
@@ -105,6 +108,32 @@ class ProfileCubit extends Cubit<ProfileState> {
     switch (result) {
       case Success():
         _onProfileUpdated(user.copyWith(displayName: trimmed));
+        emit(state.copyWith(isSavingName: false));
+        return true;
+      case Failed(:final failure):
+        _fail(failure);
+        return false;
+    }
+  }
+
+  /// Saves the picked avatar (null = remove it). Returns true when it
+  /// worked. The new profile goes to AuthCubit, so the header updates.
+  Future<bool> updateAvatar(String? avatarId) async {
+    final user = _currentUser();
+    if (user == null || state.isSavingName) return false;
+    if (avatarId == user.avatarId) return true;
+
+    emit(state.copyWith(isSavingName: true));
+    final result = await _repository.updateAvatar(avatarId);
+    if (isClosed) return false;
+
+    switch (result) {
+      case Success():
+        _onProfileUpdated(
+          avatarId == null
+              ? user.copyWith(clearAvatarId: true)
+              : user.copyWith(avatarId: avatarId),
+        );
         emit(state.copyWith(isSavingName: false));
         return true;
       case Failed(:final failure):

@@ -155,6 +155,10 @@ class FirebaseAuthRepository implements AuthRepository {
       _run('Updating the name', () => _dataSource.updateDisplayName(displayName.trim()));
 
   @override
+  Future<Result<void>> updateAvatar(String? avatarId) =>
+      _run('Saving the avatar', () => _dataSource.updateAvatar(avatarId));
+
+  @override
   Future<Result<void>> updateSettings(UserSettings settings) =>
       _run('Saving the settings', () => _dataSource.updateSettings(settings));
 

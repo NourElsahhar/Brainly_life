@@ -50,6 +50,10 @@ abstract class AuthRepository {
   /// Changes the name in users/{uid} (and on the Firebase account).
   Future<Result<void>> updateDisplayName(String displayName);
 
+  /// Saves the avatar the user picked (users/{uid}.avatarId).
+  /// null removes it (the first letter or the Google photo shows again).
+  Future<Result<void>> updateAvatar(String? avatarId);
+
   /// Saves all the settings (users/{uid}.settings).
   Future<Result<void>> updateSettings(UserSettings settings);
 

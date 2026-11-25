@@ -96,8 +96,10 @@ class AppStrings {
   static const String profileStudyPreferences = 'Study preferences';
   static const String profileSettings = 'Settings';
   static const String profileComingSoon = 'Coming soon.';
-  static const String profileChangePhoto = 'Change photo';
-  static const String profilePhotoSoon = 'Photo upload is coming soon.';
+  static const String profileChangeAvatar = 'Change avatar';
+  static const String profileChooseAvatar = 'Choose your avatar';
+  static const String profileUseInitial = 'Use my initial';
+  static const String profileAvatarSaved = 'Your avatar was updated.';
 
   static const String settingsTitle = 'Settings';
   static const String settingsStudySection = 'Study preferences';

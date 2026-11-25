@@ -110,4 +110,59 @@ void main() {
       expect(user.displayName, 'Shahd');
     },
   );
+
+  group('updateAvatar', () {
+    blocTest<ProfileCubit, ProfileState>(
+      'saves the avatar and gives the new profile to AuthCubit',
+      setUp: () => when(
+        () => repository.updateAvatar(any()),
+      ).thenAnswer((_) async => const Result<void>.success(null)),
+      build: build,
+      act: (cubit) async => expect(await cubit.updateAvatar('rocket'), isTrue),
+      expect: () => [
+        const ProfileState(isSavingName: true),
+        const ProfileState(),
+      ],
+      verify: (_) {
+        verify(() => repository.updateAvatar('rocket')).called(1);
+        expect(published.single.avatarId, 'rocket');
+      },
+    );
+
+    blocTest<ProfileCubit, ProfileState>(
+      'null removes the avatar',
+      setUp: () {
+        user = user.copyWith(avatarId: 'book');
+        when(
+          () => repository.updateAvatar(any()),
+        ).thenAnswer((_) async => const Result<void>.success(null));
+      },
+      build: build,
+      act: (cubit) async => expect(await cubit.updateAvatar(null), isTrue),
+      verify: (_) => expect(published.single.avatarId, isNull),
+    );
+
+    blocTest<ProfileCubit, ProfileState>(
+      'the same avatar again does nothing',
+      setUp: () => user = user.copyWith(avatarId: 'star'),
+      build: build,
+      act: (cubit) async => expect(await cubit.updateAvatar('star'), isTrue),
+      expect: () => <ProfileState>[],
+      verify: (_) => verifyNever(() => repository.updateAvatar(any())),
+    );
+
+    blocTest<ProfileCubit, ProfileState>(
+      'a failed save keeps the old avatar and shows the error',
+      setUp: () => when(
+        () => repository.updateAvatar(any()),
+      ).thenAnswer((_) async => const Result<void>.failure(NetworkFailure())),
+      build: build,
+      act: (cubit) async => expect(await cubit.updateAvatar('rocket'), isFalse),
+      expect: () => [
+        const ProfileState(isSavingName: true),
+        const ProfileState(failure: NetworkFailure(), failureId: 1),
+      ],
+      verify: (_) => expect(published, isEmpty),
+    );
+  });
 }

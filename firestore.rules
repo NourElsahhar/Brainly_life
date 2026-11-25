@@ -71,13 +71,15 @@ service cloud.firestore {
     function isValidUser() {
       let d = incoming();
       return d.keys().hasOnly([
-          'displayName', 'email', 'photoUrl', 'settings',
+          'displayName', 'email', 'photoUrl', 'avatarId', 'settings',
           'createdAt', 'updatedAt'
         ])
         && d.keys().hasAll(['displayName', 'email', 'settings', 'createdAt'])
         && isText(d.displayName, 0, 60)
         && isText(d.email, 0, 254)
         && isTextOrNull(d.get('photoUrl', null), 2048)
+        // One of the avatar ids in profile_avatars.dart (or absent).
+        && isTextOrNull(d.get('avatarId', null), 32)
         && isValidSettings(d.settings)
         && d.updatedAt == request.time;
     }
