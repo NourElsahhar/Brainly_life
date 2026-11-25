@@ -294,6 +294,56 @@ service cloud.firestore {
         && (docId != 'focus' || isValidFocusSettings());
     }
 
+    // ---------- users/{uid}/aiConversations (M5) ----------
+    // Written by ChatRemoteDataSource. The conversation document keeps the
+    // title and dates; each message is in its messages subcollection.
+    // Timestamps are FieldValue.serverTimestamp() (= request.time), except
+    // clientCreatedAt. Messages are never edited, only created or deleted
+    // (clear conversation / delete account).
+    //
+    // "At most 50 conversations": rules cannot count documents. The app
+    // keeps ONE conversation ('assistant'), and the id format below stops
+    // random ids; the limit is enforced by the app.
+
+    function isValidConversation() {
+      let d = incoming();
+      return d.keys().hasOnly([
+          'title', 'lastMessageAt', 'createdAt', 'updatedAt'
+        ])
+        && isText(d.get('title', 'Brainly AI'), 1, 100)
+        && isTimestampOrNull(d.get('lastMessageAt', null))
+        && isTimestampOrNull(d.get('createdAt', null))
+        && isTimestampOrNull(d.get('updatedAt', null));
+    }
+
+    function isValidMessage() {
+      let d = incoming();
+      return d.keys().hasOnly([
+          'role', 'text', 'actions', 'createdAt', 'updatedAt',
+          'clientCreatedAt'
+        ])
+        && d.keys().hasAll(['role', 'text', 'createdAt'])
+        && d.role in ['user', 'assistant']
+        && isText(d.text, 1, 4000)
+        && (d.get('actions', []) is list && d.get('actions', []).size() <= 4)
+        && d.createdAt == request.time
+        && isTimestampOrNull(d.get('updatedAt', null))
+        && isTimestampOrNull(d.get('clientCreatedAt', null));
+    }
+
+    match /users/{uid}/aiConversations/{conversationId} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && conversationId.matches('^[A-Za-z0-9_-]{1,64}$')
+        && isValidConversation();
+
+      match /messages/{messageId} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidMessage();
+        allow update: if false;
+      }
+    }
+
     // ---------- every other collection of the user ----------
     // Owner only, no shape checks yet. When you validate your collection,
     // add a block above AND add its name to this list.
@@ -302,7 +352,8 @@ service cloud.firestore {
       allow read, write: if isOwner(uid)
         && !(collection in [
           'tasks', 'taskCategories', 'aiUsage', 'weeklyReports',
-          'habits', 'habitLogs', 'focusSessions', 'preferences'
+          'habits', 'habitLogs', 'focusSessions', 'preferences',
+          'aiConversations'
         ]);
     }
   }
