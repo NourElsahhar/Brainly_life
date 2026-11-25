@@ -176,10 +176,11 @@ describe("users/{uid}/tasks", () => {
     }
   });
 
-  it("deleting a category clears categoryId in a batch", async () => {
+    it("deleting a category clears categoryId in a batch", async () => {
     await seed(path, task({categoryId: "c1"}));
-    const batch = writeBatch(db(ME));
-    batch.update(doc(db(ME), path), {categoryId: null, updatedAt: Timestamp.now()});
+    const firestore = db(ME); // ONE connection for the batch and the doc
+    const batch = writeBatch(firestore);
+    batch.update(doc(firestore, path), {categoryId: null, updatedAt: Timestamp.now()});
     await assertSucceeds(batch.commit());
   });
 });

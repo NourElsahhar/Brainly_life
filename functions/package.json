@@ -7,9 +7,9 @@
     "node": "22"
   },
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch",
-    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc -p tsconfig.json",
     "test": "node scripts/run-tests.mjs",
     "serve": "npm run build && firebase emulators:start --only functions,auth,firestore",
     "deploy": "firebase deploy --only functions",
