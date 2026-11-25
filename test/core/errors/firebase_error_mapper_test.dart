@@ -103,6 +103,13 @@ void main() {
           isA<NetworkFailure>());
     });
 
+    test('TimeoutException has its own code and message', () {
+      final failure = FirebaseErrorMapper.map(TimeoutException('too slow'));
+
+      expect(failure.code, 'timeout');
+      expect(failure.userMessage, contains('too long'));
+    });
+
     test('a Failure is returned as it is', () {
       const original = NotFoundFailure();
 

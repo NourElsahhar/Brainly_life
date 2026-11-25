@@ -3,7 +3,7 @@
 // (see FirebaseErrorMapper).
 //
 // getTimezone: the timezone saved in the settings of a NEW user.
-// For now it is UTC. Later it will come from the device (flutter_timezone).
+// The app passes DeviceTimezone.current (the phone's zone); default UTC.
 //
 // Why the _registration lock: when an account is created, Firebase says
 // "a user signed in" BEFORE the profile document is written. Without the lock,
@@ -25,6 +25,7 @@ import 'package:brainly_life/features/auth/data/models/user_profile_model.dart';
 import 'package:brainly_life/features/auth/data/models/user_settings_model.dart';
 import 'package:brainly_life/features/auth/data/repositories/auth_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:google_sign_in/google_sign_in.dart' show GoogleSignInException;
 
 class FirebaseAuthRepository implements AuthRepository {
@@ -203,6 +204,10 @@ class FirebaseAuthRepository implements AuthRepository {
       '$action failed (${failure.code ?? failure.runtimeType})',
       tag: 'Auth',
     );
+    // Debug builds only: the ORIGINAL error (for example
+    // "[cloud_firestore/unavailable] ... client is offline"), so we can see
+    // the real reason. Release builds never log it.
+    if (kDebugMode) AppLogger.warning('$action raw error: $error', tag: 'Auth');
     return failure;
   }
 }

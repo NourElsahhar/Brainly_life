@@ -10,7 +10,9 @@
 //     FirestorePaths.userCollection(uid, FirestorePaths.tasks),      // users/{uid}/tasks
 //   )
 //
-// Need a new collection? Add its name here (after the schema PR is approved).
+// Need a new collection? Add its name here (after the schema PR is approved),
+// AND add it to AuthRemoteDataSource.userCollections, so "Delete account"
+// deletes it too.
 
 class FirestorePaths {
   const FirestorePaths._();
