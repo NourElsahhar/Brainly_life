@@ -4,6 +4,7 @@ import 'package:brainly_life/features/ai_assistant/logic/ai_action_handler.dart'
 import 'package:brainly_life/features/ai_assistant/data/models/chat_message.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:brainly_life/features/auth/presentation/screens/splash_screen.dart';
 
 void main() {
   tearDown(() => getIt.reset());
@@ -12,6 +13,10 @@ void main() {
   ) async {
     await configureDependencies(useMocks: true);
     await tester.pumpWidget(const BrainlyLifeApp());
+    // The app always starts on the splash (see app_test.dart).
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(SplashScreen.duration);
+    await tester.pumpAndSettle();
     getIt<GoRouter>().go('/assistant');
     await tester.pumpAndSettle();
     expect(find.text('Hi, how can I help?'), findsOneWidget);
