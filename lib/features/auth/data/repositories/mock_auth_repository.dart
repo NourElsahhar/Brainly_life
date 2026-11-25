@@ -150,6 +150,13 @@ class MockAuthRepository implements AuthRepository {
       _updateCurrent((p) => p.copyWith(displayName: displayName.trim()));
 
   @override
+  Future<Result<void>> updateAvatar(String? avatarId) => _updateCurrent(
+    (p) => avatarId == null
+        ? p.copyWith(clearAvatarId: true)
+        : p.copyWith(avatarId: avatarId),
+  );
+
+  @override
   Future<Result<void>> updateSettings(UserSettings settings) =>
       _updateCurrent((p) => p.copyWith(settings: settings));
 

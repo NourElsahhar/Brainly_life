@@ -141,6 +141,15 @@ class AuthRemoteDataSource {
     await user.updateDisplayName(displayName);
   }
 
+  /// Saves the picked avatar, or removes the field when [avatarId] is null.
+  Future<void> updateAvatar(String? avatarId) async {
+    final user = _requireCurrentUser();
+    await _users.doc(user.uid).update({
+      'avatarId': avatarId ?? FieldValue.delete(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }).timeout(firestoreTimeout);
+  }
+
   /// Saves the whole settings map in users/{uid}.settings.
   Future<void> updateSettings(UserSettings settings) async {
     final user = _requireCurrentUser();

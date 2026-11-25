@@ -79,6 +79,30 @@ void main() {
       expect(find.text(AppStrings.profileWeeklyReport), findsOneWidget);
     });
 
+    testWidgets('the edit button picks an avatar, then the initial again', (
+      tester,
+    ) async {
+      final cubit = await pumpScreen(tester, AppRoutes.profile);
+
+      await tapAndSettle(tester, find.byIcon(Icons.edit_rounded));
+      expect(find.text(AppStrings.profileChooseAvatar), findsOneWidget);
+      await tapAndSettle(
+        tester,
+        find.byKey(const ValueKey('avatar-option-rocket')),
+      );
+
+      expect(find.byKey(const ValueKey('user-avatar-rocket')), findsOneWidget);
+      expect(find.text(AppStrings.profileAvatarSaved), findsOneWidget);
+      expect(cubit.currentUser?.avatarId, 'rocket');
+
+      await tapAndSettle(tester, find.byIcon(Icons.edit_rounded));
+      await tapAndSettle(tester, find.text(AppStrings.profileUseInitial));
+
+      expect(find.byKey(const ValueKey('user-avatar-rocket')), findsNothing);
+      expect(find.text('D'), findsOneWidget);
+      expect(cubit.currentUser?.avatarId, isNull);
+    });
+
     testWidgets('Edit profile changes the name everywhere', (tester) async {
       final cubit = await pumpScreen(tester, AppRoutes.profile);
 

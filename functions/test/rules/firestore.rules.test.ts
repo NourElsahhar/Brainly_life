@@ -142,6 +142,18 @@ describe("users/{uid}", () => {
     );
   });
 
+  it("picking an avatar works, a too long id is refused", async () => {
+    await assertSucceeds(setDoc(doc(db(ME), `users/${ME}`), newProfile()));
+    const ref = doc(db(ME), `users/${ME}`);
+
+    await assertSucceeds(
+      updateDoc(ref, {avatarId: "rocket", updatedAt: serverTimestamp()}),
+    );
+    await assertFails(
+      updateDoc(ref, {avatarId: "x".repeat(33), updatedAt: serverTimestamp()}),
+    );
+  });
+
   it("I can delete my profile", async () => {
     await seed(`users/${ME}`, {displayName: "Shahd"});
     await assertSucceeds(deleteDoc(doc(db(ME), `users/${ME}`)));
