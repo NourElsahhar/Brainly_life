@@ -12,12 +12,19 @@ with "Try again".
 
 | Part | State |
 | --- | --- |
-| Models (`Subject`, `Topic`, `StudyPlan`, `StudySession`, `PlanConstraints`) | Done (Freezed, see open decision 1) |
-| `StudyRepository`, `MockStudyRepository`, `StudySessionCompletionPort` | Done, mock only |
+| Models (`Subject`, `Topic`, `StudyPlan`, `StudySession`, `PlanConstraints`) | Done (Freezed, approved by the team) |
+| `StudyRepository`, `MockStudyRepository` | Done, in memory only |
+| `StudySessionCompletionPort`, `StudySummaryProvider` | Done and registered in DI |
 | `PlanValidator`, `PlanAdjuster` | Done, AI-only (`RuleBasedPlanner` removed) |
 | AI contract + prompt module `functions/src/ai/features/studyPlan.ts` | Done, 49 tests |
-| Payload builder, AI response parser, `PlanGenerationService` | Not started (needs M5's `AiClient`) |
-| Firestore data source, Cubits, screens | Not started |
+| Payload builder, AI response parser, `PlanGenerationService` contract | Done |
+| Subjects and topics: Cubits and screens | Done |
+| Plan wizard: `PlanWizardCubit` | Done; screens and AI service next |
+| Preview, weekly plan, session detail, adjust plan | Not started |
+| Firestore data source, rules, indexes | Not started |
+
+Timezone: every day calculation uses the signed-in user's
+`settings.timezone` (`studyPlannerTimezone` in `study_planner_injection.dart`).
 
 ## Public contracts (what other members may use)
 
@@ -160,7 +167,7 @@ Fixtures (normal, minimal, hostile, adjust) are in
 
 ## Open decisions (need team approval)
 
-1. Freezed models vs. hand-written Equatable models (Master E.2, F.3).
+1. ~~Freezed models vs. hand-written Equatable models~~ Approved: Freezed.
 2. `notes` on `studySessions` (shown on Session detail, missing in D.3).
 3. Subject priority stored as `1, 2, 3` = low, medium, high.
 4. Gateway error code for a payload that fails `payloadSchema` (C.3 has none).
