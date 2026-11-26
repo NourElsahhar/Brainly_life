@@ -64,9 +64,38 @@ final empty = MockTaskRepository(now: () => fixedTime); // for tests
 empty.failWith = const NetworkFailure(); // simulate an error
 ```
 
-`tasks_injection.dart` registers `TaskRepository` in get_it. For now it is
-the mock in both modes. The Firestore one comes later.
+`tasks_injection.dart` registers `TaskRepository` in get_it: the mock with
+`USE_MOCKS=true`, and `FirestoreTaskRepository` otherwise.
 
+## Firestore
+
+The real repositories save to `users/{uid}/tasks` and
+`users/{uid}/taskCategories`.
+
+- `TaskRemoteDataSource` (`data/datasources/task_remote_data_source.dart`):
+  the only file that calls Firestore. It reads the uid on every call,
+  waits at most 15 seconds, and THROWS on errors.
+- `FirestoreTaskRepository` and `FirestoreTaskCategoryRepository`: set
+  `createdAt` / `updatedAt` and turn every error into a `Result`
+  (`firestore_results.dart`). A stream error stays inside the stream as
+  `Result.failure`, so the list keeps listening.
+- `clearCategory` updates the tasks in batches of 400 (Firestore allows 500).
+- Dates are client `Timestamp`s, never `FieldValue.serverTimestamp()`.
+  `firestore.rules` (M1) checks the 10 task fields. M5's Analytics and AI
+  chat read `status`, `dueAt`, `createdAt` and `completedAt`, so do not
+  rename them.
+
+Profile "tasks done" (`data/repositories/task_profile_source.dart`):
+`FirestoreTaskProfileSource` counts `status == 'done'` tasks of all time
+with a count query (no task is downloaded). `MockTaskProfileSource`
+returns a fixed number. Both implement M1's `ProfileTasksSource`.
+
+```dart
+final count = await getIt<ProfileTasksSource>().tasksDone(); // Result<int>
+```
+
+Sample data for the Firebase Emulator: `tools/seed/seed.mjs` (3
+categories, 10 tasks in every tab; the Profile shows 4 done).
 ## Categories repository
 
 `TaskCategoryRepository` (`data/repositories/task_category_repository.dart`)
@@ -286,6 +315,8 @@ snackbar.
 - `task_display.dart`: `formatDue`, `formatCompleted` and
   `TaskPriority.level` (for M1's `PriorityChip`).
 
-## Coming next
+## Status
 
-The task screens, and the Firestore repositories.
+Done: models, repositories (mock and Firestore), Cubits, screens, the
+Home summary and the Profile "tasks done" source. Next: testing on a
+real phone (docs/manual_test_sheet.md).
