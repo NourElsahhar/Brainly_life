@@ -4,6 +4,12 @@
 //   - Repositories and providers: registerLazySingleton (one for the app)
 //   - Cubits: registerFactory (a new one for every screen)
 
+import 'package:brainly_life/core/ai/ai_client.dart';
+import 'package:brainly_life/features/study_planner/logic/ai_plan_generation_service.dart';
+import 'package:brainly_life/features/study_planner/logic/plan_generation_service.dart';
+import 'package:brainly_life/features/study_planner/logic/plan_wizard_cubit.dart';
+import 'package:brainly_life/features/study_planner/logic/study_plan_payload.dart';
+import 'package:clock/clock.dart';
 import 'package:brainly_life/features/auth/data/models/user_settings_model.dart';
 import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
 import 'package:brainly_life/features/auth/logic/auth_state.dart';
@@ -61,4 +67,24 @@ void registerStudyPlannerFeature(GetIt getIt, {required bool useMocks}) {
     () => SubjectDetailCubit(getIt(), timezone: studyPlannerTimezone(getIt)),
   );
   getIt.registerFactory(() => TopicFormCubit(getIt()));
+
+  // AI plans: M5's AiClient (registered by the ai_assistant feature; mock
+  // or Cloud Functions depending on useMocks) through M1's gateway.
+  getIt.registerFactory<PlanGenerationService>(
+    () => AiPlanGenerationService(
+      aiClient: getIt<AiClient>(),
+      repository: getIt<StudyRepository>(),
+      timezone: studyPlannerTimezone(getIt),
+    ),
+  );
+  getIt.registerFactory(
+    () => PlanWizardCubit(
+      getIt<StudyRepository>(),
+      getIt<PlanGenerationService>(),
+      payloadBuilder: StudyPlanPayloadBuilder(
+        clock: const Clock(),
+        timezone: studyPlannerTimezone(getIt),
+      ),
+    ),
+  );
 }
