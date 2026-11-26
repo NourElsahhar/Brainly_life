@@ -50,7 +50,18 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(
-      const StudyPlanRequest(payload: {}, days: [], subjects: [], topics: []),
+      const StudyPlanRequest(
+        payload: {},
+        days: [],
+        subjects: [],
+        topics: [],
+        constraints: PlanConstraints(
+          minutesPerWeekday: {},
+          daysOff: {},
+          maxSessionMinutes: 45,
+          breakMinutes: 10,
+        ),
+      ),
     );
   });
 
