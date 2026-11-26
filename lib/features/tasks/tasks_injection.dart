@@ -31,6 +31,13 @@ import 'package:brainly_life/features/tasks/logic/task_form_cubit.dart';
 import 'package:brainly_life/features/tasks/logic/task_detail_cubit.dart';
 import 'package:brainly_life/features/tasks/logic/completed_tasks_cubit.dart';
 import 'package:brainly_life/features/tasks/logic/task_list_cubit.dart';
+import 'package:brainly_life/features/auth/data/repositories/profile_stats_provider.dart';
+import 'package:brainly_life/features/tasks/data/datasources/task_remote_data_source.dart';
+import 'package:brainly_life/features/tasks/data/repositories/firestore_task_category_repository.dart';
+import 'package:brainly_life/features/tasks/data/repositories/firestore_task_repository.dart';
+import 'package:brainly_life/features/tasks/data/repositories/task_profile_source.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void registerTasksFeature(GetIt getIt, {required bool useMocks}) {
   // FirestoreTaskRepository is not ready yet, so both modes use the mock
@@ -38,18 +45,34 @@ void registerTasksFeature(GetIt getIt, {required bool useMocks}) {
   //   () => useMocks
   //       ? MockTaskRepository.withSampleData()
   //       : FirestoreTaskRepository(getIt()),
-  getIt.registerLazySingleton<TaskRepository>(
-    () => MockTaskRepository.withSampleData(),
+  // Mock mode: sample tasks in memory. Real mode: users/{uid}/tasks and
+  // users/{uid}/taskCategories in Firestore (one data source for both).
+  getIt.registerLazySingleton<TaskRemoteDataSource>(
+    () => TaskRemoteDataSource(
+      auth: getIt<FirebaseAuth>(),
+      firestore: getIt<FirebaseFirestore>(),
+    ),
   );
-  // Same as TaskRepository: the mock in both modes until the Firestore one
-  // is ready.
+  getIt.registerLazySingleton<TaskRepository>(
+    () => useMocks
+        ? MockTaskRepository.withSampleData()
+        : FirestoreTaskRepository(dataSource: getIt()),
+  );
   getIt.registerLazySingleton<TaskCategoryRepository>(
-    () => MockTaskCategoryRepository.withSampleData(),
+    () => useMocks
+        ? MockTaskCategoryRepository.withSampleData()
+        : FirestoreTaskCategoryRepository(dataSource: getIt()),
   );
   // The "Today's tasks" card on Home. It reads TaskRepository, so it works
   // the same with the mock and with Firestore.
   getIt.registerLazySingleton<TaskSummaryProvider>(
     () => RepositoryTaskSummaryProvider(getIt()),
+  );
+    // The "tasks done" number on the Profile (M1's port).
+  getIt.registerLazySingleton<ProfileTasksSource>(
+    () => useMocks
+        ? const MockTaskProfileSource()
+        : FirestoreTaskProfileSource(dataSource: getIt()),
   );
   // Lets other features (M5's AI assistant) create tasks.
   getIt.registerLazySingleton<TaskCreationPort>(
