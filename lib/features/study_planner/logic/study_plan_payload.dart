@@ -15,6 +15,7 @@ class StudyPlanRequest {
     required this.days,
     required this.subjects,
     required this.topics,
+    required this.constraints,
   });
 
   /// Goes to `AiRequest.payload` unchanged.
@@ -26,6 +27,9 @@ class StudyPlanRequest {
   /// The subjects and topics that were sent, to check the answer against.
   final List<Subject> subjects;
   final List<Topic> topics;
+
+  /// The user's time limits, as sent in the payload.
+  final PlanConstraints constraints;
 }
 
 /// Builds the payload described by `payloadSchema` in
@@ -146,6 +150,7 @@ class StudyPlanPayloadBuilder {
       days: PlannerDay.range(today, endDate),
       subjects: usedSubjects,
       topics: openTopics,
+      constraints: constraints,
     );
   }
 
