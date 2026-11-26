@@ -40,11 +40,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 void registerTasksFeature(GetIt getIt, {required bool useMocks}) {
-  // FirestoreTaskRepository is not ready yet, so both modes use the mock
-  // with sample data for now. When it is ready, this becomes:
-  //   () => useMocks
-  //       ? MockTaskRepository.withSampleData()
-  //       : FirestoreTaskRepository(getIt()),
   // Mock mode: sample tasks in memory. Real mode: users/{uid}/tasks and
   // users/{uid}/taskCategories in Firestore (one data source for both).
   getIt.registerLazySingleton<TaskRemoteDataSource>(
@@ -68,7 +63,7 @@ void registerTasksFeature(GetIt getIt, {required bool useMocks}) {
   getIt.registerLazySingleton<TaskSummaryProvider>(
     () => RepositoryTaskSummaryProvider(getIt()),
   );
-    // The "tasks done" number on the Profile (M1's port).
+  // The "tasks done" number on the Profile (M1's port).
   getIt.registerLazySingleton<ProfileTasksSource>(
     () => useMocks
         ? const MockTaskProfileSource()
