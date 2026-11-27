@@ -150,14 +150,36 @@ service cloud.firestore {
       allow create, update: if false;
     }
 
-    // ---------- users/{uid}/weeklyReports/{weekKey} (M5, Cloud Functions) ----------
-    // Written by the gateway's persist hook only. The app reads it.
+    // ---------- users/{uid}/weeklyReports/{weekKey} (M5) ----------
+    // The AI report of a finished week. Without Cloud Functions the app
+    // (GeminiAiClient) saves it once; it is never edited.
+
+    function isValidWeeklyReport(weekKey) {
+      let d = incoming();
+      return d.keys().hasOnly([
+          'weekKey', 'stats', 'summary', 'recommendations', 'generatedAt',
+          'createdAt', 'updatedAt', 'promptVersion'
+        ])
+        && d.keys().hasAll(['weekKey', 'stats', 'summary', 'recommendations'])
+        && d.weekKey == weekKey
+        && weekKey.matches('^20[0-9]{2}-W[0-9]{2}$')
+        && d.stats is map
+        && d.stats.size() <= 20
+        && isText(d.summary, 1, 1200)
+        && d.recommendations is list
+        && d.recommendations.size() == 3
+        && isTimestampOrNull(d.get('generatedAt', null))
+        && isTimestampOrNull(d.get('createdAt', null))
+        && isTimestampOrNull(d.get('updatedAt', null))
+        && (d.get('promptVersion', 1) is int);
+    }
 
     match /users/{uid}/weeklyReports/{weekKey} {
       allow read: if isOwner(uid);
-      // Only for "Delete account" (the app deletes everything itself).
+      // Also for "Delete account" (the app deletes everything itself).
       allow delete: if isOwner(uid);
-      allow create, update: if false;
+      allow create: if isOwner(uid) && isValidWeeklyReport(weekKey);
+      allow update: if false;
     }
 
     // ---------- users/{uid}/habits/{habitId} (M4) ----------

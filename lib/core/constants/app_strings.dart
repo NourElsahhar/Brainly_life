@@ -317,15 +317,15 @@ class AppStrings {
   static String focusHistoryItem(String day, String time, int minutes) =>
       '$day $time · $minutes min';
   // ===== Analytics and AI (M5) =====
-  static const brainlyAi = 'Brainly AI';
+  static const brainlyAi = 'Baseet AI';
   static const aiDisclaimer = 'AI can make mistakes.';
-  static const aiTyping = 'Brainly AI is typing';
+  static const aiTyping = 'Baseet AI is typing';
   static const aiIntro =
       'Ask for help with studying, planning or productivity.';
   static const clearConversation = 'Clear conversation';
   static const clearConversationPrompt =
       'Delete the saved messages in this conversation?';
-  static const messageHint = 'Message Brainly AI';
+  static const messageHint = 'Message Baseet AI';
   static const messageLength =
       'Enter a message between 1 and 1,000 characters.';
   static const copyMessage = 'Copy message';

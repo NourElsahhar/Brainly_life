@@ -72,7 +72,7 @@ class CloudFunctionsAiClient implements AiClient {
       return Result.success(response);
     } on TimeoutException {
       return const Result.failure(
-        NetworkFailure(userMessage: 'Brainly AI timed out. Please try again.'),
+        NetworkFailure(userMessage: 'Baseet AI timed out. Please try again.'),
       );
     } on FirebaseFunctionsException catch (error) {
       final details = error.details;

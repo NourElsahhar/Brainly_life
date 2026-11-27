@@ -15,7 +15,7 @@ Future<void> confirmTaskFromChat(WidgetTester tester) async {
     ),
   );
   await tester.pumpAndSettle();
-  await tester.tap(find.text('Brainly AI'));
+  await tester.tap(find.text('Baseet AI'));
   await tester.pumpAndSettle();
   expect(find.text('Plan my day'), findsOneWidget);
   await tester.enterText(find.byType(TextField), 'Create task: Read chapter 2');

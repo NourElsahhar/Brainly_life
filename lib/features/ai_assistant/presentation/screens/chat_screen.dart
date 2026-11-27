@@ -259,7 +259,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         maxLines: 2,
                         maxLength: ChatCubit.maxMessageLength,
                         label: '',
-                        hint: 'Ask Brainly AI...',
+                        hint: 'Ask Baseet AI...',
                         errorText: _validation,
                         onSubmitted: (_) => _submit(),
                       ),
