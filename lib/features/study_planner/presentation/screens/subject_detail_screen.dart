@@ -94,9 +94,8 @@ class SubjectDetailView extends StatelessWidget {
     await cubit.reload();
   }
 
-  // The plan wizard is the next milestone.
-  void _generatePlan(BuildContext context) {
-    AppSnackBar.info(context, 'The plan wizard is coming soon');
+  void _generatePlan(BuildContext context, String subjectId) {
+    context.push(StudyPlannerPaths.newPlan(subjectId: subjectId));
   }
 
   void _onStateChanged(BuildContext context, SubjectDetailState state) {
@@ -156,7 +155,8 @@ class SubjectDetailView extends StatelessWidget {
                   icon: Icons.auto_awesome_rounded,
                   onPressed: loaded.topics.isEmpty
                       ? null
-                      : () => _generatePlan(context),
+                      : () =>
+                            _generatePlan(context, loaded.overview.subject.id),
                 ),
               ),
             ),

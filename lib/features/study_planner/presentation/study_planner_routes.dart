@@ -6,6 +6,7 @@ import 'package:brainly_life/features/study_planner/presentation/screens/subject
 import 'package:brainly_life/features/study_planner/presentation/screens/subject_form_screen.dart';
 import 'package:brainly_life/features/study_planner/presentation/screens/subjects_screen.dart';
 import 'package:brainly_life/features/study_planner/presentation/screens/topic_form_screen.dart';
+import 'package:brainly_life/features/study_planner/presentation/screens/plan_wizard_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final List<RouteBase> studyPlannerRoutes = [
@@ -15,6 +16,11 @@ final List<RouteBase> studyPlannerRoutes = [
     path: AppRoutes.plan,
     builder: (context, state) => const SubjectsScreen(),
     routes: [
+      GoRoute(
+        path: 'new-plan',
+        builder: (context, state) =>
+            PlanWizardScreen(subjectId: state.uri.queryParameters['subjectId']),
+      ),
       // These must match StudyPlannerPaths. 'subjects/new' comes first, so
       // "new" is never read as a subject id.
       GoRoute(

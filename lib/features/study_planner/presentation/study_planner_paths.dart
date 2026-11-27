@@ -16,4 +16,10 @@ abstract final class StudyPlannerPaths {
 
   static String editTopic(String subjectId, String topicId) =>
       '${AppRoutes.plan}/subjects/$subjectId/topics/$topicId/edit';
+
+  /// The plan wizard. With [subjectId], only that subject starts selected.
+  static String newPlan({String? subjectId}) => Uri(
+    path: '${AppRoutes.plan}/new-plan',
+    queryParameters: subjectId == null ? null : {'subjectId': subjectId},
+  ).toString();
 }
