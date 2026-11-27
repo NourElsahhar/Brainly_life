@@ -19,6 +19,7 @@ import 'package:brainly_life/features/habits/data/models/habit_suggestion_model.
 import 'package:brainly_life/features/habits/data/repositories/habit_suggestion_port.dart';
 import 'package:cloud_functions/cloud_functions.dart'
     show FirebaseFunctions, FirebaseFunctionsException, HttpsCallableOptions;
+
 /// Calls the gateway and returns its JSON answer. A function, so tests can
 /// replace it without Firebase.
 typedef AiGatewayCall = Future<Object?> Function(

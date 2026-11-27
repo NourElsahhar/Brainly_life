@@ -174,13 +174,14 @@ class AuthRemoteDataSource {
   /// Firebase refuses to delete an account when the last sign in was long
   /// ago ('requires-recent-login'). We check that FIRST, so we never delete
   /// the profile and then fail to delete the account.
-  Future<void> deleteAccount() async {
+  Future<void> deleteAccount({String? password}) async {
     final user = _requireCurrentUser();
-    final lastSignIn = user.metadata.lastSignInTime;
-    if (lastSignIn == null ||
-        clock.now().difference(lastSignIn) > recentLoginWindow) {
-      throw FirebaseAuthException(code: 'requires-recent-login');
-    }
+
+    // 0. Firebase deletes an account only right after a sign in. So the
+    //    user confirms who they are FIRST (password or Google). Without
+    //    this, the data was deleted but user.delete() failed and the
+    //    account stayed in Authentication.
+    await _reauthenticate(user, password);
 
     // 1. Every subcollection (tasks, habits, plans...), then users/{uid}.
     //    The app does it itself: deleteUserData (Cloud Function) needs the
@@ -195,6 +196,57 @@ class AuthRemoteDataSource {
       } catch (_) {
         // Not important: the account is already deleted.
       }
+    }
+  }
+
+  /// Confirms the user again before a delete.
+  ///   - a password was typed -> email + password
+  ///   - a Google account     -> the Google picker
+  ///   - otherwise            -> only if the last sign in was recent
+  Future<void> _reauthenticate(User user, String? password) async {
+    final providers = {for (final info in user.providerData) info.providerId};
+
+    if (password != null && password.isNotEmpty) {
+      final email = user.email;
+      if (email == null || !providers.contains('password')) {
+        throw FirebaseAuthException(code: 'invalid-credential');
+      }
+      await user.reauthenticateWithCredential(
+        EmailAuthProvider.credential(email: email, password: password),
+      );
+      return;
+    }
+
+    if (providers.contains('google.com')) {
+      final google = _google;
+      await (_googleReady ??= google.initialize());
+      if (!google.supportsAuthenticate()) {
+        throw FirebaseAuthException(code: 'requires-recent-login');
+      }
+      final GoogleSignInAccount account;
+      try {
+        account = await google.authenticate();
+      } on GoogleSignInException catch (error) {
+        if (error.code == GoogleSignInExceptionCode.canceled) {
+          throw FirebaseAuthException(code: 'requires-recent-login');
+        }
+        rethrow;
+      }
+      final idToken = account.authentication.idToken;
+      if (idToken == null) {
+        throw FirebaseAuthException(code: 'invalid-credential');
+      }
+      await user.reauthenticateWithCredential(
+        GoogleAuthProvider.credential(idToken: idToken),
+      );
+      return;
+    }
+
+    // A password account that typed no password.
+    final lastSignIn = user.metadata.lastSignInTime;
+    if (lastSignIn == null ||
+        clock.now().difference(lastSignIn) > recentLoginWindow) {
+      throw FirebaseAuthException(code: 'requires-recent-login');
     }
   }
 

@@ -51,6 +51,10 @@ void main() {
           path: AppRoutes.login,
           builder: (_, _) => const Text('login page'),
         ),
+        GoRoute(
+          path: AppRoutes.register,
+          builder: (_, _) => const Text('register page'),
+        ),
       ],
     );
     addTearDown(router.dispose);
@@ -88,17 +92,17 @@ void main() {
       expect(find.text(AppStrings.profileChooseAvatar), findsOneWidget);
       await tapAndSettle(
         tester,
-        find.byKey(const ValueKey('avatar-option-rocket')),
+        find.byKey(const ValueKey('avatar-option-boy1')),
       );
 
-      expect(find.byKey(const ValueKey('user-avatar-rocket')), findsOneWidget);
+      expect(find.byKey(const ValueKey('user-avatar-boy1')), findsOneWidget);
       expect(find.text(AppStrings.profileAvatarSaved), findsOneWidget);
-      expect(cubit.currentUser?.avatarId, 'rocket');
+      expect(cubit.currentUser?.avatarId, 'boy1');
 
       await tapAndSettle(tester, find.byIcon(Icons.edit_rounded));
       await tapAndSettle(tester, find.text(AppStrings.profileUseInitial));
 
-      expect(find.byKey(const ValueKey('user-avatar-rocket')), findsNothing);
+      expect(find.byKey(const ValueKey('user-avatar-boy1')), findsNothing);
       expect(find.text('D'), findsOneWidget);
       expect(cubit.currentUser?.avatarId, isNull);
     });
@@ -199,19 +203,43 @@ void main() {
       await tapAndSettle(tester, find.text(AppStrings.settingsDeleteAccount));
       expect(find.byType(DeleteAccountDialog), findsOneWidget);
 
+      final confirm = find.byKey(DeleteAccountDialog.confirmFieldKey);
+      final password = find.byKey(DeleteAccountDialog.passwordFieldKey);
+
       // Wrong word: the button does nothing.
-      await tester.enterText(find.byType(TextField), 'delete it');
+      await tester.enterText(confirm, 'delete it');
       await tester.pump();
       await tester.tap(find.text(AppStrings.deleteAction).last);
       await tester.pumpAndSettle();
       expect(find.byType(DeleteAccountDialog), findsOneWidget);
 
-      await tester.enterText(find.byType(TextField), 'DELETE');
+      await tester.enterText(confirm, 'DELETE');
+      await tester.enterText(password, MockAuthRepository.demoPassword);
       await tester.pump();
       await tapAndSettle(tester, find.text(AppStrings.deleteAction).last);
 
       expect(find.byType(DeleteAccountDialog), findsNothing);
       expect(cubit.state, isA<Unauthenticated>());
+      // After a delete the user lands on Sign up.
+      expect(find.text('register page'), findsOneWidget);
+    });
+
+    testWidgets('A wrong password keeps the account', (tester) async {
+      final cubit = await pumpScreen(tester, AppRoutes.settings);
+
+      await tapAndSettle(tester, find.text(AppStrings.settingsDeleteAccount));
+      await tester.enterText(
+        find.byKey(DeleteAccountDialog.confirmFieldKey),
+        'DELETE',
+      );
+      await tester.enterText(
+        find.byKey(DeleteAccountDialog.passwordFieldKey),
+        'not-my-password',
+      );
+      await tester.pump();
+      await tapAndSettle(tester, find.text(AppStrings.deleteAction).last);
+
+      expect(cubit.state, isA<Authenticated>());
     });
 
     testWidgets('Cancel keeps the account', (tester) async {

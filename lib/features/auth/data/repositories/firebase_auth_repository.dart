@@ -168,8 +168,10 @@ class FirebaseAuthRepository implements AuthRepository {
       _run('Saving the settings', () => _dataSource.updateSettings(settings));
 
   @override
-  Future<Result<void>> deleteAccount() =>
-      _run('Deleting the account', _dataSource.deleteAccount);
+  Future<Result<void>> deleteAccount({String? password}) => _run(
+    'Deleting the account',
+    () => _dataSource.deleteAccount(password: password),
+  );
 
   /// Runs [action] and turns any exception into a Failure.
   Future<Result<void>> _run(String name, Future<void> Function() action) async {

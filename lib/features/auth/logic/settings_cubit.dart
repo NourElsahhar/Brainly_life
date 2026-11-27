@@ -101,11 +101,13 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   /// Deletes the account. Returns true when it worked; then AuthCubit gets
   /// "signed out" from the repository and the router opens Login.
-  Future<bool> deleteAccount() async {
+  /// [password] confirms who the user is (password accounts). Google
+  /// accounts pass null and confirm with Google.
+  Future<bool> deleteAccount({String? password}) async {
     if (state.isDeleting) return false;
     emit(state.copyWith(isDeleting: true));
 
-    final result = await _repository.deleteAccount();
+    final result = await _repository.deleteAccount(password: password);
     if (isClosed) return result is Success;
 
     switch (result) {

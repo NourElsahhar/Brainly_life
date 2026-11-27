@@ -98,23 +98,21 @@ class _ProfileBody extends StatelessWidget {
                 SettingsRow(
                   icon: Icons.bar_chart_rounded,
                   label: AppStrings.profileWeeklyAnalytics,
-                  onTap: () =>
-                      showComingSoon(context, AppStrings.profileComingSoon),
+                  onTap: () => context.push(AppRoutes.weeklyAnalytics),
                 ),
                 const _MenuDivider(),
                 SettingsRow(
                   icon: Icons.article_outlined,
                   iconColor: context.palette.teal,
                   label: AppStrings.profileWeeklyReport,
-                  onTap: () =>
-                      showComingSoon(context, AppStrings.profileComingSoon),
+                  onTap: () => context.push(AppRoutes.weeklyReport),
                 ),
                 const _MenuDivider(),
                 SettingsRow(
                   icon: Icons.tune_rounded,
                   iconColor: context.palette.warning,
                   label: AppStrings.profileStudyPreferences,
-                  onTap: () => context.push(AppRoutes.settings),
+                  onTap: () => context.push(AppRoutes.studyPreferences),
                 ),
                 const _MenuDivider(),
                 SettingsRow(

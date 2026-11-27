@@ -34,6 +34,11 @@ class AppRoutes {
   // Settings is opened with context.push from any tab, so the back arrow
   // returns to the tab the user came from.
   static const String settings = '/settings';
+  static const String studyPreferences = '/settings/study';
+  // Weekly analytics and the AI report, opened from Profile (back -> Profile).
+  // From the assistant tab the chat opens [analytics] instead.
+  static const String weeklyAnalytics = '/analytics';
+  static const String weeklyReport = '/analytics/report';
   static const String tasks = '/tasks';
   static const String newTask = '/tasks/new';
   static const String taskCategories = '/tasks/categories';

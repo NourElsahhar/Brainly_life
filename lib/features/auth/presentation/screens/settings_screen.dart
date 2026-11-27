@@ -4,29 +4,38 @@
 //                        (each row opens a sheet to pick a value)
 //   Appearance        -> Light / Dark / System (the whole app follows)
 //   AI                -> "Use AI features" switch
-//   Account           -> Sign out, Delete account (typed DELETE first)
+//   Account           -> Sign out, Delete account (typed DELETE + password,
+//                        then the Sign up screen)
+//
+// studyOnly: true shows only Study preferences (AppRoutes.studyPreferences).
 //
 // Every change is saved at once (see SettingsCubit). Errors show in a
 // snackbar and the old value comes back.
 // [repository] can be given in tests; the app takes it from get_it.
 
 import 'package:brainly_life/core/constants/app_strings.dart';
+import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:brainly_life/core/theme/theme.dart';
 import 'package:brainly_life/core/widgets/widgets.dart';
 import 'package:brainly_life/features/auth/data/models/user_settings_model.dart';
 import 'package:brainly_life/features/auth/data/repositories/auth_repository.dart';
 import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
+import 'package:brainly_life/features/auth/logic/auth_state.dart';
 import 'package:brainly_life/features/auth/logic/settings_cubit.dart';
 import 'package:brainly_life/features/auth/presentation/widgets/delete_account_dialog.dart';
 import 'package:brainly_life/features/auth/presentation/widgets/settings_widgets.dart';
 import 'package:brainly_life/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key, this.repository});
+  const SettingsScreen({super.key, this.repository, this.studyOnly = false});
 
   final AuthRepository? repository;
+
+  /// Only the "Study preferences" section (Profile -> Study preferences).
+  final bool studyOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +44,11 @@ class SettingsScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      appBar: BaseetAppBar.inner(title: AppStrings.settingsTitle),
+      appBar: BaseetAppBar.inner(
+        title: studyOnly
+            ? AppStrings.settingsStudySection
+            : AppStrings.settingsTitle,
+      ),
       body: !hasUser
           ? const SizedBox.shrink()
           : BlocProvider(
@@ -47,14 +60,16 @@ class SettingsScreen extends StatelessWidget {
                   onProfileUpdated: auth.profileUpdated,
                 );
               },
-              child: const _SettingsBody(),
+              child: _SettingsBody(studyOnly: studyOnly),
             ),
     );
   }
 }
 
 class _SettingsBody extends StatelessWidget {
-  const _SettingsBody();
+  const _SettingsBody({required this.studyOnly});
+
+  final bool studyOnly;
 
   // The values offered in the sheets.
   static const List<double> hourOptions = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12];
@@ -95,6 +110,17 @@ class _SettingsBody extends StatelessWidget {
     'Saturday',
     'Sunday',
   ][(day - 1) % 7]; // always 0..6
+
+  /// After "Delete account": wait until the user is signed out, then show
+  /// Sign up (the router would otherwise show Login).
+  static Future<void> _openRegister(AuthCubit auth, GoRouter router) async {
+    if (auth.state is! Unauthenticated) {
+      await auth.stream
+          .firstWhere((state) => state is Unauthenticated)
+          .timeout(const Duration(seconds: 5), onTimeout: () => auth.state);
+    }
+    router.go(AppRoutes.register);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -187,106 +213,115 @@ class _SettingsBody extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.s6),
-            SettingsSection(
-              title: AppStrings.settingsAppearanceSection,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.s4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        AppStrings.settingsTheme,
-                        style: context.text.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.s3),
-                      SegmentedButton<AppThemeMode>(
-                        showSelectedIcon: false,
-                        segments: const [
-                          ButtonSegment(
-                            value: AppThemeMode.light,
-                            label: Text(AppStrings.settingsThemeLight),
-                          ),
-                          ButtonSegment(
-                            value: AppThemeMode.dark,
-                            label: Text(AppStrings.settingsThemeDark),
-                          ),
-                          ButtonSegment(
-                            value: AppThemeMode.system,
-                            label: Text(AppStrings.settingsThemeSystem),
-                          ),
-                        ],
-                        selected: {s.themeMode},
-                        onSelectionChanged: (selection) =>
-                            cubit.setThemeMode(selection.first),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.s6),
-            SettingsSection(
-              title: AppStrings.settingsAiSection,
-              children: [
-                MergeSemantics(
-                  child: Padding(
+            if (!studyOnly) ...[
+              const SizedBox(height: AppSpacing.s6),
+              SettingsSection(
+                title: AppStrings.settingsAppearanceSection,
+                children: [
+                  Padding(
                     padding: const EdgeInsets.all(AppSpacing.s4),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppStrings.settingsAiSwitch,
-                                style: context.text.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.s1),
-                              Text(
-                                AppStrings.settingsAiNote,
-                                style: context.text.bodySmall?.copyWith(
-                                  color: p.textSecondary,
-                                ),
-                              ),
-                            ],
+                        Text(
+                          AppStrings.settingsTheme,
+                          style: context.text.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(width: AppSpacing.s3),
-                        Switch(
-                          value: s.aiEnabled,
-                          onChanged: cubit.setAiEnabled,
+                        const SizedBox(height: AppSpacing.s3),
+                        SegmentedButton<AppThemeMode>(
+                          showSelectedIcon: false,
+                          segments: const [
+                            ButtonSegment(
+                              value: AppThemeMode.light,
+                              label: Text(AppStrings.settingsThemeLight),
+                            ),
+                            ButtonSegment(
+                              value: AppThemeMode.dark,
+                              label: Text(AppStrings.settingsThemeDark),
+                            ),
+                            ButtonSegment(
+                              value: AppThemeMode.system,
+                              label: Text(AppStrings.settingsThemeSystem),
+                            ),
+                          ],
+                          selected: {s.themeMode},
+                          onSelectionChanged: (selection) =>
+                              cubit.setThemeMode(selection.first),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.s6),
-            SettingsSection(
-              title: AppStrings.settingsAccountSection,
-              children: [
-                SettingsRow(
-                  label: AppStrings.settingsSignOut,
-                  labelColor: p.primary,
-                  onTap: () => context.read<AuthCubit>().signOut(),
-                ),
-                SettingsRow(
-                  label: AppStrings.settingsDeleteAccount,
-                  labelColor: p.error,
-                  onTap: () async {
-                    final confirmed = await DeleteAccountDialog.show(context);
-                    if (confirmed) await cubit.deleteAccount();
-                  },
-                ),
-              ],
-            ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.s6),
+              SettingsSection(
+                title: AppStrings.settingsAiSection,
+                children: [
+                  MergeSemantics(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.s4),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppStrings.settingsAiSwitch,
+                                  style: context.text.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.s1),
+                                Text(
+                                  AppStrings.settingsAiNote,
+                                  style: context.text.bodySmall?.copyWith(
+                                    color: p.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.s3),
+                          Switch(
+                            value: s.aiEnabled,
+                            onChanged: cubit.setAiEnabled,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.s6),
+              SettingsSection(
+                title: AppStrings.settingsAccountSection,
+                children: [
+                  SettingsRow(
+                    label: AppStrings.settingsSignOut,
+                    labelColor: p.primary,
+                    onTap: () => context.read<AuthCubit>().signOut(),
+                  ),
+                  SettingsRow(
+                    label: AppStrings.settingsDeleteAccount,
+                    labelColor: p.error,
+                    onTap: () async {
+                      // Taken now: after the delete this screen is gone.
+                      final auth = context.read<AuthCubit>();
+                      final router = GoRouter.of(context);
+                      final password = await DeleteAccountDialog.show(context);
+                      if (password == null) return;
+                      final deleted = await cubit.deleteAccount(
+                        password: password.isEmpty ? null : password,
+                      );
+                      if (deleted) await _openRegister(auth, router);
+                    },
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
