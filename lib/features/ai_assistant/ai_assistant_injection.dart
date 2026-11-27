@@ -28,6 +28,7 @@ class AiAccount {
   final bool useMocks;
   String get uid =>
       useMocks ? 'demo' : services<FirebaseAuth>().currentUser?.uid ?? '';
+
   /// The signed-in user's settings, from AuthCubit (no extra Firestore read,
   /// and always the latest values after the user changes Settings).
   Future<UserSettings> settings() async {

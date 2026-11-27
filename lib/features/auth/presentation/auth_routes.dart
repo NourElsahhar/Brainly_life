@@ -53,4 +53,8 @@ final List<RouteBase> settingsRoutes = [
     path: AppRoutes.settings,
     builder: (context, state) => const SettingsScreen(),
   ),
+  GoRoute(
+    path: AppRoutes.studyPreferences,
+    builder: (context, state) => const SettingsScreen(studyOnly: true),
+  ),
 ];

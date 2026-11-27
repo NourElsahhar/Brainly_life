@@ -12,6 +12,7 @@ import 'package:brainly_life/core/constants/app_strings.dart';
 import 'package:brainly_life/core/routes/app_routes.dart';
 import 'package:brainly_life/core/theme/theme.dart';
 import 'package:brainly_life/core/widgets/widgets.dart';
+import 'package:brainly_life/features/focus/data/datasources/timer_alert.dart';
 import 'package:brainly_life/features/focus/data/models/focus_session_model.dart';
 import 'package:brainly_life/features/focus/data/models/focus_settings_model.dart';
 import 'package:brainly_life/features/focus/logic/focus_cubit.dart';
@@ -19,7 +20,6 @@ import 'package:brainly_life/features/focus/logic/focus_state.dart';
 import 'package:brainly_life/features/focus/logic/pomodoro_engine.dart';
 import 'package:brainly_life/injection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -58,8 +58,7 @@ class _FocusViewState extends State<FocusView> {
   }
 
   void _alert(FocusSettings settings) {
-    if (settings.vibration) HapticFeedback.vibrate();
-    if (settings.sound) SystemSound.play(SystemSoundType.alert);
+    TimerAlert.play(sound: settings.sound, vibration: settings.vibration);
   }
 
   Future<void> _openSettings(BuildContext context) async {

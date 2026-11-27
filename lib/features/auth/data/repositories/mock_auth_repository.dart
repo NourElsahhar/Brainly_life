@@ -161,10 +161,19 @@ class MockAuthRepository implements AuthRepository {
       _updateCurrent((p) => p.copyWith(settings: settings));
 
   @override
-  Future<Result<void>> deleteAccount() async {
+  Future<Result<void>> deleteAccount({String? password}) async {
     await Future<void>.delayed(delay);
     final current = _current;
     if (current == null) return const Result.failure(_noUser);
+    final account = _accounts[_key(current.email)];
+    if (password != null && account != null && account.password != password) {
+      return const Result.failure(
+        AuthFailure(
+          userMessage: 'Incorrect email or password.',
+          code: 'invalid-credential',
+        ),
+      );
+    }
 
     _accounts.remove(_key(current.email));
     _setCurrent(null);

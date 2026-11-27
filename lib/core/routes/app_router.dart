@@ -19,6 +19,7 @@
 // screens and does not break when another feature builds its real screen.
 
 import 'package:brainly_life/features/ai_assistant/presentation/ai_assistant_routes.dart';
+import 'package:brainly_life/features/analytics/presentation/analytics_routes.dart';
 import 'package:brainly_life/features/auth/presentation/auth_routes.dart';
 import 'package:brainly_life/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:brainly_life/features/auth/presentation/screens/splash_screen.dart';
@@ -172,7 +173,12 @@ GoRouter createAppRouter(
       // Settings is always here (also in tests that replace the others).
       ...settingsRoutes,
       ...(fullScreenRoutes ??
-          [...tasksRoutes, ...focusRoutes, ...habitsFullScreenRoutes]),
+          [
+            ...tasksRoutes,
+            ...focusRoutes,
+            ...habitsFullScreenRoutes,
+            ...analyticsFullScreenRoutes,
+          ]),
     ],
   );
 }

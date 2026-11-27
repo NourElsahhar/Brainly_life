@@ -57,10 +57,12 @@ abstract class AuthRepository {
   /// Saves all the settings (users/{uid}.settings).
   Future<Result<void>> updateSettings(UserSettings settings);
 
-  /// Deletes users/{uid} and the Firebase account, then the user is signed
-  /// out. Firebase only allows it soon after a sign in; if it was long ago
-  /// the Failure code is 'requires-recent-login' and nothing is deleted.
-  /// (The rest of the data, users/{uid}/..., is removed by the
-  /// deleteUserData Cloud Function.)
-  Future<Result<void>> deleteAccount();
+  /// Deletes all the user's data, users/{uid} and the Firebase account,
+  /// then the user is signed out.
+  ///
+  /// Firebase only deletes an account right after a sign in, so the user
+  /// confirms who they are first: with [password] (email accounts) or with
+  /// Google (Google accounts, [password] null). A wrong password fails with
+  /// 'invalid-credential' and nothing is deleted.
+  Future<Result<void>> deleteAccount({String? password});
 }

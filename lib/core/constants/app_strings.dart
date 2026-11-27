@@ -133,6 +133,11 @@ class AppStrings {
   static const String deleteHint = 'Type DELETE to confirm';
   static const String deleteCancel = 'Cancel';
   static const String deleteAction = 'Delete account';
+  static const String deletePasswordHint = 'Your password';
+  static const String deletePasswordHelper =
+      'For your security. Signed in with Google? Leave it empty.';
+  static const String deleteShowPassword = 'Show password';
+  static const String deleteHidePassword = 'Hide password';
 
   // ===== Home (M3) =====
 

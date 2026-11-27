@@ -107,7 +107,7 @@ void main() {
     blocTest<SettingsCubit, SettingsState>(
       'success: deleting, then done',
       setUp: () =>
-          when(() => repository.deleteAccount())
+          when(() => repository.deleteAccount(password: any(named: 'password')))
               .thenAnswer((_) async => const Result<void>.success(null)),
       build: build,
       act: (cubit) async => expect(await cubit.deleteAccount(), isTrue),
@@ -119,11 +119,13 @@ void main() {
 
     blocTest<SettingsCubit, SettingsState>(
       'sign in too long ago: the error is shown',
-      setUp: () => when(() => repository.deleteAccount()).thenAnswer(
-        (_) async => const Result<void>.failure(
-          AuthFailure(code: 'requires-recent-login'),
-        ),
-      ),
+      setUp: () =>
+          when(() => repository.deleteAccount(password: any(named: 'password')))
+              .thenAnswer(
+                (_) async => const Result<void>.failure(
+                  AuthFailure(code: 'requires-recent-login'),
+                ),
+              ),
       build: build,
       act: (cubit) async => expect(await cubit.deleteAccount(), isFalse),
       expect: () => [
