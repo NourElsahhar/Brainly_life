@@ -50,7 +50,7 @@ final List<AppTab> appTabs = [
     routes: studyPlannerRoutes,
   ),
   AppTab(
-    label: 'Brainly AI',
+    label: 'Baseet AI',
     icon: Icons.auto_awesome_outlined,
     selectedIcon: Icons.auto_awesome_rounded,
     routes: aiAssistantRoutes,

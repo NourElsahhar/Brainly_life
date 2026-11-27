@@ -71,7 +71,7 @@ class _AssistantEntryState extends State<_AssistantEntry>
     builder: (context, snapshot) {
       if (snapshot.hasError) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Brainly AI')),
+          appBar: AppBar(title: const Text('Baseet AI')),
           body: Center(
             child: AppButton(
               label: 'Unable to load your account. Retry',
@@ -87,7 +87,7 @@ class _AssistantEntryState extends State<_AssistantEntry>
       }
       if (!snapshot.data!.aiEnabled) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Brainly AI')),
+          appBar: AppBar(title: const Text('Baseet AI')),
           body: Center(
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.screenMargin),

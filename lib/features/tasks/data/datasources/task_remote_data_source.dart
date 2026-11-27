@@ -170,4 +170,3 @@ class TaskRemoteDataSource {
     await _categories.doc(id).delete().timeout(timeout);
   }
 }
-

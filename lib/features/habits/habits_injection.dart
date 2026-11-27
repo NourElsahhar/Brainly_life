@@ -21,10 +21,11 @@ import 'package:brainly_life/features/auth/data/models/user_settings_model.dart'
 import 'package:brainly_life/features/auth/data/repositories/profile_stats_provider.dart';
 import 'package:brainly_life/features/auth/logic/auth_cubit.dart';
 import 'package:brainly_life/features/auth/logic/auth_state.dart';
+import 'package:brainly_life/core/ai/ai_client.dart';
 import 'package:brainly_life/features/habits/data/datasources/habit_remote_data_source.dart';
+import 'package:brainly_life/features/habits/data/repositories/ai_habit_suggestion_port.dart';
 import 'package:brainly_life/features/habits/data/models/habit_model.dart';
 import 'package:brainly_life/features/habits/data/repositories/firestore_habit_repository.dart';
-import 'package:brainly_life/features/habits/data/repositories/gateway_habit_suggestion_port.dart';
 import 'package:brainly_life/features/habits/data/repositories/habit_creation_port.dart';
 import 'package:brainly_life/features/habits/data/repositories/habit_profile_streak_source.dart';
 import 'package:brainly_life/features/habits/data/repositories/habit_repository.dart';
@@ -39,7 +40,6 @@ import 'package:brainly_life/features/habits/logic/habit_suggestion_cubit.dart';
 import 'package:brainly_life/features/habits/logic/habits_cubit.dart';
 import 'package:brainly_life/features/home/data/repositories/home_summary_port.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:brainly_life/features/habits/logic/habit_templates.dart';
@@ -88,13 +88,15 @@ void registerHabitsFeature(GetIt getIt, {required bool useMocks}) {
     () => HabitProfileStreakSource(getIt<HabitRepository>()),
   );
 
-  // AI suggestions on the Habits screen (the server builds the statistics).
+  // AI suggestions on the Habits screen: statistics of the last 30 days,
+  // sent through the shared AiClient (registered by ai_assistant).
   getIt.registerLazySingleton<HabitSuggestionPort>(
     () => useMocks
         ? MockHabitSuggestionPort(delay: const Duration(milliseconds: 600))
-        : GatewayHabitSuggestionPort.firebase(
-            functions: getIt<FirebaseFunctions>(),
-            aiEnabled: () => _settings(getIt).aiEnabled,
+        : AiHabitSuggestionPort(
+            client: getIt<AiClient>(),
+            repository: getIt<HabitRepository>(),
+            timezone: () => _settings(getIt).timezone,
           ),
   );
   getIt.registerFactory(

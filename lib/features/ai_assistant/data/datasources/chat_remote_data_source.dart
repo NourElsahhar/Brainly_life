@@ -45,7 +45,7 @@ class ChatRemoteDataSource {
       final existing = await transaction.get(ref);
       if (existing.exists) return;
       transaction.set(_conversation, {
-        'title': 'Brainly AI',
+        'title': 'Baseet AI',
         'lastMessageAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
         if (!parent.exists) 'createdAt': FieldValue.serverTimestamp(),

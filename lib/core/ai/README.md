@@ -1,8 +1,17 @@
 # core/ai — the Flutter AI client (owner: M5)
 
-Every AI call in the app goes through **one** interface, `AiClient`. It talks
-to the `aiGateway` Cloud Function (M1). The Gemini key lives only on the
-server — never in the app.
+Every AI call in the app goes through **one** interface, `AiClient`.
+
+**Real mode = `GeminiAiClient`:** the team has no Blaze plan, so the app
+talks to Gemini **directly** through Firebase AI Logic (Gemini Developer
+API, free on Spark). Firebase keeps the key: never put an API key in the
+app. The prompts are in `gemini_prompts.dart` (the same prompts as
+`functions/src/ai/features/*.ts`). `CloudFunctionsAiClient` (the
+`aiGateway` function) is kept for when the team gets Blaze: switching back
+is one line in `ai_assistant_injection.dart`.
+
+Setup (once): Firebase console -> AI Services -> AI Logic -> Get started ->
+Gemini Developer API.
 
 ```dart
 import 'package:brainly_life/core/ai/ai.dart';
@@ -15,7 +24,11 @@ import 'package:brainly_life/core/ai/ai.dart';
 | `ai_client.dart` | `AiClient` — `Future<Result<AiResponse>> generate(AiRequest request)` |
 | `ai_models.dart` | `AiFeature`, `AiRequest`, `AiResponse`, `AiUsage` |
 | `ai_failures.dart` | `AiErrorCode` (the gateway codes) and `AiGatewayFailure` |
-| `cloud_functions_ai_client.dart` | the real client (calls `aiGateway`) |
+| `gemini_ai_client.dart` | the real client: Gemini directly (limits, checks, weekly report) |
+| `gemini_prompts.dart` | the prompt of every feature |
+| `firebase_gemini_call.dart` | the only file that uses `firebase_ai` |
+| `shared_prefs_ai_usage_counter.dart` | the daily limits, counted on the phone |
+| `cloud_functions_ai_client.dart` | the Cloud Functions client (for Blaze later) |
 | `mock_ai_client.dart` | the fake client for development and tests |
 | `ai_widgets.dart` | `AiLoadingBubble`, `AiErrorCard`, `AiDisclaimer`, `AiSuggestionCard` |
 
@@ -36,17 +49,20 @@ result.fold(
   in `functions/src/ai/features/`.
 - `response.data` is already checked by the server against the feature's
   `responseSchema`. `response.usage.remainingToday` = calls left today.
-- **Never put the uid, name, e-mail or photo in the payload.** The server
-  knows the user from the sign-in and reads what it needs from Firestore.
+- **Never put the uid, name, e-mail or photo in the payload.**
+- The chat also gets the user's data (study planner, tasks, habit streak)
+  from `AiChatContext` in the ai_assistant feature.
 - The payload must be at most 20 KB (bigger -> `payloadTooLarge`, no call).
 
 ## What the real client does
 
-- Returns `disabled` without calling the server when the user turned
+- Returns `disabled` without calling Gemini when the user turned
   **"Use AI features"** off in Settings.
-- 30-second timeout (then a `NetworkFailure`).
-- Retries **once** only for `provider_unavailable`. Never for
-  `rate_limited` or the others.
+- Daily limit per feature, counted on the phone (studyPlan 5,
+  habitSuggest 5, chat 20, dailyTip 3, weeklyInsight 3).
+- 60-second timeout (then a `NetworkFailure`).
+- A broken answer is retried **once**, then `invalidResponse`.
+- `rateLimited` also when the free tier of the whole project is used up.
 - Never logs the payload or the answer.
 
 ## Errors
@@ -83,7 +99,7 @@ MockAiClient(fixtures: {AiFeature.chat: {'reply': 'Hi', 'actions': []}});
 
 ## Shared widgets
 
-- `AiLoadingBubble({label})` — "Brainly AI is typing" bubble.
+- `AiLoadingBubble({label})` — "Baseet AI is typing" bubble.
 - `AiErrorCard({required failure, onRetry})` — message from the failure,
   retry button when `onRetry` is given.
 - `AiDisclaimer()` — "AI can make mistakes." Put it under every AI answer.
@@ -91,7 +107,7 @@ MockAiClient(fixtures: {AiFeature.chat: {'reply': 'Hi', 'actions': []}});
 
 ## Adding a new AI feature
 
-1. Server: write `functions/src/ai/features/<name>.ts` matching
-   `FeatureModule`, add it to `registry.ts` and `KNOWN_FEATURES`
-   (see `functions/README.md`), then `npm test`.
-2. App: add the name to `AiFeature` and a fixture in `MockAiClient`.
+1. Add the name to `AiFeature` and a fixture in `MockAiClient`.
+2. Add its prompt to `GeminiPrompts`, its limit and temperature to
+   `GeminiAiClient`, and its answer check to `GeminiAiClient.checkAnswer`.
+3. (For Blaze later) the server module in `functions/src/ai/features/`.

@@ -23,7 +23,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Brainly AI'));
+    await tester.tap(find.text('Baseet AI'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Plan my day'));
     await tester.pumpAndSettle();

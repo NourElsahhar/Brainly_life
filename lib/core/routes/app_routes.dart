@@ -25,7 +25,7 @@ class AppRoutes {
   // The tabs of the bottom bar
   static const String home = '/home';
   static const String plan = '/plan'; // study planner
-  static const String assistant = '/assistant'; // Brainly AI
+  static const String assistant = '/assistant'; // Baseet AI
   static const String analytics = '/assistant/analytics'; // Weekly analytics
   static const String habits = '/habits';
   static const String profile = '/profile';

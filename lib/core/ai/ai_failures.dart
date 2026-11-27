@@ -1,7 +1,7 @@
 import '../errors/failure.dart';
 
 enum AiErrorCode {
-  unauthenticated('unauthenticated', 'Sign in again to use Brainly AI.'),
+  unauthenticated('unauthenticated', 'Sign in again to use Baseet AI.'),
   invalidFeature('invalid_feature', 'This AI feature is unavailable.'),
   payloadTooLarge(
     'payload_too_large',
@@ -13,15 +13,15 @@ enum AiErrorCode {
   ),
   providerUnavailable(
     'provider_unavailable',
-    'Brainly AI is temporarily unavailable. Please try again.',
+    'Baseet AI is temporarily unavailable. Please try again.',
   ),
   invalidResponse(
     'invalid_response',
-    'Brainly AI returned an unexpected answer. Please try again.',
+    'Baseet AI returned an unexpected answer. Please try again.',
   ),
   internal(
     'internal',
-    'Something went wrong with Brainly AI. Please try again.',
+    'Something went wrong with Baseet AI. Please try again.',
   ),
   disabled('ai_disabled', 'Enable AI in Settings to use this feature.');
 

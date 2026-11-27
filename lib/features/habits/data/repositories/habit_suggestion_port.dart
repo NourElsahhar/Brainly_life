@@ -1,11 +1,10 @@
 // HabitSuggestionPort = the contract that gives the Habits screen its AI
-// suggestions. The Habits feature only knows this contract, never the AI
-// client. The real one is GatewayHabitSuggestionPort (it calls the aiGateway
-// function with the feature habitSuggest).
+// suggestions. The real one is AiHabitSuggestionPort (habit statistics of
+// the last 30 days -> the shared AiClient, feature habitSuggest); the mock
+// is MockHabitSuggestionPort.
 //
 // Rules for the real one:
-//   - Send nothing about the user. The server builds the habit statistics
-//     from Firestore with the signed-in uid.
+//   - Send only habit statistics: no uid, name or e-mail.
 //   - Return Result.failure(failure) when the AI is off, unavailable or the
 //     answer is not valid. The card shows "Suggestions are unavailable".
 //   - Return at most 3 items (the cubit also cuts the list to 3).

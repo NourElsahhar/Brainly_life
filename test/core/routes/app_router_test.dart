@@ -41,7 +41,7 @@ AppTab _placeholderTab(String label, String path) {
 List<AppTab> testTabs() => [
   _placeholderTab('Home', AppRoutes.home),
   _placeholderTab('Plan', AppRoutes.plan),
-  _placeholderTab('Brainly AI', AppRoutes.assistant),
+  _placeholderTab('Baseet AI', AppRoutes.assistant),
   _placeholderTab('Habits', AppRoutes.habits),
   AppTab(
     label: 'Profile',
@@ -193,7 +193,7 @@ void main() {
       expect(appTabs.map((tab) => tab.label).toList(), [
         'Home',
         'Plan',
-        'Brainly AI',
+        'Baseet AI',
         'Habits',
         'Profile',
       ]);
@@ -238,7 +238,7 @@ void main() {
 
       expect(appBarTitle('Home'), findsOneWidget);
       expect(find.byType(NavigationBar), findsOneWidget);
-      for (final label in ['Home', 'Plan', 'Brainly AI', 'Habits', 'Profile']) {
+      for (final label in ['Home', 'Plan', 'Baseet AI', 'Habits', 'Profile']) {
         expect(
           find.descendant(
             of: find.byType(NavigationBar),
